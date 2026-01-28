@@ -1,0 +1,8 @@
+name = "decap-oauth-proxy"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+GITHUB_CLIENT_ID = ""
+GITHUB_CLIENT_SECRET = ""
+DECAP_OAUTH_REDIRECT_URL = ""

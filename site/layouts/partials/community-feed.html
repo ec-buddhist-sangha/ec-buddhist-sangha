@@ -1,0 +1,44 @@
+{{ define "main" }}
+<section class="bg-sangha-paper min-h-screen pb-20 py-16">
+  <div class="container mx-auto px-4 max-w-5xl">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-serif text-2xl font-bold text-sangha-navy">Community Updates</h2>
+      <a href="/topics" class="text-sangha-gold hover:text-yellow-600 font-bold text-sm uppercase tracking-widest">
+        View Forum →
+      </a>
+    </div>
+    
+    <div class="grid gap-6">
+      {{ range first 5 (where .Site.RegularPages "Section" "in" (slice "events" "announcements")) }}
+        <article class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div class="flex items-start gap-4">
+            {{ if eq .Section "events" }}
+              <div class="w-12 h-12 bg-sangha-light rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-sangha-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+            {{ else }}
+              <div class="w-12 h-12 bg-sangha-light rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-sangha-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+              </div>
+            {{ end }}
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[10px] uppercase tracking-widest {{ if eq .Section "events" }}text-sangha-gold{{ else }}text-sangha-navy{{ end }} font-bold">
+                  {{ .Section | title }}
+                </span>
+                <span class="text-gray-400 text-xs">• {{ .Date.Format "Jan 2, 2006" }}</span>
+              </div>
+              <h3 class="font-serif text-lg font-bold text-sangha-navy mb-2">
+                <a href="{{ .Permalink }}" class="hover:text-sangha-gold transition-colors">{{ .Title }}</a>
+              </h3>
+              <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">{{ .Summary }}</p>
+            </div>
+          </div>
+        </article>
+      {{ else }}
+        <p class="text-gray-500 text-center py-12">No updates yet. Check back soon!</p>
+      {{ end }}
+    </div>
+  </div>
+</section>
+{{ end }}

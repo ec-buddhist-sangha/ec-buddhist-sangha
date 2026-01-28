@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-sangha-navy antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .prose blockquote {
+    @apply bg-sangha-light p-6 rounded-xl border-l-4 border-sangha-gold my-8 not-italic;
+  }
+  .prose blockquote p {
+    @apply text-gray-600 text-sm;
+  }
+  .prose blockquote strong {
+    @apply text-sangha-navy font-bold block mb-2;
+  }
+  .prose .sangha-box {
+    @apply bg-sangha-light p-6 rounded-xl border-l-4 border-sangha-gold my-8 not-italic;
+  }
+  .prose .sangha-box p {
+    @apply text-gray-600 text-sm;
+  }
+  .prose .sangha-box strong {
+    @apply text-sangha-navy font-bold block mb-2 text-base;
+  }
+  .prose ul {
+    @apply space-y-4 text-gray-600 list-none;
+  }
+  .prose ul li {
+    @apply pl-0;
+  }
+}

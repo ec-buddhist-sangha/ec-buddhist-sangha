@@ -1,0 +1,11 @@
+{{ if or (eq .Section "topics") (eq .Section "pages") }}
+<section id="comments" class="bg-sangha-light py-12">
+  <div class="container mx-auto px-4 max-w-3xl">
+    <h3 class="font-serif text-2xl font-bold text-sangha-navy mb-6">Comments</h3>
+    <div id="isso-thread"></div>
+    <noscript>Please enable JavaScript to view comments.</noscript>
+  </div>
+</section>
+
+<script data-isso="/comments/" src="https://comments.eauclairesangha.org/js/embed.min.js"></script>
+{{ end }}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pages on Eau Claire Buddhist Sangha</title>
+    <link>https://eauclairesangha.org/pages/</link>
+    <description>Recent content in Pages on Eau Claire Buddhist Sangha</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 01 Jan 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://eauclairesangha.org/pages/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Calendar</title>
+      <link>https://eauclairesangha.org/pages/calendar/</link>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>https://eauclairesangha.org/pages/calendar/</guid>
+      <description>&lt;p&gt;Our calendar shows all upcoming events including weekly Tuesday sits, seasonal retreats, and community gatherings.&lt;/p&gt;&#xA;&lt;p&gt;For questions about specific events, please contact the board or speak with any regular member after our Tuesday meetings.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

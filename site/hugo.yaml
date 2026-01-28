@@ -1,0 +1,35 @@
+baseURL: https://eauclairesangha.org/
+languageCode: en-us
+title: Eau Claire Buddhist Sangha
+
+build:
+  writeStats: true
+
+params:
+  site_description: A calm Buddhist community in Western Wisconsin
+  sangha_navy: '#1B3B5A'
+  sangha_gold: '#C59D45'
+  sangha_light: '#F5F5F0'
+  sangha_paper: '#FAFAF8'
+  practice:
+    - title: "Meditation"
+      description: "We practice silent sitting meditation (Vipassana) for 30 minutes."
+    - title: "Dharma"
+      description: "Talks exploring the Buddha's teachings and their application in modern life."
+    - title: "Sangha"
+      description: "Building community through shared presence and mindful discussion."
+
+menu:
+  main:
+    - name: Home
+      URL: /
+      weight: 1
+    - name: About
+      URL: /about/
+      weight: 2
+    - name: Calendar
+      URL: /calendar/
+      weight: 3
+    - name: Forum
+      URL: /topics/
+      weight: 4

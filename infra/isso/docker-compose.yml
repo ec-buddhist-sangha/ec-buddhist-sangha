@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  isso:
+    image: isso
+    container_name: isso-comments
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/var/lib/isso
+      - ./config:/etc/isso
+    environment:
+      - ISSO_SETTINGS=/etc/isso/isso.conf
+    restart: unless-stopped

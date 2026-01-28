@@ -1,0 +1,64 @@
+{{ define "main" }}
+{{ partial "hero.html" . }}
+
+<section class="bg-white py-16 border-b border-gray-100">
+  <div class="container mx-auto px-4 max-w-5xl">
+    <div class="grid md:grid-cols-3 gap-12 text-center">
+      {{ range $i, $item := .Site.Params.practice }}
+        <div class="flex flex-col items-center">
+          <div class="w-16 h-16 bg-sangha-light text-sangha-gold rounded-full flex items-center justify-center mb-4">
+            {{ if eq $i 0 }}
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+            {{ else if eq $i 1 }}
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ else }}
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            {{ end }}
+          </div>
+          <h3 class="font-serif text-xl font-bold text-sangha-navy mb-2">{{ $item.title }}</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">{{ $item.description }}</p>
+        </div>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+<section class="bg-sangha-light py-12">
+  <div class="container mx-auto px-4">
+    <div class="bg-sangha-navy rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 max-w-6xl mx-auto shadow-xl">
+      <div class="flex-1">
+        <h2 class="text-3xl font-serif font-bold mb-4 text-white">New to Meditation?</h2>
+        <p class="text-blue-100 mb-6 max-w-lg">
+          We offer free meditation instruction every Tuesday at 6:45 PM. No special clothing or equipment needed. Cushions and chairs are provided.
+        </p>
+        <a href="/about" class="inline-flex items-center justify-center bg-sangha-gold px-8 py-3 rounded-full font-bold hover:opacity-90 transition-opacity text-sangha-navy">
+          Read Newcomer Guide
+        </a>
+      </div>
+      <div class="w-full md:w-auto flex justify-center">
+        <svg class="w-32 h-32 text-sangha-gold" viewBox="0 0 24 24" fill="currentColor"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/></svg>
+      </div>
+    </div>
+  </section>
+
+{{ partial "community-feed.html" . }}
+
+<section class="bg-sangha-navy py-16">
+  <div class="container mx-auto px-4 max-w-4xl text-center">
+    <h2 class="font-serif text-3xl font-bold text-white mb-6">Upcoming Events</h2>
+    <div class="bg-white rounded-xl p-4 h-96">
+      <iframe 
+        src="https://calendar.google.com/calendar/embed?height=350&wkst=1&bgcolor=%23ffffff&ctz=America%2FChicago&src=ZWF1Y2xhaXJlc2FuZ2hhQGdtYWlsLmNvbQ&src=Y19tZWV0aW5nY29kZUBncm91cC5jb20&color=%23C59D45&color=%231B3B5A"
+        style="border-width:0" 
+        width="100%" 
+        height="100%" 
+        frameborder="0" 
+        scrolling="no">
+      </iframe>
+    </div>
+    <a href="/calendar" class="inline-block mt-6 text-sangha-gold hover:text-white font-bold transition-colors">
+      View Full Calendar →
+    </a>
+  </div>
+</section>
+{{ end }}

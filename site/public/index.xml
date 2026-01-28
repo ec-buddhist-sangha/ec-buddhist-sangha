@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Home on Eau Claire Buddhist Sangha</title>
+    <link>http://localhost:1313/</link>
+    <description>Recent content in Home on Eau Claire Buddhist Sangha</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 28 Jan 2025 19:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Weekly Tuesday Sit &amp; Dharma Talk</title>
+      <link>http://localhost:1313/events/weekly-sit/</link>
+      <pubDate>Tue, 28 Jan 2025 19:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/events/weekly-sit/</guid>
+      <description>&lt;p&gt;Our core weekly gathering. We begin with 30 minutes of silent meditation, followed by a talk on &lt;strong&gt;&amp;ldquo;The Second Noble Truth: The Cause of Suffering&amp;rdquo;&lt;/strong&gt;.&lt;/p&gt;&#xA;&lt;h2 id=&#34;schedule&#34;&gt;Schedule&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;6:45 PM&lt;/strong&gt; - Optional meditation instruction for beginners&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:00 PM&lt;/strong&gt; - Silent sitting meditation (30 minutes)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:30 PM&lt;/strong&gt; - Dharma talk or discussion&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;8:00 PM&lt;/strong&gt; - Tea and open discussion&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;All levels of experience are welcome. Cushions and chairs are provided. No special clothing needed.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Daily Practice Struggles</title>
+      <link>http://localhost:1313/topics/daily-practice-struggles/</link>
+      <pubDate>Mon, 20 Jan 2025 10:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/topics/daily-practice-struggles/</guid>
+      <description>&lt;p&gt;How do you all maintain a 20-minute daily sit when the kids are home? I&amp;rsquo;ve been struggling to find consistent time in the mornings before work.&lt;/p&gt;&#xA;&lt;p&gt;I&amp;rsquo;ve tried:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Waking up 30 minutes earlier (hard when the kids wake up early too)&lt;/li&gt;&#xA;&lt;li&gt;Sitting in the evening (I&amp;rsquo;m too tired)&lt;/li&gt;&#xA;&lt;li&gt;Short 10-minute sits (helpful but not the same)&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Would love to hear what works for other parents in the sangha.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>New Library Books Available</title>
+      <link>http://localhost:1313/announcements/new-library-books/</link>
+      <pubDate>Sun, 19 Jan 2025 14:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/announcements/new-library-books/</guid>
+      <description>&lt;p&gt;We have added five new titles to our community library, including Pema Chödrön&amp;rsquo;s latest work on living with compassion and uncertainty.&lt;/p&gt;&#xA;&lt;p&gt;New titles include:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;em&gt;Living Beautifully with Uncertainty and Change&lt;/em&gt; by Pema Chödrön&lt;/li&gt;&#xA;&lt;li&gt;&lt;em&gt;The Art of Gathering&lt;/em&gt; by Priya Krishna&lt;/li&gt;&#xA;&lt;li&gt;&lt;em&gt;Stillness Speaks&lt;/em&gt; by Eckhart Tolle&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Feel free to browse and borrow after our Tuesday meetings. Our library is a free resource for all sangha members.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>About the Sangha</title>
+      <link>http://localhost:1313/about/</link>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/about/</guid>
+      <description>&lt;div class=&#34;sangha-box&#34;&gt;&#xA;  &lt;p&gt;&lt;strong&gt;Sangha: The Buddhist Community&lt;/strong&gt;&lt;/p&gt;&#xA;  &lt;p&gt;A Buddhist community that meets to meditate together and study the dharma, the teachings of the Buddha.&lt;/p&gt;&#xA;&lt;p&gt;The Eau Claire Buddhist Sangha is a peer-led sangha, with occasional guidance from teachers in the Vipassana and Zen traditions of Buddhism. Everyone is welcome, whether you study and practice in a particular lineage of Buddhism or practice with another faith tradition. Participants come from all walks of life and all faith traditions.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Calendar</title>
+      <link>http://localhost:1313/calendar/</link>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/calendar/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>
