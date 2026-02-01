@@ -3,6 +3,6 @@ main = "index.js"
 compatibility_date = "2024-01-01"
 
 [vars]
-GITHUB_CLIENT_ID = ""
-GITHUB_CLIENT_SECRET = ""
-DECAP_OAUTH_REDIRECT_URL = ""
+# GITHUB_CLIENT_ID = "your-client-id-here"  # Set via Cloudflare Dashboard or: npx wrangler secret put GITHUB_CLIENT_ID
+# GITHUB_CLIENT_SECRET is a secret - set via: npx wrangler secret put GITHUB_CLIENT_SECRET
+DECAP_OAUTH_REDIRECT_URL = "https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/"
