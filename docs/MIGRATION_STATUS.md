@@ -29,6 +29,10 @@
   - `pages/` - Static content
   - `topics/` - Forum discussion starters
 - Created `/static/admin/index.html`
+- **Updated 2/1/2026:** Migrated from Netlify Identity to GitHub OAuth
+  - Configured GitHub backend with OAuth proxy
+  - Removed Netlify Identity widget
+  - Tested and working: Login with GitHub OAuth
 
 ### Phase 4: OAuth Proxy Worker ✅
 - Created `/workers/oauth-proxy/package.json`
@@ -120,21 +124,23 @@
 
 ## Remaining Work (Current Status)
 
+**Last Updated:** 2/1/2026
+
 ### 🔴 Critical - Blocking Production Use
 
-1. ~~**OAuth Proxy Worker Deployment** (Phase 4)~~ ✅ **DONE**
+1. ~~**OAuth Proxy Worker Deployment** (Phase 4)~~ ✅ **DONE** (2/1/2026)
    - Worker deployed: `decap-oauth-proxy.eau-claire-buddhist-sangha.workers.dev`
    - GitHub OAuth app configured under `ec-buddhist-sangha` org
    - Decap CMS config updated to use GitHub backend
+   - Removed Netlify Identity widget
+   - **Verified working** - Decap CMS now shows GitHub login
 
-2. **Isso Comments Server** (Phase 5)
+2. **Isso Comments Server** (Phase 5) - Next Priority
    - Docker config ready at `/infra/isso/`
    - Needs: DigitalOcean droplet ($4-6/mo) + DNS setup
    - Update comments.html partial with production URL
 
-3. ~~**Decap CMS GitHub OAuth**~~ ✅ **DONE** - Part of #1 above
-
-4. **Create Donate Page**
+3. **Create Donate Page**
    - Currently 404 at `/donate/`
    - Add donation info and payment links
 
