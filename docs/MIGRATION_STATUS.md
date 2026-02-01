@@ -32,7 +32,7 @@
 - **Updated 2/1/2026:** Migrated from Netlify Identity to GitHub OAuth
   - Configured GitHub backend with OAuth proxy
   - Removed Netlify Identity widget
-  - Tested and working: Login with GitHub OAuth
+  - **Fully configured and tested** - Decap CMS login flow complete
 
 ### Phase 4: OAuth Proxy Worker ✅
 - Created `/workers/oauth-proxy/package.json`
@@ -40,6 +40,10 @@
 - Created `/workers/oauth-proxy/wrangler.toml`
 - Deployed to Cloudflare Workers: `decap-oauth-proxy.eau-claire-buddhist-sangha.workers.dev`
 - GitHub OAuth app registered under `ec-buddhist-sangha` organization
+- **Environment variables configured:**
+  - `DECAP_OAUTH_REDIRECT_URL`: `https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/`
+  - `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` set in Cloudflare Dashboard
+- **wrangler.toml updated** with production redirect URL for local/Cloudflare sync
 
 ### Phase 5: Isso Comments (Ready) ✅
 - Created `/infra/isso/docker-compose.yml`
@@ -124,7 +128,7 @@
 
 ## Remaining Work (Current Status)
 
-**Last Updated:** 2/1/2026
+**Last Updated:** 2/1/2026 (OAuth proxy fully configured)
 
 ### 🔴 Critical - Blocking Production Use
 
