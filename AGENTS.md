@@ -144,6 +144,34 @@ docker compose up -d
 
 ---
 
+## Testing with Playwright
+
+**Always test navigation and page rendering before pushing changes to Hugo site.**
+
+### Quick test workflow
+```bash
+# Start Hugo server with correct baseURL for subdirectory
+cd site
+hugo server -D --baseURL "http://127.0.0.1:1313/ec-buddhist-sangha/"
+
+# In another terminal, use Playwright to test
+# Navigate to pages, click through navigation links, check for 404s
+```
+
+### What to verify
+1. All navigation links work (Home, About, Calendar, Forum, CMS)
+2. Page URLs are correct (no path duplication)
+3. Assets (CSS, images) load correctly
+4. Console has no errors
+
+### Common issues to catch
+- Path duplication with subdirectory deployments
+- Hardcoded absolute paths instead of using `absURL`
+- Menu URLs missing baseURL prefix
+- Assets using relative paths instead of `absURL`
+
+---
+
 ## Styling guidance
 
 - Maintain "Sangha" palette: sangha-navy (#1B3B5A), sangha-gold (#C59D45), sangha-light (#F5F5F0), sangha-paper (#FAFAF8)
