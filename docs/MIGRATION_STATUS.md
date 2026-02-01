@@ -47,10 +47,11 @@
 - Added calendar preview to homepage
 - Created dedicated calendar page
 
-### Phase 7: Cloudflare Pages (Ready)
-- Requires: Connect repo in Cloudflare dashboard
-- Build command: `hugo`
-- Output directory: `public`
+### Phase 7: GitHub Pages Deployment ✅
+- Using GitHub Pages (not Cloudflare Pages as originally planned)
+- Build via GitHub Actions workflow
+- BaseURL: `https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/`
+- All URL path issues resolved (see commit 0f88494)
 
 ### Phase 8: Content Migration ✅
 - Sample content created:
@@ -113,6 +114,43 @@
 /prototype/
   └── [moved from root - React prototype]
 ```
+
+---
+
+## Remaining Work (Current Status)
+
+### 🔴 Critical - Blocking Production Use
+
+1. **OAuth Proxy Worker Deployment** (Phase 4)
+   - Worker code ready at `/workers/oauth-proxy/`
+   - Needs: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `DECAP_OAUTH_REDIRECT_URL`
+   - Deploy: `cd workers/oauth-proxy && npm install && npx wrangler deploy`
+
+2. **Isso Comments Server** (Phase 5)
+   - Docker config ready at `/infra/isso/`
+   - Needs: DigitalOcean droplet ($4-6/mo) + DNS setup
+   - Update comments.html partial with production URL
+
+3. **Decap CMS GitHub OAuth**
+   - Currently using Netlify Identity (not working)
+   - Register OAuth app in GitHub
+   - Update `/site/static/admin/config.yml`
+
+4. **Create Donate Page**
+   - Currently 404 at `/donate/`
+   - Add donation info and payment links
+
+### 🟡 High Priority
+
+5. **Real Footer Links** - Facebook Community, Email Newsletter
+6. **Content Migration** - More events, announcements, topics
+7. **Favicon** - Add to baseof.html
+
+### 🟢 Medium Priority
+
+8. **Google Calendar Visibility** - Currently requires auth
+9. **SEO Meta Tags** - Open Graph, Twitter Cards
+10. **Analytics** - Optional (Google Analytics or Plausible)
 
 ---
 
