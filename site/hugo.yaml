@@ -2,8 +2,6 @@ baseURL: https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/
 languageCode: en-us
 title: Eau Claire Buddhist Sangha
 
-relativeURLs: true
-
 build:
   writeStats: true
 
