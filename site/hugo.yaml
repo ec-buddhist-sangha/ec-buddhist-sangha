@@ -2,8 +2,6 @@ baseURL: https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/
 languageCode: en-us
 title: Eau Claire Buddhist Sangha
 
-relativeURLs: true
-
 build:
   writeStats: true
 
@@ -24,14 +22,14 @@ params:
 menu:
   main:
     - name: Home
-      URL: /
+      URL: /ec-buddhist-sangha/
       weight: 1
     - name: About
-      URL: /about/
+      URL: /ec-buddhist-sangha/about/
       weight: 2
     - name: Calendar
-      URL: /calendar/
+      URL: /ec-buddhist-sangha/calendar/
       weight: 3
     - name: Forum
-      URL: /topics/
+      URL: /ec-buddhist-sangha/topics/
       weight: 4
