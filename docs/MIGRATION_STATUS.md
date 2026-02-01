@@ -162,6 +162,67 @@
 
 ---
 
+## 📝 Immediate Next Steps (Content Display)
+
+**Status:** Ready to implement - Homepage feed needs fixes
+
+### 1. Fix Homepage Community Feed
+**Issue:** `community-feed.html` partial has `{{ define "main" }}` which conflicts with homepage layout, preventing feed from rendering
+
+**Tasks:**
+- [ ] Remove `{{ define "main" }}` wrapper from `community-feed.html`
+- [ ] Verify feed shows 5 most recent items (events + announcements, sorted by date)
+- [ ] Test feed displays on homepage between "New to Meditation" CTA and Google Calendar section
+
+### 2. Create Combined Events/Announcements Page
+**Goal:** Replace Google Calendar with a dedicated page showing all events and announcements chronologically
+
+**Tasks:**
+- [ ] Create new layout or modify existing list layout to show both events and announcements
+- [ ] Sort all items chronologically (newest first)
+- [ ] Keep visual distinction between events (gold icon) and announcements (navy icon)
+- [ ] Add "View All Updates →" link from homepage feed to this page
+
+**URL Options:** (Choose one)
+- `/updates/` - Neutral, covers both types
+- `/news/` - Traditional news/announcements feel  
+- `/events/` - Expand existing events page to include announcements
+
+### 3. Update Navigation Menu
+**Changes needed in `hugo.yaml`:**
+- [ ] Rename "Calendar" menu item to "Events" (or chosen name from above)
+- [ ] Change URL from `/calendar/` to new combined page URL
+- [ ] Remove or hide Google Calendar page from navigation
+
+### 4. Remove Google Calendar Section
+**From homepage (`home.html`):**
+- [ ] Remove Google Calendar iframe section (currently shows "Upcoming Events")
+- [ ] Optional: Keep calendar page but remove from menu, or delete entirely
+
+### 5. Update Feed Link
+**In `community-feed.html`:**
+- [ ] Change "View Forum →" link to "View All Updates →"
+- [ ] Link to new combined events/announcements page
+
+---
+
+## Questions to Resolve
+
+1. **Page Name:** What should the combined events/announcements page be called?
+   - Options: "Events", "News", "Updates", or other?
+
+2. **Google Calendar:** 
+   - Remove completely, or keep as hidden page?
+   - If kept, should it be linked from anywhere?
+
+3. **Content Display:**
+   - Should events and announcements be visually distinct (current: different icons)?
+   - Should they be mixed chronologically or grouped by type?
+
+**Decision needed before implementation**
+
+---
+
 ## Next Steps for Deployment
 
 ### 1. Cloudflare Pages
