@@ -72,6 +72,31 @@
 ### Phase 9: Switchover
 - Pending DNS update
 
+### Phase 10: Custom Domain Migration (Future)
+**Goal:** Switch from GitHub Pages subdomain to registered hostname (e.g., `eauclairebuddhistsangha.org`)
+
+**What Changes:**
+1. **DNS Configuration**
+   - Point domain to hosting (GitHub Pages or Cloudflare Pages)
+   - Configure SSL certificate
+
+2. **Cloudflare Worker Update**
+   - Update `DECAP_OAUTH_REDIRECT_URL` environment variable:
+     - FROM: `https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/`
+     - TO: `https://yourdomain.com/admin/`
+   - Redeploy Worker: `cd workers/oauth-proxy && npx wrangler deploy`
+
+3. **Hugo Configuration**
+   - Update `baseURL` in `hugo.yaml` to new domain
+   - Rebuild and deploy site
+
+**What Stays the Same:**
+- GitHub OAuth App callback URL (points to proxy, not your site)
+- Decap CMS `base_url` (points to proxy URL)
+- Cloudflare Worker code (no changes needed)
+
+**Note:** The OAuth flow remains clean because the proxy handles authentication independently. Only the final redirect to Decap CMS needs the updated domain.
+
 ---
 
 ## File Structure Summary
