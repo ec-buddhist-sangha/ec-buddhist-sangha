@@ -61,7 +61,7 @@ router.get('/callback', async (request, env) => {
     }
     
     // Return HTML page that communicates token back to parent window via postMessage
-    // This is the correct way to handle OAuth popup flow for Decap CMS
+    // This follows the exact flow expected by Decap CMS
     const html = `
 <!DOCTYPE html>
 <html>
@@ -72,16 +72,25 @@ router.get('/callback', async (request, env) => {
   <p>Authorizing Decap CMS...</p>
   <script>
     (function() {
-      // Send authorization success message to parent window
-      window.opener.postMessage(
-        'authorization:github:success:${JSON.stringify({ token: "${tokenData.access_token}" })}',
-        '*'
-      );
+      const token = "${tokenData.access_token}";
       
-      // Close this popup window after a short delay
-      setTimeout(function() {
-        window.close();
-      }, 100);
+      // Listen for message from parent, then send token
+      const receiveMessage = (message) => {
+        window.opener.postMessage(
+          'authorization:github:success:' + JSON.stringify({ token: token }),
+          '*'
+        );
+        window.removeEventListener("message", receiveMessage, false);
+        // Close popup after sending token
+        setTimeout(function() {
+          window.close();
+        }, 100);
+      };
+      
+      window.addEventListener("message", receiveMessage, false);
+      
+      // Notify parent that we're ready to authorize
+      window.opener.postMessage("authorizing:github", "*");
     })();
   </script>
 </body>
