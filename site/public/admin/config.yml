@@ -1,6 +1,8 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: ec-buddhist-sangha/ec-buddhist-sangha
   branch: main
+  base_url: https://decap-oauth-proxy.eau-claire-buddhist-sangha.workers.dev
 
 media_folder: "site/static/images"
 public_folder: "/images"

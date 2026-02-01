@@ -30,11 +30,12 @@
   - `topics/` - Forum discussion starters
 - Created `/static/admin/index.html`
 
-### Phase 4: OAuth Proxy Worker (Ready) ✅
+### Phase 4: OAuth Proxy Worker ✅
 - Created `/workers/oauth-proxy/package.json`
 - Created `/workers/oauth-proxy/index.js`
 - Created `/workers/oauth-proxy/wrangler.toml`
-- Ready for deployment with secrets
+- Deployed to Cloudflare Workers: `decap-oauth-proxy.eau-claire-buddhist-sangha.workers.dev`
+- GitHub OAuth app registered under `ec-buddhist-sangha` organization
 
 ### Phase 5: Isso Comments (Ready) ✅
 - Created `/infra/isso/docker-compose.yml`
@@ -121,20 +122,17 @@
 
 ### 🔴 Critical - Blocking Production Use
 
-1. **OAuth Proxy Worker Deployment** (Phase 4)
-   - Worker code ready at `/workers/oauth-proxy/`
-   - Needs: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `DECAP_OAUTH_REDIRECT_URL`
-   - Deploy: `cd workers/oauth-proxy && npm install && npx wrangler deploy`
+1. ~~**OAuth Proxy Worker Deployment** (Phase 4)~~ ✅ **DONE**
+   - Worker deployed: `decap-oauth-proxy.eau-claire-buddhist-sangha.workers.dev`
+   - GitHub OAuth app configured under `ec-buddhist-sangha` org
+   - Decap CMS config updated to use GitHub backend
 
 2. **Isso Comments Server** (Phase 5)
    - Docker config ready at `/infra/isso/`
    - Needs: DigitalOcean droplet ($4-6/mo) + DNS setup
    - Update comments.html partial with production URL
 
-3. **Decap CMS GitHub OAuth**
-   - Currently using Netlify Identity (not working)
-   - Register OAuth app in GitHub
-   - Update `/site/static/admin/config.yml`
+3. ~~**Decap CMS GitHub OAuth**~~ ✅ **DONE** - Part of #1 above
 
 4. **Create Donate Page**
    - Currently 404 at `/donate/`
