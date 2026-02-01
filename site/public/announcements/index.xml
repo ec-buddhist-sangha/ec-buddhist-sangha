@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Announcements on Eau Claire Buddhist Sangha</title>
-    <link>http://localhost:1313/announcements/</link>
+    <link>http://localhost:1313/ec-buddhist-sangha/announcements/</link>
     <description>Recent content in Announcements on Eau Claire Buddhist Sangha</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 19 Jan 2025 14:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/announcements/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/ec-buddhist-sangha/announcements/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>New Library Books Available</title>
-      <link>http://localhost:1313/announcements/new-library-books/</link>
+      <link>http://localhost:1313/ec-buddhist-sangha/announcements/new-library-books/</link>
       <pubDate>Sun, 19 Jan 2025 14:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/announcements/new-library-books/</guid>
+      <guid>http://localhost:1313/ec-buddhist-sangha/announcements/new-library-books/</guid>
       <description>&lt;p&gt;We have added five new titles to our community library, including Pema Chödrön&amp;rsquo;s latest work on living with compassion and uncertainty.&lt;/p&gt;&#xA;&lt;p&gt;New titles include:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;em&gt;Living Beautifully with Uncertainty and Change&lt;/em&gt; by Pema Chödrön&lt;/li&gt;&#xA;&lt;li&gt;&lt;em&gt;The Art of Gathering&lt;/em&gt; by Priya Krishna&lt;/li&gt;&#xA;&lt;li&gt;&lt;em&gt;Stillness Speaks&lt;/em&gt; by Eckhart Tolle&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Feel free to browse and borrow after our Tuesday meetings. Our library is a free resource for all sangha members.&lt;/p&gt;</description>
     </item>
   </channel>

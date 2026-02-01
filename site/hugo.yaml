@@ -22,14 +22,14 @@ params:
 menu:
   main:
     - name: Home
-      URL: /ec-buddhist-sangha/
+      URL: /
       weight: 1
     - name: About
-      URL: /ec-buddhist-sangha/about/
+      URL: /about/
       weight: 2
     - name: Calendar
-      URL: /ec-buddhist-sangha/calendar/
+      URL: /calendar/
       weight: 3
     - name: Forum
-      URL: /ec-buddhist-sangha/topics/
+      URL: /topics/
       weight: 4
