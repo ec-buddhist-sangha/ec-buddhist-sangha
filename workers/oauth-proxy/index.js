@@ -1,17 +1,20 @@
 import { Router } from 'itty-router';
 
 const router = Router();
-
-const GITHUB_CLIENT_ID = GITHUB_CLIENT_ID || '';
-const GITHUB_CLIENT_SECRET = GITHUB_CLIENT_SECRET || '';
-const DECAP_OAUTH_REDIRECT_URL = DECAP_OAUTH_REDIRECT_URL || 'https://yoursite.com/admin/';
-
 const BASE_URL = 'https://github.com';
 
+// Environment variables will be accessed via env object in handlers
+
 // Start OAuth flow - redirect to GitHub
-router.get('/auth', async (request) => {
+router.get('/auth', async (request, env) => {
+  const clientId = env.GITHUB_CLIENT_ID || '';
+  
+  if (!clientId) {
+    return new Response('GITHUB_CLIENT_ID not configured', { status: 500 });
+  }
+  
   const url = new URL(`${BASE_URL}/login/oauth/authorize`);
-  url.searchParams.set('client_id', GITHUB_CLIENT_ID);
+  url.searchParams.set('client_id', clientId);
   url.searchParams.set('redirect_uri', `${new URL(request.url).origin}/callback`);
   url.searchParams.set('scope', 'repo,read:org');
   url.searchParams.set('state', crypto.randomUUID());
@@ -20,13 +23,21 @@ router.get('/auth', async (request) => {
 });
 
 // OAuth callback - exchange code for token
-router.get('/callback', async (request) => {
+router.get('/callback', async (request, env) => {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   
   if (!code) {
     return new Response('No code provided', { status: 400 });
+  }
+  
+  const clientId = env.GITHUB_CLIENT_ID || '';
+  const clientSecret = env.GITHUB_CLIENT_SECRET || '';
+  const redirectUrl = env.DECAP_OAUTH_REDIRECT_URL || 'https://yoursite.com/admin/';
+  
+  if (!clientId || !clientSecret) {
+    return new Response('OAuth credentials not configured', { status: 500 });
   }
   
   try {
@@ -37,8 +48,8 @@ router.get('/callback', async (request) => {
         Accept: 'application/json',
       },
       body: JSON.stringify({
-        client_id: GITHUB_CLIENT_ID,
-        client_secret: GITHUB_CLIENT_SECRET,
+        client_id: clientId,
+        client_secret: clientSecret,
         code,
         redirect_uri: `${new URL(request.url).origin}/callback`,
       }),
@@ -51,10 +62,10 @@ router.get('/callback', async (request) => {
     }
     
     // Redirect back to Decap with the token
-    const redirectUrl = new URL(DECAP_OAUTH_REDIRECT_URL);
-    redirectUrl.searchParams.set('access_token', tokenData.access_token);
+    const finalRedirectUrl = new URL(redirectUrl);
+    finalRedirectUrl.searchParams.set('access_token', tokenData.access_token);
     
-    return Response.redirect(redirectUrl.toString(), 302);
+    return Response.redirect(finalRedirectUrl.toString(), 302);
   } catch (error) {
     console.error('OAuth error:', error);
     return new Response('Authentication failed', { status: 500 });
@@ -68,5 +79,7 @@ router.get('/health', () => new Response('OK', { status: 200 }));
 router.all('*', () => new Response('Not Found', { status: 404 }));
 
 export default {
-  fetch: router.fetch,
+  async fetch(request, env, ctx) {
+    return router.fetch(request, env, ctx);
+  },
 };
