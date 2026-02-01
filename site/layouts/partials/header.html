@@ -1,11 +1,11 @@
 <header class="bg-sangha-navy text-white sticky top-0 z-50 shadow-lg">
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center h-20">
-      <a href="/" class="flex items-center gap-3 group">
+      <a href="{{ "/" | absURL }}" class="flex items-center gap-3 group">
         <div class="relative flex items-center justify-center w-12 h-12 md:w-14 md:h-14">
           <div class="absolute inset-0 rounded-full group-hover:scale-110 transition-transform duration-300"
                style="background: radial-gradient(closest-side, rgba(255,255,255,0.9) 20%, rgba(255,255,255,0.2) 70%, transparent 100%); filter: blur(4px);"></div>
-          <img src="/images/logo.png" alt="Sangha Logo" class="w-10 h-10 md:w-12 md:h-12 relative z-10 object-contain" />
+          <img src="{{ "images/logo.png" | absURL }}" alt="Sangha Logo" class="w-10 h-10 md:w-12 md:h-12 relative z-10 object-contain" />
         </div>
         <div class="flex flex-col">
           <span class="font-serif text-lg md:text-xl leading-none tracking-wide font-bold">EAU CLAIRE</span>
@@ -15,15 +15,15 @@
       <nav class="hidden md:flex items-center gap-6 lg:gap-8">
         {{ $current := . }}
         {{ range .Site.Menus.main }}
-          <a href="{{ .URL }}" class="{{ if eq $current.RelPermalink .URL }}text-sangha-gold border-b-2 border-sangha-gold{{ else }}text-gray-300 hover:text-white{{ end }} transition-all text-xs font-bold tracking-widest uppercase py-2">
+          <a href="{{ .Permalink }}" class="{{ if eq $current.RelPermalink .URL }}text-sangha-gold border-b-2 border-sangha-gold{{ else }}text-gray-300 hover:text-white{{ end }} transition-all text-xs font-bold tracking-widest uppercase py-2">
             {{ .Name }}
           </a>
         {{ end }}
-        <a href="/donate" class="bg-sangha-gold hover:bg-yellow-600 text-sangha-navy px-5 py-2 rounded-full font-bold transition-all flex items-center gap-2 shadow-md hover:-translate-y-0.5 active:translate-y-0">
+        <a href="{{ "/donate" | absURL }}" class="bg-sangha-gold hover:bg-yellow-600 text-sangha-navy px-5 py-2 rounded-full font-bold transition-all flex items-center gap-2 shadow-md hover:-translate-y-0.5 active:translate-y-0">
           <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           <span class="text-xs uppercase tracking-tighter">Donate</span>
         </a>
-        <a href="/admin/" class="text-[10px] uppercase tracking-tighter border border-white/20 px-3 py-1 rounded-full hover:bg-white/10 transition-colors text-white/40">
+        <a href="{{ "/admin/" | absURL }}" class="text-[10px] uppercase tracking-tighter border border-white/20 px-3 py-1 rounded-full hover:bg-white/10 transition-colors text-white/40">
           CMS
         </a>
       </nav>
