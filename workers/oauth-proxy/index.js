@@ -34,7 +34,6 @@ router.get('/callback', async (request, env) => {
   
   const clientId = env.GITHUB_CLIENT_ID || '';
   const clientSecret = env.GITHUB_CLIENT_SECRET || '';
-  const redirectUrl = env.DECAP_OAUTH_REDIRECT_URL || 'https://yoursite.com/admin/';
   
   if (!clientId || !clientSecret) {
     return new Response('OAuth credentials not configured', { status: 500 });
@@ -61,13 +60,37 @@ router.get('/callback', async (request, env) => {
       return new Response(`Error: ${tokenData.error_description}`, { status: 400 });
     }
     
-    // Redirect back to Decap with the token in the URL hash (required by Decap CMS)
-    const finalRedirectUrl = new URL(redirectUrl);
-    // Decap CMS expects the token in the hash fragment, not query params
-    const hash = finalRedirectUrl.hash || '#/';
-    finalRedirectUrl.hash = `${hash}access_token=${tokenData.access_token}`;
+    // Return HTML page that communicates token back to parent window via postMessage
+    // This is the correct way to handle OAuth popup flow for Decap CMS
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Decap CMS Authorization</title>
+</head>
+<body>
+  <p>Authorizing Decap CMS...</p>
+  <script>
+    (function() {
+      // Send authorization success message to parent window
+      window.opener.postMessage(
+        'authorization:github:success:${JSON.stringify({ token: "${tokenData.access_token}" })}',
+        '*'
+      );
+      
+      // Close this popup window after a short delay
+      setTimeout(function() {
+        window.close();
+      }, 100);
+    })();
+  </script>
+</body>
+</html>`;
     
-    return Response.redirect(finalRedirectUrl.toString(), 302);
+    return new Response(html, {
+      headers: { 'Content-Type': 'text/html' },
+      status: 200
+    });
   } catch (error) {
     console.error('OAuth error:', error);
     return new Response('Authentication failed', { status: 500 });
