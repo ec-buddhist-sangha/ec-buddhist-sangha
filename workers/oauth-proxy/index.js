@@ -61,9 +61,11 @@ router.get('/callback', async (request, env) => {
       return new Response(`Error: ${tokenData.error_description}`, { status: 400 });
     }
     
-    // Redirect back to Decap with the token
+    // Redirect back to Decap with the token in the URL hash (required by Decap CMS)
     const finalRedirectUrl = new URL(redirectUrl);
-    finalRedirectUrl.searchParams.set('access_token', tokenData.access_token);
+    // Decap CMS expects the token in the hash fragment, not query params
+    const hash = finalRedirectUrl.hash || '#/';
+    finalRedirectUrl.hash = `${hash}access_token=${tokenData.access_token}`;
     
     return Response.redirect(finalRedirectUrl.toString(), 302);
   } catch (error) {
