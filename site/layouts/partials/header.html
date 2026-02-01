@@ -15,7 +15,7 @@
       <nav class="hidden md:flex items-center gap-6 lg:gap-8">
         {{ $current := . }}
         {{ range .Site.Menus.main }}
-          <a href="{{ .Permalink }}" class="{{ if eq $current.RelPermalink .URL }}text-sangha-gold border-b-2 border-sangha-gold{{ else }}text-gray-300 hover:text-white{{ end }} transition-all text-xs font-bold tracking-widest uppercase py-2">
+          <a href="{{ .URL | absURL }}" class="{{ if eq $current.RelPermalink .URL }}text-sangha-gold border-b-2 border-sangha-gold{{ else }}text-gray-300 hover:text-white{{ end }} transition-all text-xs font-bold tracking-widest uppercase py-2">
             {{ .Name }}
           </a>
         {{ end }}
