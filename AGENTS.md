@@ -40,7 +40,7 @@ This affects:
 3. **Phase 3:** Decap CMS configuration with GitHub backend and collections (events, announcements, pages, topics)
 4. **Phase 4:** OAuth proxy Worker with Wrangler CLI for Decap auth
 5. **Phase 5:** Isso comments deployment, embed on Topics and Pages only
-6. **Phase 6:** Google Calendar embed on homepage + dedicated page
+6. **Phase 6:** ~~Google Calendar embed on homepage~~ Replaced with Community Updates feed (events + announcements)
 7. **Phase 7:** Cloudflare Pages deployment with Hugo build
 8. **Phase 8:** Content migration from prototype to Markdown
 9. **Phase 9:** DNS switchover and prototype decommission
@@ -55,7 +55,7 @@ This affects:
 | CMS | Decap CMS | GitHub backend, admin at /admin |
 | Auth | GitHub OAuth | Via Cloudflare Worker proxy (Wrangler) |
 | Comments | Isso | Self-hosted on DigitalOcean, Topics + Pages only |
-| Calendar | Google Calendar | Embed on homepage + dedicated page |
+| Community Updates | Hugo-generated feed | Events + announcements on homepage, no external embeds |
 | Hosting | Cloudflare Pages | Free tier, Hugo builds |
 | Styling | Tailwind CSS | Compiled at build time |
 | Comment moderation | Auto-publish | Can be changed later |
