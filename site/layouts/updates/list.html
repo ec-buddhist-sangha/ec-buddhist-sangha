@@ -1,14 +1,12 @@
-<section class="bg-sangha-paper py-16">
+{{ define "main" }}
+<section class="bg-sangha-light min-h-screen py-16">
   <div class="container mx-auto px-4 max-w-5xl">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="font-serif text-2xl font-bold text-sangha-navy">Community Updates</h2>
-      <a href="{{ "updates/" | absURL }}" class="text-sangha-gold hover:text-yellow-600 font-bold text-sm uppercase tracking-widest">
-        View All Updates →
-      </a>
-    </div>
-    
+    <h1 class="font-serif text-4xl font-bold text-sangha-navy mb-8 text-center">Community Updates</h1>
+    <p class="text-gray-600 text-center mb-12 max-w-2xl mx-auto">Events, announcements, and news from the Eau Claire Buddhist Sangha.</p>
+
     <div class="grid gap-6">
-      {{ range first 5 (where .Site.RegularPages "Section" "in" (slice "events" "announcements")) }}
+      {{ $pages := where .Site.RegularPages "Section" "in" (slice "events" "announcements") }}
+      {{ range $pages.ByDate.Reverse }}
         <article class="update-card">
           <div class="flex items-start gap-4">
             {{ if eq .Section "events" }}
@@ -25,12 +23,12 @@
                 <span class="text-[10px] uppercase tracking-widest {{ if eq .Section "events" }}text-sangha-gold{{ else }}text-sangha-navy{{ end }} font-bold">
                   {{ .Section | title }}
                 </span>
-                <span class="text-gray-400 text-xs">• {{ .Date.Format "Jan 2, 2006" }}</span>
+                <span class="text-gray-400 text-xs">&bull; {{ .Date.Format "Jan 2, 2006" }}</span>
               </div>
               <h3 class="font-serif text-lg font-bold text-sangha-navy mb-2">
                 <a href="{{ .Permalink }}" class="hover:text-sangha-gold transition-colors">{{ .Title }}</a>
               </h3>
-              <div class="text-gray-600 text-sm leading-relaxed">{{ .Content }}</div>
+              <p class="text-gray-600 text-sm leading-relaxed">{{ .Summary | plainify | truncate 200 }}</p>
             </div>
           </div>
         </article>
@@ -40,3 +38,4 @@
     </div>
   </div>
 </section>
+{{ end }}

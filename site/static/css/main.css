@@ -12,6 +12,28 @@
 }
 
 @layer components {
+  /* Base prose typography spacing */
+  .prose h2 {
+    @apply text-2xl font-bold text-sangha-navy mt-10 mb-4;
+  }
+  .prose h3 {
+    @apply text-xl font-bold text-sangha-navy mt-8 mb-3;
+  }
+  .prose p {
+    @apply text-gray-600 leading-relaxed mb-4;
+  }
+  .prose p:last-child {
+    @apply mb-0;
+  }
+  .prose > ul {
+    @apply my-6;
+  }
+  .prose hr {
+    @apply my-10 border-gray-200;
+  }
+  .prose a {
+    @apply text-sangha-gold hover:text-yellow-600 underline transition-colors;
+  }
   .prose blockquote {
     @apply bg-sangha-light p-6 rounded-xl border-l-4 border-sangha-gold my-8 not-italic;
   }
@@ -29,6 +51,18 @@
   }
   .prose .sangha-box strong {
     @apply text-sangha-navy font-bold block mb-2 text-base;
+  }
+  .update-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .update-card:hover {
+    border-left-color: #C59D45;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.08);
   }
   .prose ul {
     @apply space-y-4 text-gray-600 list-none;

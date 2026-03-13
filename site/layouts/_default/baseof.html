@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ .Title }} | {{ .Site.Title }}</title>
     <meta name="description" content="{{ .Summary | default .Site.Params.site_description }}" />
+    <link rel="icon" type="image/png" href="{{ "images/logo.png" | absURL }}" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ .Title }} | {{ .Site.Title }}" />
+    <meta property="og:description" content="{{ .Summary | default .Site.Params.site_description }}" />
+    <meta property="og:url" content="{{ .Permalink }}" />
+    <meta property="og:site_name" content="{{ .Site.Title }}" />
+    <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}" />
+    <meta property="og:image" content="{{ "images/logo.png" | absURL }}" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="{{ .Title }} | {{ .Site.Title }}" />
+    <meta name="twitter:description" content="{{ .Summary | default .Site.Params.site_description }}" />
+    <meta name="twitter:image" content="{{ "images/logo.png" | absURL }}" />
     <link rel="stylesheet" href="{{ "css/output.css" | absURL }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +26,7 @@
       {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
     {{ end -}}
   </head>
-  <body class="min-h-screen flex flex-col font-sans selection:bg-sangha-gold/30">
+  <body class="min-h-screen flex flex-col font-sans selection:bg-sangha-gold/30 bg-sangha-light">
     {{ partial "header" . }}
     <main class="flex-1">{{ block "main" . }}{{ end }}</main>
     {{ partial "footer" . }}

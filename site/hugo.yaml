@@ -5,6 +5,11 @@ title: Eau Claire Buddhist Sangha
 build:
   writeStats: true
 
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
 params:
   site_description: A calm Buddhist community in Western Wisconsin
   sangha_navy: '#1B3B5A'
@@ -27,8 +32,8 @@ menu:
     - name: About
       URL: /about/
       weight: 2
-    - name: Calendar
-      URL: /calendar/
+    - name: Updates
+      URL: /updates/
       weight: 3
     - name: Forum
       URL: /topics/

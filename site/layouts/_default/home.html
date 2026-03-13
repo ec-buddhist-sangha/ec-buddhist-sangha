@@ -1,7 +1,8 @@
 {{ define "main" }}
 {{ partial "hero.html" . }}
+{{ partial "metta-prayer.html" . }}
 
-<section class="bg-white py-16 border-b border-gray-100">
+<section class="bg-sangha-paper py-16 border-b border-gray-100">
   <div class="container mx-auto px-4 max-w-5xl">
     <div class="grid md:grid-cols-3 gap-12 text-center">
       {{ range $i, $item := .Site.Params.practice }}
@@ -23,12 +24,12 @@
   </div>
 </section>
 
-<section class="bg-sangha-light py-12">
+<section class="bg-sangha-paper py-12">
   <div class="container mx-auto px-4">
     <div class="bg-sangha-navy rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 max-w-6xl mx-auto shadow-xl">
       <div class="flex-1">
         <h2 class="text-3xl font-serif font-bold mb-4 text-white">New to Meditation?</h2>
-        <p class="text-blue-100 mb-6 max-w-lg">
+        <p class="text-white/80 mb-6 max-w-lg">
           We offer free meditation instruction every Tuesday at 6:45 PM. No special clothing or equipment needed. Cushions and chairs are provided.
         </p>
         <a href="{{ "about/" | absURL }}" class="inline-flex items-center justify-center bg-sangha-gold px-8 py-3 rounded-full font-bold hover:opacity-90 transition-opacity text-sangha-navy">

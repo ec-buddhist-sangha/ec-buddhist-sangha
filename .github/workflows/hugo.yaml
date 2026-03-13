@@ -41,6 +41,9 @@ jobs:
       - name: Install dependencies
         run: cd site && npm install
 
+      - name: Build Tailwind CSS
+        run: cd site && npm run css:prod
+
       - name: Build Hugo
         run: cd site && hugo --minify --gc
 
