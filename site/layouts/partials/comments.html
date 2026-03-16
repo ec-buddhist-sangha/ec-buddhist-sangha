@@ -18,7 +18,7 @@
 (function() {
   var s = document.createElement('script');
   s.src = 'https://comments.eauclairesangha.org/js/embed.min.js';
-  s.setAttribute('data-isso', '/comments/');
+  s.setAttribute('data-isso', 'https://comments.eauclairesangha.org/');
   s.onerror = function() {
     var fallback = document.getElementById('isso-fallback');
     if (fallback) fallback.classList.remove('hidden');
