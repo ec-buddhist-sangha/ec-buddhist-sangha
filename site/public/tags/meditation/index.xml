@@ -2,17 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Meditation on Eau Claire Buddhist Sangha</title>
-    <link>http://127.0.0.1:1313/ec-buddhist-sangha/tags/meditation/</link>
+    <link>http://127.0.0.1:1314/ec-buddhist-sangha/tags/meditation/</link>
     <description>Recent content in Meditation on Eau Claire Buddhist Sangha</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 28 Jan 2025 19:00:00 +0000</lastBuildDate>
-    <atom:link href="http://127.0.0.1:1313/ec-buddhist-sangha/tags/meditation/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 05 Feb 2025 14:00:00 +0000</lastBuildDate>
+    <atom:link href="http://127.0.0.1:1314/ec-buddhist-sangha/tags/meditation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Tips for Meditation Posture</title>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/topics/meditation-posture-tips/</link>
+      <pubDate>Wed, 05 Feb 2025 14:00:00 +0000</pubDate>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/topics/meditation-posture-tips/</guid>
+      <description>&lt;p&gt;After struggling with lower back pain during sits for almost two years, I&amp;rsquo;ve finally found a setup that works. Thought I&amp;rsquo;d share in case it helps others.&lt;/p&gt;&#xA;&lt;h2 id=&#34;what-helped-me&#34;&gt;What helped me&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;&lt;strong&gt;A higher cushion&lt;/strong&gt; — I switched from a standard zafu to a taller one (about 6 inches). This tilted my pelvis forward enough that my spine could stack naturally.&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;&lt;strong&gt;A folded blanket under my knees&lt;/strong&gt; — For those of us who sit cross-legged, a little support under the knees takes pressure off the hips.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Weekly Tuesday Sit &amp; Dharma Talk</title>
-      <link>http://127.0.0.1:1313/ec-buddhist-sangha/events/weekly-sit/</link>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/events/weekly-sit/</link>
       <pubDate>Tue, 28 Jan 2025 19:00:00 +0000</pubDate>
-      <guid>http://127.0.0.1:1313/ec-buddhist-sangha/events/weekly-sit/</guid>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/events/weekly-sit/</guid>
       <description>&lt;p&gt;Our core weekly gathering. We begin with 30 minutes of silent meditation, followed by a talk on &lt;strong&gt;&amp;ldquo;The Second Noble Truth: The Cause of Suffering&amp;rdquo;&lt;/strong&gt;.&lt;/p&gt;&#xA;&lt;h2 id=&#34;schedule&#34;&gt;Schedule&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;6:45 PM&lt;/strong&gt; - Optional meditation instruction for beginners&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:00 PM&lt;/strong&gt; - Silent sitting meditation (30 minutes)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:30 PM&lt;/strong&gt; - Dharma talk or discussion&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;8:00 PM&lt;/strong&gt; - Tea and open discussion&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;All levels of experience are welcome. Cushions and chairs are provided. No special clothing needed.&lt;/p&gt;</description>
     </item>
   </channel>

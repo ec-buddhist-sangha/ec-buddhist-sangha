@@ -1,14 +1,29 @@
-version: '3.8'
-
 services:
   isso:
-    image: isso
+    image: ghcr.io/isso-comments/isso:latest
     container_name: isso-comments
-    ports:
-      - "8080:8080"
     volumes:
-      - ./data:/var/lib/isso
-      - ./config:/etc/isso
+      - isso-data:/var/lib/isso
+      - ./isso.conf:/etc/isso/isso.conf:ro
     environment:
       - ISSO_SETTINGS=/etc/isso/isso.conf
     restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: isso-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - isso
+    restart: unless-stopped
+
+volumes:
+  isso-data:
+  caddy-data:
+  caddy-config:

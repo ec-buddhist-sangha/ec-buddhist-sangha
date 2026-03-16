@@ -1,0 +1,43 @@
+{{ define "main" }}
+<section class="bg-sangha-light min-h-screen py-12 md:py-16">
+  <div class="max-w-3xl mx-auto px-4">
+    <!-- Back link -->
+    <a href="{{ "topics/" | absURL }}" class="inline-flex items-center gap-1 text-sm text-sangha-gold hover:text-yellow-600 transition-colors mb-6">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to Forum
+    </a>
+
+    <!-- Tag pills -->
+    {{ with .Params.tags }}
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      {{ range . }}
+      <span class="inline-flex items-center gap-1 text-xs font-medium text-sangha-gold bg-yellow-50 px-2 py-1 rounded-md border border-yellow-100">
+        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 9l16 0M4 15l16 0M10 3l-2 18M16 3l-2 18"/></svg>
+        {{ . }}
+      </span>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    <!-- Title -->
+    <h1 class="font-serif text-3xl font-bold text-sangha-navy mb-3">{{ .Title }}</h1>
+
+    <!-- Author & date -->
+    <div class="flex items-center gap-4 text-sm text-gray-400 mb-8">
+      {{ with .Params.author }}
+      <span class="font-medium text-gray-600">By {{ . }}</span>
+      {{ end }}
+      <span>{{ .Date.Format "January 2, 2006" }}</span>
+    </div>
+
+    <!-- Content -->
+    <div class="bg-white rounded-2xl p-8 md:p-12 shadow-sm">
+      <article class="prose prose-slate max-w-none">
+        {{ .Content }}
+      </article>
+    </div>
+  </div>
+</section>
+
+{{ partial "comments" . }}
+{{ end }}

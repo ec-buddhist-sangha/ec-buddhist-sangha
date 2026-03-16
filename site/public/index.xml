@@ -2,46 +2,67 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Home on Eau Claire Buddhist Sangha</title>
-    <link>http://127.0.0.1:1313/ec-buddhist-sangha/</link>
+    <link>http://127.0.0.1:1314/ec-buddhist-sangha/</link>
     <description>Recent content in Home on Eau Claire Buddhist Sangha</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 28 Jan 2025 19:00:00 +0000</lastBuildDate>
-    <atom:link href="http://127.0.0.1:1313/ec-buddhist-sangha/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 01 Feb 2026 16:53:00 -0600</lastBuildDate>
+    <atom:link href="http://127.0.0.1:1314/ec-buddhist-sangha/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Some interesting thing</title>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/events/2026-02-01-some-interesting-thing/</link>
+      <pubDate>Sun, 01 Feb 2026 16:53:00 -0600</pubDate>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/events/2026-02-01-some-interesting-thing/</guid>
+      <description>&lt;p&gt;Some interesting thing is happening today!&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Tips for Meditation Posture</title>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/topics/meditation-posture-tips/</link>
+      <pubDate>Wed, 05 Feb 2025 14:00:00 +0000</pubDate>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/topics/meditation-posture-tips/</guid>
+      <description>&lt;p&gt;After struggling with lower back pain during sits for almost two years, I&amp;rsquo;ve finally found a setup that works. Thought I&amp;rsquo;d share in case it helps others.&lt;/p&gt;&#xA;&lt;h2 id=&#34;what-helped-me&#34;&gt;What helped me&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;&lt;strong&gt;A higher cushion&lt;/strong&gt; — I switched from a standard zafu to a taller one (about 6 inches). This tilted my pelvis forward enough that my spine could stack naturally.&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;&lt;strong&gt;A folded blanket under my knees&lt;/strong&gt; — For those of us who sit cross-legged, a little support under the knees takes pressure off the hips.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Weekly Tuesday Sit &amp; Dharma Talk</title>
-      <link>http://127.0.0.1:1313/ec-buddhist-sangha/events/weekly-sit/</link>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/events/weekly-sit/</link>
       <pubDate>Tue, 28 Jan 2025 19:00:00 +0000</pubDate>
-      <guid>http://127.0.0.1:1313/ec-buddhist-sangha/events/weekly-sit/</guid>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/events/weekly-sit/</guid>
       <description>&lt;p&gt;Our core weekly gathering. We begin with 30 minutes of silent meditation, followed by a talk on &lt;strong&gt;&amp;ldquo;The Second Noble Truth: The Cause of Suffering&amp;rdquo;&lt;/strong&gt;.&lt;/p&gt;&#xA;&lt;h2 id=&#34;schedule&#34;&gt;Schedule&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;6:45 PM&lt;/strong&gt; - Optional meditation instruction for beginners&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:00 PM&lt;/strong&gt; - Silent sitting meditation (30 minutes)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:30 PM&lt;/strong&gt; - Dharma talk or discussion&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;8:00 PM&lt;/strong&gt; - Tea and open discussion&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;All levels of experience are welcome. Cushions and chairs are provided. No special clothing needed.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Daily Practice Struggles</title>
-      <link>http://127.0.0.1:1313/ec-buddhist-sangha/topics/daily-practice-struggles/</link>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/topics/daily-practice-struggles/</link>
       <pubDate>Mon, 20 Jan 2025 10:00:00 +0000</pubDate>
-      <guid>http://127.0.0.1:1313/ec-buddhist-sangha/topics/daily-practice-struggles/</guid>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/topics/daily-practice-struggles/</guid>
       <description>&lt;p&gt;How do you all maintain a 20-minute daily sit when the kids are home? I&amp;rsquo;ve been struggling to find consistent time in the mornings before work.&lt;/p&gt;&#xA;&lt;p&gt;I&amp;rsquo;ve tried:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Waking up 30 minutes earlier (hard when the kids wake up early too)&lt;/li&gt;&#xA;&lt;li&gt;Sitting in the evening (I&amp;rsquo;m too tired)&lt;/li&gt;&#xA;&lt;li&gt;Short 10-minute sits (helpful but not the same)&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Would love to hear what works for other parents in the sangha.&lt;/p&gt;</description>
     </item>
     <item>
       <title>New Library Books Available</title>
-      <link>http://127.0.0.1:1313/ec-buddhist-sangha/announcements/new-library-books/</link>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/announcements/new-library-books/</link>
       <pubDate>Sun, 19 Jan 2025 14:00:00 +0000</pubDate>
-      <guid>http://127.0.0.1:1313/ec-buddhist-sangha/announcements/new-library-books/</guid>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/announcements/new-library-books/</guid>
       <description>&lt;p&gt;We have added five new titles to our community library, including Pema Chödrön&amp;rsquo;s latest work on living with compassion and uncertainty.&lt;/p&gt;&#xA;&lt;p&gt;New titles include:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;em&gt;Living Beautifully with Uncertainty and Change&lt;/em&gt; by Pema Chödrön&lt;/li&gt;&#xA;&lt;li&gt;&lt;em&gt;The Art of Gathering&lt;/em&gt; by Priya Krishna&lt;/li&gt;&#xA;&lt;li&gt;&lt;em&gt;Stillness Speaks&lt;/em&gt; by Eckhart Tolle&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Feel free to browse and borrow after our Tuesday meetings. Our library is a free resource for all sangha members.&lt;/p&gt;</description>
     </item>
     <item>
-      <title>About the Sangha</title>
-      <link>http://127.0.0.1:1313/ec-buddhist-sangha/about/</link>
-      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
-      <guid>http://127.0.0.1:1313/ec-buddhist-sangha/about/</guid>
-      <description>&lt;div class=&#34;sangha-box&#34;&gt;&#xA;  &lt;p&gt;&lt;strong&gt;Sangha: The Buddhist Community&lt;/strong&gt;&lt;/p&gt;&#xA;  &lt;p&gt;A Buddhist community that meets to meditate together and study the dharma, the teachings of the Buddha.&lt;/p&gt;&#xA;&lt;p&gt;The Eau Claire Buddhist Sangha is a peer-led sangha, with occasional guidance from teachers in the Vipassana and Zen traditions of Buddhism. Everyone is welcome, whether you study and practice in a particular lineage of Buddhism or practice with another faith tradition. Participants come from all walks of life and all faith traditions.&lt;/p&gt;</description>
+      <title>January Book Club: &#39;The Heart of the Buddha&#39;s Teaching&#39;</title>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/topics/book-club-january/</link>
+      <pubDate>Wed, 15 Jan 2025 09:00:00 +0000</pubDate>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/topics/book-club-january/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;d like to propose we read &lt;strong&gt;&amp;ldquo;The Heart of the Buddha&amp;rsquo;s Teaching&amp;rdquo;&lt;/strong&gt; by Thich Nhat Hanh for our January/February book club cycle.&lt;/p&gt;&#xA;&lt;h2 id=&#34;why-this-book&#34;&gt;Why this book?&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;It&amp;rsquo;s accessible to newcomers but has depth for experienced practitioners&lt;/li&gt;&#xA;&lt;li&gt;Thich Nhat Hanh&amp;rsquo;s writing style is clear and practical&lt;/li&gt;&#xA;&lt;li&gt;It covers the core teachings in a way that connects to everyday life&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;suggested-schedule&#34;&gt;Suggested schedule&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Week 1-2:&lt;/strong&gt; Part One — The Four Noble Truths (chapters 1-7)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Week 3-4:&lt;/strong&gt; Part Two — The Noble Eightfold Path (chapters 8-16)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Week 5-6:&lt;/strong&gt; Part Three — Other Buddhist Teachings (chapters 17-28)&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;We could discuss each section during our Wednesday evening sits. What does everyone think of this timeline?&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Calendar</title>
-      <link>http://127.0.0.1:1313/ec-buddhist-sangha/calendar/</link>
+      <title>About our Sangha</title>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/about/</link>
       <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
-      <guid>http://127.0.0.1:1313/ec-buddhist-sangha/calendar/</guid>
-      <description></description>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/about/</guid>
+      <description>&lt;h2 id=&#34;about-our-sangha&#34;&gt;About our Sangha&lt;/h2&gt;&#xA;&lt;p&gt;The Eau Claire Buddhist Sangha meets weekly on Tuesday evenings. We meditate together, listen to a recorded dharma talk from a teacher, brought by one of the members, and have a discussion about the teachings and meditation practice.&lt;/p&gt;&#xA;&lt;p&gt;Each 90 minute gathering is divided into 30 minute segments.&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:00 PM:&lt;/strong&gt; Group meditation with instruction for newcomers&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;7:30 PM:&lt;/strong&gt; Recorded Dharma talk from a teacher presented by one of the members&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;8:00 PM:&lt;/strong&gt; Open discussion about the teachings and meditation practice&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Cushions, chairs, and blankets are available for meditation support. Through practice, learning, and dialogue, we support our own and each others&amp;rsquo; practice and intentions to follow the path to live a skillful, compassionate life.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Support the Sangha</title>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/donate/</link>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/donate/</guid>
+      <description>&lt;div class=&#34;sangha-box&#34;&gt;&#xA;  &lt;h3 class=&#34;font-serif text-lg font-bold text-sangha-navy mb-2&#34;&gt;Dana: The Practice of Generosity&lt;/h3&gt;&#xA;  &lt;p&gt;Dana is the Pali word for generosity — one of the foundational practices in Buddhism. Our sangha is sustained entirely through dana.&lt;/p&gt;&#xA;&lt;p&gt;There is no fee to attend the weekly gatherings. All are invited to contribute what they can — whether through time, talent, or financial support — toward the flourishing of this community.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;what-your-donations-support&#34;&gt;What Your Donations Support&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Room rental at Unity of Eau Claire&lt;/li&gt;&#xA;&lt;li&gt;Meditation cushions, chairs, and blankets&lt;/li&gt;&#xA;&lt;li&gt;Library materials and dharma resources&lt;/li&gt;&#xA;&lt;li&gt;Dharma talk recordings and media&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;ways-to-give&#34;&gt;Ways to Give&lt;/h2&gt;&#xA;&lt;h3 id=&#34;online&#34;&gt;Online&lt;/h3&gt;&#xA;&lt;div class=&#34;bg-sangha-light border border-sangha-gold/30 rounded-xl p-6 text-center my-6&#34;&gt;&#xA;  &lt;p class=&#34;text-sangha-navy font-serif text-lg mb-2&#34;&gt;PayPal Donations&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

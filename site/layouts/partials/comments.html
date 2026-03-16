@@ -1,11 +1,29 @@
 {{ if or (eq .Section "topics") (eq .Section "pages") }}
 <section id="comments" class="bg-sangha-light py-12">
   <div class="container mx-auto px-4 max-w-3xl">
-    <h3 class="font-serif text-2xl font-bold text-sangha-navy mb-6">Comments</h3>
+    <h3 class="font-serif text-2xl font-bold text-sangha-navy mb-6">Discussion</h3>
     <div id="isso-thread"></div>
-    <noscript>Please enable JavaScript to view comments.</noscript>
+    <div id="isso-fallback" class="hidden bg-white rounded-xl border border-gray-200 p-6 text-center">
+      <p class="text-gray-500 text-sm">Comments are temporarily unavailable. Please check back later.</p>
+    </div>
+    <noscript>
+      <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
+        <p class="text-gray-500 text-sm">Please enable JavaScript to view comments.</p>
+      </div>
+    </noscript>
   </div>
 </section>
 
-<script data-isso="/comments/" src="https://comments.eauclairesangha.org/js/embed.min.js"></script>
+<script>
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://comments.eauclairesangha.org/js/embed.min.js';
+  s.setAttribute('data-isso', '/comments/');
+  s.onerror = function() {
+    var fallback = document.getElementById('isso-fallback');
+    if (fallback) fallback.classList.remove('hidden');
+  };
+  document.head.appendChild(s);
+})();
+</script>
 {{ end }}

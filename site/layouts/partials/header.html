@@ -16,7 +16,7 @@
       <nav class="hidden md:flex items-center gap-6 lg:gap-8">
         {{ $current := . }}
         {{ range .Site.Menus.main }}
-          <a href="{{ .URL | absURL }}" class="{{ if eq $current.RelPermalink .URL }}text-sangha-gold border-b-2 border-sangha-gold{{ else }}text-gray-300 hover:text-white{{ end }} transition-all text-xs font-bold tracking-widest uppercase py-2">
+          <a href="{{ .URL | absURL }}" class="{{ if or (eq $current.RelPermalink .URL) (and (ne .URL $.Site.Home.RelPermalink) (hasPrefix $current.RelPermalink .URL)) }}text-sangha-gold border-b-2 border-sangha-gold{{ else }}text-gray-300 hover:text-white{{ end }} transition-all text-xs font-bold tracking-widest uppercase py-2">
             {{ .Name }}
           </a>
         {{ end }}
@@ -39,7 +39,7 @@
     <div class="container mx-auto px-4 flex flex-col gap-2 pt-2">
       {{ $current := . }}
       {{ range .Site.Menus.main }}
-        <a href="{{ .URL | absURL }}" class="{{ if eq $current.RelPermalink .URL }}text-sangha-gold{{ else }}text-gray-300{{ end }} text-sm font-bold tracking-widest uppercase py-2 border-b border-white/5">
+        <a href="{{ .URL | absURL }}" class="{{ if or (eq $current.RelPermalink .URL) (and (ne .URL $.Site.Home.RelPermalink) (hasPrefix $current.RelPermalink .URL)) }}text-sangha-gold{{ else }}text-gray-300{{ end }} text-sm font-bold tracking-widest uppercase py-2 border-b border-white/5">
           {{ .Name }}
         </a>
       {{ end }}

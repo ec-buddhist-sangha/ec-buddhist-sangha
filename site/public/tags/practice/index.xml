@@ -2,17 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Practice on Eau Claire Buddhist Sangha</title>
-    <link>http://127.0.0.1:1313/ec-buddhist-sangha/tags/practice/</link>
+    <link>http://127.0.0.1:1314/ec-buddhist-sangha/tags/practice/</link>
     <description>Recent content in Practice on Eau Claire Buddhist Sangha</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 20 Jan 2025 10:00:00 +0000</lastBuildDate>
-    <atom:link href="http://127.0.0.1:1313/ec-buddhist-sangha/tags/practice/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 05 Feb 2025 14:00:00 +0000</lastBuildDate>
+    <atom:link href="http://127.0.0.1:1314/ec-buddhist-sangha/tags/practice/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Tips for Meditation Posture</title>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/topics/meditation-posture-tips/</link>
+      <pubDate>Wed, 05 Feb 2025 14:00:00 +0000</pubDate>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/topics/meditation-posture-tips/</guid>
+      <description>&lt;p&gt;After struggling with lower back pain during sits for almost two years, I&amp;rsquo;ve finally found a setup that works. Thought I&amp;rsquo;d share in case it helps others.&lt;/p&gt;&#xA;&lt;h2 id=&#34;what-helped-me&#34;&gt;What helped me&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;&lt;strong&gt;A higher cushion&lt;/strong&gt; — I switched from a standard zafu to a taller one (about 6 inches). This tilted my pelvis forward enough that my spine could stack naturally.&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;&lt;strong&gt;A folded blanket under my knees&lt;/strong&gt; — For those of us who sit cross-legged, a little support under the knees takes pressure off the hips.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Daily Practice Struggles</title>
-      <link>http://127.0.0.1:1313/ec-buddhist-sangha/topics/daily-practice-struggles/</link>
+      <link>http://127.0.0.1:1314/ec-buddhist-sangha/topics/daily-practice-struggles/</link>
       <pubDate>Mon, 20 Jan 2025 10:00:00 +0000</pubDate>
-      <guid>http://127.0.0.1:1313/ec-buddhist-sangha/topics/daily-practice-struggles/</guid>
+      <guid>http://127.0.0.1:1314/ec-buddhist-sangha/topics/daily-practice-struggles/</guid>
       <description>&lt;p&gt;How do you all maintain a 20-minute daily sit when the kids are home? I&amp;rsquo;ve been struggling to find consistent time in the mornings before work.&lt;/p&gt;&#xA;&lt;p&gt;I&amp;rsquo;ve tried:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Waking up 30 minutes earlier (hard when the kids wake up early too)&lt;/li&gt;&#xA;&lt;li&gt;Sitting in the evening (I&amp;rsquo;m too tired)&lt;/li&gt;&#xA;&lt;li&gt;Short 10-minute sits (helpful but not the same)&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Would love to hear what works for other parents in the sangha.&lt;/p&gt;</description>
     </item>
   </channel>

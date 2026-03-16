@@ -3,6 +3,7 @@ backend:
   repo: ec-buddhist-sangha/ec-buddhist-sangha
   branch: main
   base_url: https://decap-oauth-proxy.eau-claire-buddhist-sangha.workers.dev
+  auth_endpoint: /auth
 
 media_folder: "site/static/images"
 public_folder: "/images"

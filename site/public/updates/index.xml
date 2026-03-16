@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Community Updates on Eau Claire Buddhist Sangha</title>
+    <link>http://127.0.0.1:1314/ec-buddhist-sangha/updates/</link>
+    <description>Recent content in Community Updates on Eau Claire Buddhist Sangha</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate></lastBuildDate>
+    <atom:link href="http://127.0.0.1:1314/ec-buddhist-sangha/updates/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>
