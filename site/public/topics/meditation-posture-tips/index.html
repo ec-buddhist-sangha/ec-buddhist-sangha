@@ -197,10 +197,7 @@ A folded blanket under my knees — For those of us who sit cross-legged, a litt
 <section id="comments" class="bg-sangha-light py-12">
   <div class="container mx-auto px-4 max-w-3xl">
     <h3 class="font-serif text-2xl font-bold text-sangha-navy mb-6">Discussion</h3>
-    <div id="isso-thread"></div>
-    <div id="isso-fallback" class="hidden bg-white rounded-xl border border-gray-200 p-6 text-center">
-      <p class="text-gray-500 text-sm">Comments are temporarily unavailable. Please check back later.</p>
-    </div>
+    <div id="remark42"></div>
     <noscript>
       <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
         <p class="text-gray-500 text-sm">Please enable JavaScript to view comments.</p>
@@ -210,15 +207,23 @@ A folded blanket under my knees — For those of us who sit cross-legged, a litt
 </section>
 
 <script>
+  var remark_config = {
+    host: 'https://comments.eauclairesangha.org',
+    site_id: 'ec-buddhist-sangha',
+    theme: 'light',
+    locale: 'en'
+  };
+</script>
+<script>
 (function() {
   var s = document.createElement('script');
-  s.src = 'https://comments.eauclairesangha.org/js/embed.min.js';
-  s.setAttribute('data-isso', 'https://comments.eauclairesangha.org/');
+  s.src = remark_config.host + '/web/embed.js';
+  s.defer = true;
   s.onerror = function() {
-    var fallback = document.getElementById('isso-fallback');
-    if (fallback) fallback.classList.remove('hidden');
+    var el = document.getElementById('remark42');
+    if (el) el.innerHTML = '<div class="bg-white rounded-xl border border-gray-200 p-6 text-center"><p class="text-gray-500 text-sm">Comments are temporarily unavailable. Please check back later.</p></div>';
   };
-  document.head.appendChild(s);
+  (document.head || document.body).appendChild(s);
 })();
 </script>
 

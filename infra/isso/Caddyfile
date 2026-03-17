@@ -1,13 +1,6 @@
 comments.eauclairesangha.org {
-	reverse_proxy isso:8080
-
-	header {
-		Access-Control-Allow-Origin https://ec-buddhist-sangha.github.io
-		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-		Access-Control-Allow-Headers "Content-Type"
-		Access-Control-Allow-Credentials true
+	log {
+		output stdout
 	}
-
-	@options method OPTIONS
-	respond @options 204
+	reverse_proxy remark42:8080
 }
