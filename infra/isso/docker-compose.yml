@@ -9,6 +9,7 @@ services:
       - AUTH_GITHUB_CID=Ov23liCFq83Gu0SzJUeQ
       - AUTH_GITHUB_CSEC=6e2d234e7bec3cbbbf8f937daf51aa9ded3c8ef8
       - AUTH_ANON=false
+      - AUTH_SAME_SITE=none
       - ADMIN_SHARED_EMAIL=
     volumes:
       - remark-data:/srv/var
