@@ -8,5 +8,67 @@
 <body>
   <!-- Include the script that builds the page and powers Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    (function () {
+      function calendarAdminUrl() {
+        var basePath = window.location.pathname.replace(/\/admin\/?.*$/, "/");
+        return window.location.origin + basePath + "admin/calendar/?cms=1";
+      }
+
+      function allowCalendarAdminAccess() {
+        try {
+          window.sessionStorage.setItem("ecbs-calendar-admin-access", String(Date.now()));
+        } catch (error) {
+          // Session storage may be unavailable in stricter browser contexts.
+        }
+      }
+
+      function makeCalendarLink(referenceLink) {
+        var link = referenceLink.cloneNode(false);
+        link.href = calendarAdminUrl();
+        link.removeAttribute("aria-current");
+        link.removeAttribute("data-selected");
+        link.setAttribute("data-calendar-admin-link", "true");
+        link.textContent = "Calendar Admin";
+        link.addEventListener("click", function (event) {
+          event.preventDefault();
+          allowCalendarAdminAccess();
+          window.location.href = calendarAdminUrl();
+        }, true);
+        return link;
+      }
+
+      function routeCalendarAdminLink(link) {
+        if (!link || link.getAttribute("data-calendar-admin-link") === "true") return;
+        link.href = calendarAdminUrl();
+        link.setAttribute("data-calendar-admin-link", "true");
+        link.addEventListener("click", function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          allowCalendarAdminAccess();
+          window.location.href = calendarAdminUrl();
+        }, true);
+      }
+
+      function insertCalendarAdminLink() {
+        var configuredLink = document.querySelector('a[href*="#/collections/calendar_admin"]');
+        if (configuredLink) {
+          routeCalendarAdminLink(configuredLink);
+          return;
+        }
+        if (document.querySelector("[data-calendar-admin-link]")) return;
+        var referenceLink = document.querySelector('a[href*="#/collections/"]');
+        if (!referenceLink || !referenceLink.parentElement) return;
+        var referenceItem = referenceLink.parentElement;
+        var item = referenceItem.cloneNode(false);
+        item.appendChild(makeCalendarLink(referenceLink));
+        referenceItem.parentElement.appendChild(item);
+      }
+
+      window.addEventListener("load", insertCalendarAdminLink);
+      new MutationObserver(insertCalendarAdminLink).observe(document.body, { childList: true, subtree: true });
+    })();
+  </script>
 </body>
 </html>

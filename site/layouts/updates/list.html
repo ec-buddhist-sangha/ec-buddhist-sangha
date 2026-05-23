@@ -26,7 +26,7 @@
                 <span class="text-gray-400 text-xs">&bull; {{ .Date.Format "Jan 2, 2006" }}</span>
               </div>
               <h3 class="font-serif text-lg font-bold text-sangha-navy mb-2">
-                <a href="{{ .Permalink }}" class="hover:text-sangha-gold transition-colors">{{ .Title }}</a>
+                <a href="{{ .RelPermalink }}" class="hover:text-sangha-gold transition-colors">{{ .Title }}</a>
               </h3>
               <p class="text-gray-600 text-sm leading-relaxed">{{ .Summary | plainify | truncate 200 }}</p>
             </div>

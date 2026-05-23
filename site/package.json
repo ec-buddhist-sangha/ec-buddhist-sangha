@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "description": "Eau Claire Buddhist Sangha - Hugo Site",
   "scripts": {
-    "dev": "hugo server -D",
+    "dev": "hugo server -D --renderToMemory --baseURL http://127.0.0.1:1313/ec-buddhist-sangha/ --appendPort=false",
     "build": "hugo",
     "css:build": "npx tailwindcss -i ./static/css/main.css -o ./static/css/output.css --watch",
-    "css:prod": "npx tailwindcss -i ./static/css/main.css -o ./static/css/output.css --minify"
+    "css:prod": "npx tailwindcss -i ./static/css/main.css -o ./static/css/output.css --minify",
+    "test": "node --test tests/calendar.test.js"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.23",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19"
   },

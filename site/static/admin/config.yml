@@ -14,6 +14,16 @@ i18n:
   default_locale: en
 
 collections:
+  - name: "calendar_admin"
+    label: "Calendar Admin"
+    files:
+      - label: "Open Calendar Admin"
+        name: "calendar_admin"
+        file: "site/content/calendar-admin.md"
+        fields:
+          - {label: "Title", name: "title", widget: "string"}
+          - {label: "Description", name: "description", widget: "text", required: false}
+
   - name: "events"
     label: "Events"
     folder: "site/content/events"

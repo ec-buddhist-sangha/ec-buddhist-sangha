@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 max-w-5xl">
     <div class="flex items-center justify-between mb-8">
       <h2 class="font-serif text-2xl font-bold text-sangha-navy">Community Updates</h2>
-      <a href="{{ "updates/" | absURL }}" class="text-sangha-gold hover:text-yellow-600 font-bold text-sm uppercase tracking-widest">
+      <a href="{{ "updates/" | relURL }}" class="text-sangha-gold hover:text-yellow-600 font-bold text-sm uppercase tracking-widest">
         View All Updates →
       </a>
     </div>
@@ -28,7 +28,7 @@
                 <span class="text-gray-400 text-xs">• {{ .Date.Format "Jan 2, 2006" }}</span>
               </div>
               <h3 class="font-serif text-lg font-bold text-sangha-navy mb-2">
-                <a href="{{ .Permalink }}" class="hover:text-sangha-gold transition-colors">{{ .Title }}</a>
+                <a href="{{ .RelPermalink }}" class="hover:text-sangha-gold transition-colors">{{ .Title }}</a>
               </h3>
               <div class="text-gray-600 text-sm leading-relaxed">{{ .Content }}</div>
             </div>

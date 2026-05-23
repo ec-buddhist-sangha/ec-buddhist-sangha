@@ -64,6 +64,27 @@
     border-left-color: #C59D45;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.08);
   }
+  .calendar-weekdays {
+    display: none;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 640px) {
+    .calendar-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+    .calendar-grid {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+  }
   .prose ul {
     @apply space-y-4 text-gray-600 list-none;
   }
