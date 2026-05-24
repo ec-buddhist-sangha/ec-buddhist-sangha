@@ -41,12 +41,14 @@ function loadApi() {
   return api;
 }
 
-function loadDomApi() {
+function loadDomApi(options = {}) {
+  const url = options.url || "http://127.0.0.1:1313/ec-buddhist-sangha/admin/calendar/?month=2026-06";
+  const localDev = options.localDev !== false;
   const dom = new JSDOM(
-    '<!doctype html><html><body><div id="calendar-app" data-calendar-view="admin" data-calendar-base="http://127.0.0.1:1313/ec-buddhist-sangha/"></div></body></html>',
+    `<!doctype html><html><body><div id="calendar-app" data-calendar-view="admin" data-calendar-base="http://127.0.0.1:1313/ec-buddhist-sangha/" data-calendar-local-dev="${localDev ? "true" : "false"}"></div></body></html>`,
     {
       runScripts: "outside-only",
-      url: "http://127.0.0.1:1313/ec-buddhist-sangha/admin/calendar/?month=2026-06"
+      url
     }
   );
   dom.window.console = console;
@@ -60,6 +62,10 @@ function loadDomApi() {
   api.__setStore = (store) => dom.window.localStorage.setItem("ecbs-calendar-v1", JSON.stringify(api.normalizeStore(store)));
   api.__getStore = () => JSON.parse(dom.window.localStorage.getItem("ecbs-calendar-v1"));
   return api;
+}
+
+function dateKey(date) {
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
 }
 
 test("signedUpPeople dedupes speaker and backup by email", () => {
@@ -114,6 +120,49 @@ test("public attendee panel shows count without attendee names", () => {
   assert.match(html, /1 person attending/);
   assert.doesNotMatch(html, /Maya/);
   assert.doesNotMatch(html, /maya@example.com/);
+});
+
+test("calendar admin opens directly during local development", () => {
+  const api = loadDomApi();
+
+  assert.equal(api.hasCalendarAdminAccess(), true);
+});
+
+test("calendar admin local bypass is disabled outside Hugo local development", () => {
+  const api = loadDomApi({
+    localDev: false,
+    url: "https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/calendar/"
+  });
+
+  assert.equal(api.hasCalendarAdminAccess(), false);
+});
+
+test("calendar admin local bypass requires the Hugo server marker even on localhost", () => {
+  const api = loadDomApi({
+    localDev: false,
+    url: "http://127.0.0.1:1313/ec-buddhist-sangha/admin/calendar/"
+  });
+
+  assert.equal(api.hasCalendarAdminAccess(), false);
+});
+
+test("calendar admin ignores guessed cms query outside local development", () => {
+  const api = loadDomApi({
+    localDev: false,
+    url: "https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/calendar/?cms=1"
+  });
+
+  assert.equal(api.hasCalendarAdminAccess(), false);
+});
+
+test("calendar admin accepts Decap session handoff outside local development", () => {
+  const api = loadDomApi({
+    localDev: false,
+    url: "https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/calendar/"
+  });
+  api.__window.sessionStorage.setItem("ecbs-calendar-admin-access", String(Date.now()));
+
+  assert.equal(api.hasCalendarAdminAccess(), true);
 });
 
 test("public regular meeting attend link opens details and auto-attends", () => {
@@ -1649,6 +1698,92 @@ test("public calendar hides open signup buttons outside the signup window", () =
   assert.match(api.__root.textContent, /Opens 1 month before/);
   assert.doesNotMatch(api.__root.textContent, /Open for volunteer/);
   assert.doesNotMatch(api.__root.textContent, /Sign up as backup/);
+});
+
+test("public calendar local development login sets and clears the mock user without storing password", () => {
+  const api = loadDomApi();
+  api.__setStore({
+    recurrences: [
+      { id: "inactive", name: "Inactive", frequency: "weekly", startDate: "2099-01-01", active: false }
+    ],
+    slots: []
+  });
+
+  api.renderCalendar(api.__root, {});
+
+  const form = api.__root.querySelector("#local-dev-login-form");
+  assert.ok(form);
+  form.querySelector('[name="username"]').value = "Bob";
+  form.querySelector('[name="password"]').value = "anything-local";
+  form.dispatchEvent(new api.__window.Event("submit", { bubbles: true, cancelable: true }));
+
+  assert.equal(api.__window.localStorage.getItem("ecbs-calendar-current-user-name"), "Bob");
+  assert.equal(api.__window.localStorage.getItem("ecbs-calendar-current-user-email"), "bob@example.com");
+  assert.equal(api.__window.localStorage.getItem("ecbs-calendar-current-user-password"), null);
+  assert.match(api.__root.textContent, /Signed in as Bob/);
+
+  api.__root.querySelector('[data-action="clear-local-dev-login"]').click();
+  assert.equal(api.__window.localStorage.getItem("ecbs-calendar-current-user-name"), null);
+  assert.match(api.__root.textContent, /Not signed in/);
+});
+
+test("mobile public calendar starts with today even when empty", () => {
+  const api = loadDomApi();
+  const today = dateKey(new Date());
+  api.__setStore({
+    recurrences: [
+      { id: "inactive", name: "Inactive", frequency: "weekly", startDate: "2099-01-01", active: false }
+    ],
+    slots: [
+      {
+        id: "slot-tomorrow",
+        date: api.shiftDateByDays(today, 1),
+        title: "Tomorrow gathering",
+        speaker: null,
+        backups: []
+      }
+    ]
+  });
+
+  api.renderCalendar(api.__root, {});
+
+  const todayBlock = api.__root.querySelector("[data-mobile-calendar-today]");
+  const mobileSlots = api.__root.querySelectorAll("[data-mobile-calendar-slot]");
+  assert.ok(todayBlock);
+  assert.match(todayBlock.textContent, /Today/);
+  assert.match(todayBlock.textContent, /No calendar items today/);
+  assert.equal(mobileSlots.length, 1);
+  assert.match(mobileSlots[0].textContent, /Tomorrow gathering/);
+});
+
+test("mobile public calendar paginates upcoming items by five with controls on top and bottom", () => {
+  const api = loadDomApi();
+  const today = dateKey(new Date());
+  const slots = Array.from({ length: 7 }, (_, index) => ({
+    id: "mobile-slot-" + index,
+    date: api.shiftDateByDays(today, index + 1),
+    title: "Mobile item " + index,
+    speaker: null,
+    backups: []
+  }));
+  api.__setStore({
+    recurrences: [
+      { id: "inactive", name: "Inactive", frequency: "weekly", startDate: "2099-01-01", active: false }
+    ],
+    slots
+  });
+
+  api.renderCalendar(api.__root, {});
+  assert.equal(api.__root.querySelectorAll("[data-mobile-calendar-slot]").length, 4);
+  assert.equal(api.__root.querySelectorAll('[data-action="next-mobile-page"]').length, 2);
+  assert.match(api.__root.textContent, /Mobile item 0/);
+  assert.doesNotMatch(api.__root.textContent, /Mobile item 4/);
+
+  api.__root.querySelector('[data-action="next-mobile-page"]').click();
+  assert.equal(api.__root.querySelector("[data-mobile-calendar-today]"), null);
+  assert.equal(api.__root.querySelectorAll("[data-mobile-calendar-slot]").length, 3);
+  assert.match(api.__root.textContent, /Mobile item 4/);
+  assert.match(api.__root.textContent, /Mobile item 6/);
 });
 
 test("the next open talk gets a green action without green card framing", () => {

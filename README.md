@@ -138,6 +138,7 @@ npm run preview
 cd site
 npm install  # if using Tailwind pipeline
 hugo server -D  # development with drafts
+hugo server -D --renderToMemory --disableFastRender --bind 0.0.0.0 --baseURL "http://192.168.0.101:1313/ec-buddhist-sangha/"  # LAN preview; replace IP if needed
 hugo  # production build
 ```
 

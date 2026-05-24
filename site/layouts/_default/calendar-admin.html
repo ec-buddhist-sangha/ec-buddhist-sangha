@@ -5,7 +5,7 @@
       <p class="text-[10px] uppercase tracking-widest text-sangha-gold font-bold mb-2">Calendar Stewardship</p>
       <h1 class="font-serif text-3xl md:text-4xl font-bold text-sangha-navy">{{ .Title }}</h1>
     </div>
-    <div id="calendar-app" data-calendar-view="admin" data-calendar-base="{{ "" | relURL }}"></div>
+    <div id="calendar-app" data-calendar-view="admin" data-calendar-base="{{ "" | relURL }}" data-calendar-local-dev="{{ hugo.IsServer }}"></div>
   </div>
 </section>
 {{ $calendarVersion := readFile "static/js/calendar.js" | md5 }}

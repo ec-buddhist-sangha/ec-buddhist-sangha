@@ -4,19 +4,49 @@ This feature is scaffolded as a static Hugo interface first, with the backend bo
 
 ## Pages
 
-- `/calendar/` shows a standard month grid calendar with previous and next controls.
+- `/calendar/` shows a standard month grid calendar with previous and next controls on desktop. On mobile, it switches to a single-column list with up to five blocks per page, previous and next controls above and below the list, and a `Today` block first. If nothing is scheduled today, the first block says there are no calendar items today.
 - `/admin/calendar/` shows the same grid calendar and lets a scheduler click a date, choose an item type, and edit the calendar item.
 - `/calendar-item/?slot=<slot-id>` lets a member volunteer to bring a talk, add themselves as a backup, or mark attendance for a talk or regular meeting.
 
 Calendar and item detail pages are intentionally not shown in the main site menu during inception. Calendar details are viewable without signing in, but volunteer, backup, and attendance actions require a logged-in member.
 
-The Calendar Admin page renders at `/admin/calendar/` and is linked from the Decap CMS menu. The static preview includes a soft client-side gate so casual direct visits to `/admin/calendar/` are asked to open it through the CMS first. This is not production security; final access control should be enforced with Cloudflare Access or a backend authorization check.
+The Calendar Admin page renders at `/admin/calendar/` and is linked from the Decap CMS menu. During Hugo local development on localhost or a private LAN address, `/admin/calendar/` opens directly for faster iteration. The bypass requires Hugo's `.Site.IsServer` marker and a local/private host, so it is not emitted by production builds pushed to GitHub Pages. Outside local development, the Decap menu writes a short-lived same-origin session marker before opening Calendar Admin. The page ignores guessed query strings such as `?cms=1`. This is still not production security; final access control should be enforced with Cloudflare Access or a backend authorization check.
+
+## Local Preview Notes
+
+For LAN testing from another device, run Hugo from `site/` with the computer's current LAN IP and the GitHub Pages subpath. Replace `192.168.0.101` if the computer's LAN address changes:
+
+```powershell
+hugo server -D --renderToMemory --disableFastRender --bind 0.0.0.0 --baseURL "http://192.168.0.101:1313/ec-buddhist-sangha/"
+```
+
+Use `--renderToMemory` for local preview. Otherwise Hugo serves from `site/public`, and cleaning generated output from the git working tree can make the live preview lose routes, JavaScript, or CSS even though the Hugo process is still running.
+
+If `/ec-buddhist-sangha/calendar/` starts returning `404` locally or from another device while the server is still running, or if a page displays without styling, restart Hugo with the command above. During development, Hugo's fast render server has repeatedly stayed alive but stopped serving the root calendar content pages after file changes. Running with `--renderToMemory --disableFastRender` is the preferred local preview mode for this calendar work. A restart has restored `/calendar/`, `/calendar-item/`, `/admin/calendar/`, and the CSS assets.
+
+Quick check:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing "http://192.168.0.101:1313/ec-buddhist-sangha/calendar/"
+```
+
+Expected result is HTTP `200`. A `404` with a live Hugo process means restart the server, not a phone or firewall issue.
+
+Also check CSS if a page looks unstyled:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing "http://192.168.0.101:1313/ec-buddhist-sangha/css/output.css"
+```
+
+Expected result is HTTP `200`. If this fails while Hugo is running, restart with `--renderToMemory`.
 
 ## Current Persistence
 
 The first implementation uses browser `localStorage` under `ecbs-calendar-v1`. This is only for local UI validation and does not share data between users or devices.
 
 Until authentication is wired, the volunteer form uses `ecbs-calendar-current-user-name` from browser local storage as the mock logged-in name. If that value is missing, signup panels show a sign-in-required message instead of volunteer forms.
+
+During Hugo local development on localhost or a private LAN address, the public calendar shows a small `Local Development Login` helper above the calendar. This helper also requires Hugo's `.Site.IsServer` marker, so it is not emitted by production builds. It accepts a username and password so different mock users can be previewed quickly. The password is accepted only to mimic a login form and is not stored; the helper only writes `ecbs-calendar-current-user-name` and a derived preview email.
 
 For preview/testing, adding `?demo=1` to any calendar scheduler page seeds the default weekly Sangha meeting recurrence. The Development reset restores the same seed data.
 

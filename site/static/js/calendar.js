@@ -21,6 +21,8 @@
   var CALENDAR_HISTORY_DAYS = 30;
   var CALENDAR_TITLE_LIMIT = 64;
   var CALENDAR_DESCRIPTION_LIMIT = 92;
+  var MOBILE_CALENDAR_PAGE_SIZE = 5;
+  var MOBILE_CALENDAR_MONTHS_AHEAD = 12;
   var ADMIN_ACCESS_KEY = "ecbs-calendar-admin-access";
   var ADMIN_ACCESS_MAX_AGE_MS = 8 * 60 * 60 * 1000;
   var REMINDER_OPTIONS = [
@@ -29,6 +31,7 @@
     { id: "morning-of", label: "Morning of", daysBefore: 0 }
   ];
   var appBaseUrl = null;
+  var localDevelopmentPage = false;
   var modalScrollLock = null;
 
   function pad(value) {
@@ -542,6 +545,15 @@
     return store;
   }
 
+  function ensureMobileCalendarRenderSlots(store) {
+    var today = new Date();
+    for (var i = 0; i <= MOBILE_CALENDAR_MONTHS_AHEAD; i += 1) {
+      var target = new Date(today.getFullYear(), today.getMonth() + i, 1);
+      store = ensureRecurringSlots(store, target.getFullYear(), target.getMonth());
+    }
+    return store;
+  }
+
   function actualNextUpcomingSlot(store) {
     return store.slots.filter(function (slot) {
       return !isPastSlot(slot) && !slot.canceled;
@@ -711,6 +723,26 @@
     } catch (error) {
       return currentUserName() ? emailFromName(currentUserName()) : "";
     }
+  }
+
+  function isLocalDevelopmentHost() {
+    try {
+      var host = window.location && window.location.hostname ? window.location.hostname : "";
+      return host === "localhost" || host === "127.0.0.1" || host === "::1" || /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(host);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function isLocalDevelopmentMode() {
+    var rootFlag = false;
+    try {
+      var root = typeof document !== "undefined" ? document.getElementById("calendar-app") : null;
+      rootFlag = Boolean(root && root.getAttribute("data-calendar-local-dev") === "true");
+    } catch (error) {
+      rootFlag = false;
+    }
+    return Boolean((localDevelopmentPage || rootFlag) && isLocalDevelopmentHost());
   }
 
   function slotStatus(slot) {
@@ -1333,26 +1365,7 @@
   }
 
   function hasCalendarAdminAccess() {
-    if (typeof window !== "undefined") {
-      var params = new URLSearchParams(window.location.search || "");
-      if (params.get("cms") === "1") {
-        try {
-          if (window.sessionStorage) {
-            window.sessionStorage.setItem(ADMIN_ACCESS_KEY, String(Date.now()));
-          }
-        } catch (error) {
-          // The URL handoff is enough for this local/static gate.
-        }
-        try {
-          params.delete("cms");
-          var cleanUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "") + window.location.hash;
-          window.history.replaceState({}, document.title, cleanUrl);
-        } catch (error) {
-          // Keep the URL as-is when history replacement is unavailable.
-        }
-        return true;
-      }
-    }
+    if (isLocalDevelopmentMode()) return true;
     if (typeof window === "undefined" || !window.sessionStorage) return false;
     try {
       var raw = window.sessionStorage.getItem(ADMIN_ACCESS_KEY);
@@ -1428,19 +1441,152 @@
       '<div class="calendar-grid divide-x divide-y divide-gray-100">' + cells.join("") + '</div>';
   }
 
+  function renderMobileCalendarList(store, page) {
+    page = Math.max(0, Number(page) || 0);
+    var today = dateKey(new Date());
+    var settings = normalizeCalendarSettings(store.settings);
+    var nextUpcomingSlot = actualNextUpcomingSlot(store);
+    var nextUpcomingSlotKey = nextUpcomingSlot ? slotInstanceKey(nextUpcomingSlot) : "";
+    var todaySlots = store.slots.filter(function (slot) { return slot.date === today; }).sort(byDateTime);
+    var futureSlots = store.slots.filter(function (slot) { return slot.date > today; }).sort(byDateTime);
+    var offset = page === 0 ? 0 : 4 + ((page - 1) * MOBILE_CALENDAR_PAGE_SIZE);
+    var limit = page === 0 ? MOBILE_CALENDAR_PAGE_SIZE - 1 : MOBILE_CALENDAR_PAGE_SIZE;
+    var visibleSlots = futureSlots.slice(offset, offset + limit);
+    var hasPrev = page > 0;
+    var hasNext = futureSlots.length > offset + limit;
+    var rows = page === 0 ? [renderMobileTodayBlock(todaySlots, nextUpcomingSlotKey, settings)] : [];
+    rows = rows.concat(visibleSlots.map(function (slot) {
+      return renderMobileCalendarSlotBlock(slot, nextUpcomingSlotKey, settings);
+    }));
+    if (!rows.length) {
+      rows.push('<div class="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-500">No upcoming calendar items are currently scheduled.</div>');
+    }
+    return '<div class="p-4">' +
+      '<div class="mb-4">' + renderMobileCalendarPager(page, hasPrev, hasNext) + '</div>' +
+      '<div class="grid gap-4">' + rows.join("") + '</div>' +
+      '<div class="mt-4">' + renderMobileCalendarPager(page, hasPrev, hasNext) + '</div>' +
+    '</div>';
+  }
+
+  function renderMobileCalendarPager(page, hasPrev, hasNext) {
+    var disabledPrev = hasPrev ? "" : " disabled";
+    var disabledNext = hasNext ? "" : " disabled";
+    var disabledClass = " disabled:cursor-not-allowed disabled:opacity-40";
+    return '<div class="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-3">' +
+      '<button type="button" data-action="prev-mobile-page" class="rounded-full border border-gray-200 px-4 py-2 text-xs font-bold uppercase tracking-widest text-sangha-navy hover:bg-sangha-light' + disabledClass + '"' + disabledPrev + '>Prev</button>' +
+      '<div class="text-center text-xs font-bold uppercase tracking-widest text-gray-500">' + (page === 0 ? "Today" : "Page " + (page + 1)) + '</div>' +
+      '<button type="button" data-action="next-mobile-page" class="rounded-full border border-gray-200 px-4 py-2 text-xs font-bold uppercase tracking-widest text-sangha-navy hover:bg-sangha-light' + disabledClass + '"' + disabledNext + '>Next</button>' +
+    '</div>';
+  }
+
+  function renderMobileTodayBlock(todaySlots, nextUpcomingSlotKey, settings) {
+    var rows = todaySlots.map(function (slot) {
+      return renderPublicSlotCard(slot, nextUpcomingSlotKey, settings, "mt-3");
+    }).join("");
+    if (!rows) {
+      rows = '<div class="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">No calendar items today.</div>';
+    }
+    return '<section data-mobile-calendar-today class="rounded-xl border border-green-200 bg-green-50/60 p-4">' +
+      '<div class="flex items-center justify-between gap-3">' +
+        '<h2 class="font-serif text-lg font-bold text-sangha-navy">Today</h2>' +
+        '<span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold text-green-700"><span class="h-2 w-2 rounded-full bg-green-600"></span>' + escapeHtml(displayDate(dateKey(new Date()))) + '</span>' +
+      '</div>' +
+      rows +
+    '</section>';
+  }
+
+  function renderMobileCalendarSlotBlock(slot, nextUpcomingSlotKey, settings) {
+    return '<section data-mobile-calendar-slot="' + escapeHtml(slot.id) + '" class="rounded-xl border border-gray-200 bg-white p-4">' +
+      '<div class="mb-3 text-xs font-bold uppercase tracking-widest text-gray-400">' + escapeHtml(displayDate(slot.date)) + '</div>' +
+      renderPublicSlotCard(slot, nextUpcomingSlotKey, settings, "") +
+    '</section>';
+  }
+
+  function wireMobileCalendarControls(root, year, month, page) {
+    root.querySelectorAll('[data-action="prev-mobile-page"]').forEach(function (button) {
+      button.addEventListener("click", function () {
+        if (button.disabled) return;
+        renderCalendar(root, { year: year, month: month, mobilePage: Math.max(0, page - 1) });
+      });
+    });
+    root.querySelectorAll('[data-action="next-mobile-page"]').forEach(function (button) {
+      button.addEventListener("click", function () {
+        if (button.disabled) return;
+        renderCalendar(root, { year: year, month: month, mobilePage: page + 1 });
+      });
+    });
+  }
+
   function renderCalendar(root, state) {
     var requestedMonth = initialMonthFromQuery();
     var month = state.month == null ? requestedMonth.month : state.month;
     var year = state.year == null ? requestedMonth.year : state.year;
-    var store = ensureCalendarRenderSlots(loadStore(), year, month);
+    var mobilePage = state.mobilePage == null ? 0 : Math.max(0, Number(state.mobilePage) || 0);
+    var store = ensureMobileCalendarRenderSlots(ensureCalendarRenderSlots(loadStore(), year, month));
 
     renderShell(root,
+      renderLocalDevelopmentLogin() +
       '<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">' +
-        renderMonthControls(year, month, MONTH_LABELS[month] + " " + year, "Recurring meetings appear automatically from the admin schedule.") +
-        calendarGridHtml(year, month, store, "public") +
+        '<div class="hidden lg:block">' +
+          renderMonthControls(year, month, MONTH_LABELS[month] + " " + year, "Recurring meetings appear automatically from the admin schedule.") +
+          calendarGridHtml(year, month, store, "public") +
+        '</div>' +
+        '<div class="lg:hidden">' +
+          renderMobileCalendarList(store, mobilePage) +
+        '</div>' +
       '</div>');
 
+    wireLocalDevelopmentLogin(root, function () {
+      renderCalendar(root, { year: year, month: month, mobilePage: mobilePage });
+    });
     wireMonthControls(root, renderCalendar, year, month);
+    wireMobileCalendarControls(root, year, month, mobilePage);
+  }
+
+  function renderLocalDevelopmentLogin() {
+    if (!isLocalDevelopmentMode()) return "";
+    var userName = currentUserName();
+    var status = userName
+      ? '<div class="text-xs font-bold text-sangha-navy">Signed in as ' + escapeHtml(userName) + '</div>'
+      : '<div class="text-xs font-bold text-gray-500">Not signed in</div>';
+    return '<section data-local-dev-login class="mb-4 rounded-2xl border border-dashed border-sangha-gold/60 bg-yellow-50/70 p-4">' +
+      '<div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">' +
+        '<div>' +
+          '<p class="text-[10px] uppercase tracking-widest font-bold text-sangha-gold">Local Development Login</p>' +
+          status +
+        '</div>' +
+        '<form id="local-dev-login-form" class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-end">' +
+          '<label class="text-xs font-bold text-sangha-navy">Username<input name="username" value="' + escapeHtml(userName) + '" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-normal text-gray-700" autocomplete="username" /></label>' +
+          '<label class="text-xs font-bold text-sangha-navy">Password<input name="password" type="password" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-normal text-gray-700" autocomplete="current-password" /></label>' +
+          '<button type="submit" class="rounded-lg bg-sangha-navy px-4 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-blue-900">Set User</button>' +
+          '<button type="button" data-action="clear-local-dev-login" class="rounded-lg border border-gray-200 bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest text-sangha-navy hover:bg-sangha-light">Clear</button>' +
+        '</form>' +
+      '</div>' +
+      '<p class="mt-2 text-xs text-gray-500">Password is accepted for preview only and is not stored.</p>' +
+    '</section>';
+  }
+
+  function wireLocalDevelopmentLogin(root, rerender) {
+    var form = root.querySelector("#local-dev-login-form");
+    if (!form) return;
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var username = fieldValue(form, "username").trim();
+      if (!username || !window.localStorage) return;
+      window.localStorage.setItem("ecbs-calendar-current-user-name", username);
+      window.localStorage.setItem("ecbs-calendar-current-user-email", emailFromName(username));
+      rerender();
+    });
+    var clearButton = root.querySelector('[data-action="clear-local-dev-login"]');
+    if (clearButton) {
+      clearButton.addEventListener("click", function () {
+        if (window.localStorage) {
+          window.localStorage.removeItem("ecbs-calendar-current-user-name");
+          window.localStorage.removeItem("ecbs-calendar-current-user-email");
+        }
+        rerender();
+      });
+    }
   }
 
   function addCurrentUserAttendance(store, slot) {
@@ -1454,66 +1600,71 @@
     return attendee;
   }
 
+  function renderPublicSlotCard(slot, nextUpcomingSlotKey, settings, extraClass) {
+    settings = normalizeCalendarSettings(settings);
+    var meeting = isMeetingSlot(slot);
+    var assigned = slot.speaker && slot.speaker.name;
+    var past = isPastSlot(slot);
+    var canceled = slot.canceled;
+    var moved = Boolean(slot.movedToDate);
+    var isNext = slotInstanceKey(slot) === nextUpcomingSlotKey;
+    var signupsOpen = signupWindowOpen(slot, settings);
+    var isNextOpenTalk = isNext && !meeting && !assigned && signupsOpen;
+    var signupUrl = appUrl("calendar-item/", { slot: slot.id });
+    var attendUrl = appUrl("calendar-item/", { slot: slot.id, attend: "1" });
+    var backupUrl = signupUrl + "#talk-backup-form";
+    var slotTitle = slot.title || "Calendar item";
+    var slotDescription = slot.description || "";
+    var backupTitle = backupTooltip(slot);
+    var attendanceLabel = attendanceCountLabel(slot);
+    var cardClasses = moved
+      ? "border-red-200 bg-red-50"
+      : past
+      ? "border-gray-200 bg-gray-100 opacity-75"
+      : canceled
+        ? "border-red-200 bg-red-50"
+      : isNext
+        ? "border-2 border-sangha-gold bg-white shadow-md"
+        : "border-gray-200 bg-white";
+    var titleClass = moved ? "text-red-700" : past ? "text-gray-500" : canceled ? "text-red-700" : "text-sangha-navy";
+    var descriptionClass = moved ? "text-red-700" : past ? "text-gray-500" : canceled ? "text-red-700" : "text-gray-600";
+    var primaryActionClass = assigned
+      ? (isNext ? "bg-white text-sangha-navy ring-1 ring-sangha-navy/15 hover:bg-sangha-light" : "bg-white text-gray-500 ring-1 ring-gray-200 hover:bg-gray-100")
+      : (isNextOpenTalk ? "bg-green-600 text-white shadow-sm hover:bg-green-700" : "bg-white text-sangha-navy ring-1 ring-gray-200 hover:text-sangha-gold hover:ring-sangha-gold");
+    var backupActionClass = isNext
+      ? "border-sangha-navy/20 bg-white text-sangha-navy shadow-sm hover:border-sangha-gold hover:text-sangha-gold"
+      : "border-gray-200 bg-white/80 text-gray-500 shadow-none hover:border-gray-300";
+
+    return '<div class="block rounded-lg border ' + cardClasses + ' p-2 transition-colors ' + (extraClass || "") + '">' +
+      '<a href="' + signupUrl + '" class="block rounded-md hover:text-sangha-gold focus:outline-none focus:ring-2 focus:ring-sangha-gold focus:ring-offset-2">' +
+        '<div class="text-xs font-bold ' + titleClass + ' line-clamp-2"' + tooltipAttr(slotTitle) + '>' + escapeHtml(compactText(slotTitle, CALENDAR_TITLE_LIMIT)) + '</div>' +
+        '<div class="text-xs ' + descriptionClass + ' mt-1 line-clamp-2"' + tooltipAttr(slotDescription) + '>' + escapeHtml(compactText(slotDescription, CALENDAR_DESCRIPTION_LIMIT)) + '</div>' +
+        '<div class="text-[10px] uppercase tracking-widest font-bold text-gray-400 mt-2">' + displayTimeRange(slot) + '</div>' +
+        '<div class="mt-1 text-[10px] font-bold text-gray-400"' + tooltipAttr(attendanceLabel) + '>' + escapeHtml(attendanceLabel) + '</div>' +
+      '</a>' +
+      '<div class="mt-2 flex flex-col gap-2">' +
+      (moved
+        ? '<div class="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Moved to ' + escapeHtml(displayNumericShortDate(slot.movedToDate)) + '</div>'
+      : past
+        ? '<div class="mt-2 inline-flex rounded-full bg-gray-200 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-gray-500">Past meeting</div>'
+        : canceled
+          ? '<div class="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Canceled</div>'
+        : meeting
+          ? (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>')
+        : assigned
+          ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-xs font-bold ' + primaryActionClass + '">' + escapeHtml(publicName(slot.speaker.name)) + '</a>'
+          : (signupsOpen ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">Open for volunteer</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>')) +
+      (past || canceled || meeting || !signupsOpen ? '' : '<a href="' + backupUrl + '" class="inline-flex w-full min-w-0 flex-col items-center justify-center rounded-full border px-2 py-1.5 text-center ' + backupActionClass + '"' + tooltipAttr(backupTitle) + ' aria-label="' + escapeHtml(backupTitle) + '"><span class="text-[9px] font-bold leading-none text-gray-400">' + backupCountLabel(slot) + '</span><span class="mt-1 text-[10px] uppercase tracking-widest font-bold leading-tight">Sign up as backup</span></a>') +
+      '</div>' +
+    '</div>';
+  }
+
   function renderPublicDayCell(day, activeMonth, slots, nextUpcomingSlotKey, settings) {
     settings = normalizeCalendarSettings(settings);
     var muted = day.getMonth() !== activeMonth ? " bg-gray-50 text-gray-400" : " bg-white text-sangha-navy";
     var today = dateKey(day) === dateKey(new Date()) ? " ring-2 ring-green-500 ring-inset" : "";
     var daySlots = slots.map(function (slot) {
-      var meeting = isMeetingSlot(slot);
-      var assigned = slot.speaker && slot.speaker.name;
-      var past = isPastSlot(slot);
-      var canceled = slot.canceled;
-      var moved = Boolean(slot.movedToDate);
-      var isNext = slotInstanceKey(slot) === nextUpcomingSlotKey;
-      var signupsOpen = signupWindowOpen(slot, settings);
-      var isNextOpenTalk = isNext && !meeting && !assigned && signupsOpen;
-      var signupUrl = appUrl("calendar-item/", { slot: slot.id });
-      var attendUrl = appUrl("calendar-item/", { slot: slot.id, attend: "1" });
-      var backupUrl = signupUrl + "#talk-backup-form";
-      var slotTitle = slot.title || "Calendar item";
-      var slotDescription = slot.description || "";
-      var backupTitle = backupTooltip(slot);
-      var attendanceLabel = attendanceCountLabel(slot);
-      var cardClasses = moved
-        ? "border-red-200 bg-red-50"
-        : past
-        ? "border-gray-200 bg-gray-100 opacity-75"
-        : canceled
-          ? "border-red-200 bg-red-50"
-        : isNext
-          ? "border-2 border-sangha-gold bg-white shadow-md"
-          : "border-gray-200 bg-white";
-      var titleClass = moved ? "text-red-700" : past ? "text-gray-500" : canceled ? "text-red-700" : "text-sangha-navy";
-      var descriptionClass = moved ? "text-red-700" : past ? "text-gray-500" : canceled ? "text-red-700" : "text-gray-600";
-      var timeClass = "text-gray-400";
-      var primaryActionClass = assigned
-        ? (isNext ? "bg-white text-sangha-navy ring-1 ring-sangha-navy/15 hover:bg-sangha-light" : "bg-white text-gray-500 ring-1 ring-gray-200 hover:bg-gray-100")
-        : (isNextOpenTalk ? "bg-green-600 text-white shadow-sm hover:bg-green-700" : "bg-white text-sangha-navy ring-1 ring-gray-200 hover:text-sangha-gold hover:ring-sangha-gold");
-      var backupActionClass = isNext
-        ? "border-sangha-navy/20 bg-white text-sangha-navy shadow-sm hover:border-sangha-gold hover:text-sangha-gold"
-        : "border-gray-200 bg-white/80 text-gray-500 shadow-none hover:border-gray-300";
-      return '<div class="block mt-2 rounded-lg border ' + cardClasses + ' p-2 transition-colors">' +
-        '<a href="' + signupUrl + '" class="block rounded-md hover:text-sangha-gold focus:outline-none focus:ring-2 focus:ring-sangha-gold focus:ring-offset-2">' +
-          '<div class="text-xs font-bold ' + titleClass + ' line-clamp-2"' + tooltipAttr(slotTitle) + '>' + escapeHtml(compactText(slotTitle, CALENDAR_TITLE_LIMIT)) + '</div>' +
-          '<div class="text-xs ' + descriptionClass + ' mt-1 line-clamp-2"' + tooltipAttr(slotDescription) + '>' + escapeHtml(compactText(slotDescription, CALENDAR_DESCRIPTION_LIMIT)) + '</div>' +
-          '<div class="text-[10px] uppercase tracking-widest font-bold ' + timeClass + ' mt-2">' + displayTimeRange(slot) + '</div>' +
-          '<div class="mt-1 text-[10px] font-bold text-gray-400"' + tooltipAttr(attendanceLabel) + '>' + escapeHtml(attendanceLabel) + '</div>' +
-        '</a>' +
-        '<div class="mt-2 flex flex-col gap-2">' +
-        (moved
-          ? '<div class="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Moved to ' + escapeHtml(displayNumericShortDate(slot.movedToDate)) + '</div>'
-        : past
-          ? '<div class="mt-2 inline-flex rounded-full bg-gray-200 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-gray-500">Past meeting</div>'
-          : canceled
-            ? '<div class="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Canceled</div>'
-          : meeting
-            ? (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>')
-          : assigned
-            ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-xs font-bold ' + primaryActionClass + '">' + escapeHtml(publicName(slot.speaker.name)) + '</a>'
-            : (signupsOpen ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">Open for volunteer</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>')) +
-        (past || canceled || meeting || !signupsOpen ? '' : '<a href="' + backupUrl + '" class="inline-flex w-full min-w-0 flex-col items-center justify-center rounded-full border px-2 py-1.5 text-center ' + backupActionClass + '"' + tooltipAttr(backupTitle) + ' aria-label="' + escapeHtml(backupTitle) + '"><span class="text-[9px] font-bold leading-none text-gray-400">' + backupCountLabel(slot) + '</span><span class="mt-1 text-[10px] uppercase tracking-widest font-bold leading-tight">Sign up as backup</span></a>') +
-        '</div>' +
-      '</div>';
+      return renderPublicSlotCard(slot, nextUpcomingSlotKey, settings, "mt-2");
     }).join("");
 
     return '<div class="min-h-28 sm:min-h-36 md:min-h-44 p-2 md:p-3' + muted + today + '">' +
@@ -3902,6 +4053,7 @@
     if (!root) return;
     try {
       appBaseUrl = root.getAttribute("data-calendar-base") || window.location.href;
+      localDevelopmentPage = root.getAttribute("data-calendar-local-dev") === "true";
       if (new URLSearchParams(window.location.search).get("demo") === "1") {
         seedDemoStore();
       }
