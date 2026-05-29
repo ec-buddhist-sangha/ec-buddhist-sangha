@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Hugo build artifacts
+site/public/
+site/hugo_stats.json
