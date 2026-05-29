@@ -131,7 +131,7 @@ test("calendar admin opens directly during local development", () => {
 test("calendar admin local bypass is disabled outside Hugo local development", () => {
   const api = loadDomApi({
     localDev: false,
-    url: "https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/calendar/"
+    url: "https://eauclairesangha.org/admin/calendar/"
   });
 
   assert.equal(api.hasCalendarAdminAccess(), false);
@@ -149,7 +149,7 @@ test("calendar admin local bypass requires the Hugo server marker even on localh
 test("calendar admin ignores guessed cms query outside local development", () => {
   const api = loadDomApi({
     localDev: false,
-    url: "https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/calendar/?cms=1"
+    url: "https://eauclairesangha.org/admin/calendar/?cms=1"
   });
 
   assert.equal(api.hasCalendarAdminAccess(), false);
@@ -158,7 +158,7 @@ test("calendar admin ignores guessed cms query outside local development", () =>
 test("calendar admin accepts Decap session handoff outside local development", () => {
   const api = loadDomApi({
     localDev: false,
-    url: "https://ec-buddhist-sangha.github.io/ec-buddhist-sangha/admin/calendar/"
+    url: "https://eauclairesangha.org/admin/calendar/"
   });
   api.__window.sessionStorage.setItem("ecbs-calendar-admin-access", String(Date.now()));
 
