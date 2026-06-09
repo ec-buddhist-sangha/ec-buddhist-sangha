@@ -26,3 +26,8 @@ dist-ssr
 # Hugo build artifacts
 site/public/
 site/hugo_stats.json
+
+# Cloudflare Worker secrets & build artifacts
+workers/*/.dev.vars
+workers/*/node_modules/
+workers/*/.wrangler/
