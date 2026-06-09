@@ -33,4 +33,10 @@ describe("router", () => {
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: "not_found" });
   });
+
+  it("/decap/auth redirects to GitHub", async () => {
+    const res = await call("/decap/auth?provider=github");
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toContain("github.com/login/oauth/authorize");
+  });
 });
