@@ -25,6 +25,10 @@
     {{ range .AlternativeOutputFormats -}}
       {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .RelPermalink $.Site.Title | safeHTML }}
     {{ end -}}
+    <meta name="ecbs:worker-base" content="{{ .Site.Params.calendarApiBase }}" />
+    <meta name="ecbs:site-base" content="{{ "" | relURL }}" />
+    {{ $authVersion := readFile "static/js/auth.js" | md5 }}
+    <script src="{{ "js/auth.js" | relURL }}?v={{ $authVersion }}"></script>
   </head>
   <body class="min-h-screen flex flex-col font-sans selection:bg-sangha-gold/30 bg-sangha-light">
     {{ partial "header" . }}
