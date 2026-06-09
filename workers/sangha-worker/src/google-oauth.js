@@ -34,9 +34,10 @@ export async function exchangeCode(env, code, options = {}) {
   return response.json();
 }
 
-// Decodes (does not signature-verify) the id_token payload. Safe here because
-// the token was returned directly from Google's token endpoint over TLS in
-// exchangeCode, authenticated with our client_secret.
+// Decodes (does not signature-verify) the id_token payload. Safe ONLY for tokens
+// obtained via exchangeCode (returned directly from Google's token endpoint over
+// TLS, authenticated with our client_secret). NEVER call this on a client-supplied
+// token — doing so would be an auth bypass.
 export function decodeIdToken(idToken) {
   const parts = String(idToken || "").split(".");
   if (parts.length !== 3) throw new Error("Malformed id_token");

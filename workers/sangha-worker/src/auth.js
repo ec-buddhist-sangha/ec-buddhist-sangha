@@ -9,9 +9,22 @@ import { signJwt, verifyJwt } from "./jwt.js";
 const SITE_JWT_TTL_SECONDS = 8 * 60 * 60;
 const STATE_TTL_SECONDS = 10 * 60;
 
+// Only honor a caller-supplied return_to if it is on our own origin; otherwise
+// fall back to CORS_ORIGIN. Prevents an open redirect that would leak the
+// site JWT (carried in the URL fragment) to an attacker-controlled page.
+function safeReturnTo(requested, env) {
+  if (!requested) return env.CORS_ORIGIN;
+  try {
+    if (new URL(requested).origin === new URL(env.CORS_ORIGIN).origin) return requested;
+  } catch (error) {
+    // fall through to the safe default
+  }
+  return env.CORS_ORIGIN;
+}
+
 export async function handleLogin(request, env) {
   const requestUrl = new URL(request.url);
-  const returnTo = requestUrl.searchParams.get("return_to") || env.CORS_ORIGIN;
+  const returnTo = safeReturnTo(requestUrl.searchParams.get("return_to"), env);
   const state = await signJwt(
     { kind: "login-state", return_to: returnTo },
     env.JWT_SIGNING_SECRET,
@@ -54,7 +67,7 @@ export async function handleCallback(request, env, options = {}) {
     env.JWT_SIGNING_SECRET,
     { expiresInSeconds: SITE_JWT_TTL_SECONDS }
   );
-  const target = new URL(state.return_to || env.CORS_ORIGIN);
+  const target = new URL(safeReturnTo(state.return_to, env));
   target.hash = "token=" + encodeURIComponent(siteJwt);
   return Response.redirect(target.toString(), 302);
 }

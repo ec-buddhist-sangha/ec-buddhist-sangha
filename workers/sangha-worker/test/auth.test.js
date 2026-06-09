@@ -19,6 +19,20 @@ describe("handleLogin", () => {
     expect(state.kind).toBe("login-state");
     expect(state.return_to).toBe("https://eauclairesangha.org/calendar/");
   });
+
+  it("ignores a cross-origin return_to and falls back to CORS_ORIGIN", async () => {
+    const req = new Request("https://worker.test/auth/login?return_to=https://evil.example/grab");
+    const res = await handleLogin(req, env);
+    const state = await verifyJwt(new URL(res.headers.get("Location")).searchParams.get("state"), env.JWT_SIGNING_SECRET);
+    expect(state.return_to).toBe(env.CORS_ORIGIN);
+  });
+
+  it("preserves a same-origin return_to", async () => {
+    const req = new Request("https://worker.test/auth/login?return_to=https://eauclairesangha.org/calendar/");
+    const res = await handleLogin(req, env);
+    const state = await verifyJwt(new URL(res.headers.get("Location")).searchParams.get("state"), env.JWT_SIGNING_SECRET);
+    expect(state.return_to).toBe("https://eauclairesangha.org/calendar/");
+  });
 });
 
 describe("handleCallback", () => {
