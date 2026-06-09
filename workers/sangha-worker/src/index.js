@@ -8,6 +8,7 @@ import {
   handleGetCalendar, handlePutCalendar,
   handlePostSignup, handleDeleteSignup, handleGetSignup
 } from "./calendar.js";
+import { handlePostComment } from "./comments.js";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.put("/api/calendar", requireRole(["admin"], handlePutCalendar));
 router.post("/api/signups", requireRole(["member", "admin"], handlePostSignup));
 router.delete("/api/signups", requireRole(["member", "admin"], handleDeleteSignup));
 router.get("/api/signups", requireRole(["member", "admin"], handleGetSignup));
+router.post("/api/comments", requireRole(["member", "admin"], handlePostComment));
 router.all("*", (request, env) => jsonResponse(env, { error: "not_found" }, 404));
 
 export default {

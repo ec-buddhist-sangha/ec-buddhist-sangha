@@ -11,6 +11,8 @@ GOOGLE_GROUP_EMAIL = "sangha@eauclairesangha.org"
 GOOGLE_ADMIN_EMAIL = "admin@eauclairesangha.org"
 GOOGLE_REDIRECT_URI = "https://sangha-worker.eau-claire-buddhist-sangha.workers.dev/auth/callback"
 CORS_ORIGIN = "https://eauclairesangha.org"
+REMARK42_URL = "https://comments.eauclairesangha.org"
+REMARK42_SITE_ID = "ec-buddhist-sangha"
 
 # Secrets (set via `wrangler secret put`):
 #   GOOGLE_CLIENT_ID
@@ -21,6 +23,7 @@ CORS_ORIGIN = "https://eauclairesangha.org"
 # Added in later plans:
 #   Plan 02: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 #   Plan 04: REMARK42_JWT_SECRET, REMARK42_URL
+#   REMARK42_JWT_SECRET   (must equal Remark42's SECRET)  -> Plan 04 comments proxy
 #   Plan 03 adds the [[d1_databases]] binding below.
 
 [[d1_databases]]
