@@ -1810,3 +1810,38 @@ test("the next open talk gets a green action without green card framing", () => 
   assert.match(nextOpen.outerHTML, /bg-green-600/);
   assert.doesNotMatch(nextOpen.outerHTML, /border-green-600|bg-green-50/);
 });
+
+test("diffMemberSignups detects add, remove, role change, and detail edits", () => {
+  const api = loadApi();
+  const email = "mem@example.com";
+  const prev = api.normalizeStore({
+    slots: [
+      { id: "add", date: "2026-06-09", speaker: null, backups: [], attendees: [] },
+      { id: "remove", date: "2026-06-09", speaker: null, backups: [api.makeVolunteer("Mem", "", "", "t", email)], attendees: [] },
+      { id: "change", date: "2026-06-09", speaker: null, backups: [api.makeVolunteer("Mem", "", "", "t", email)], attendees: [] },
+      { id: "detail", date: "2026-06-09", speaker: api.makeVolunteer("Mem", "old-link", "", "t", email), backups: [], attendees: [] },
+      { id: "other", date: "2026-06-09", speaker: api.makeVolunteer("Someone", "", "", "t", "other@example.com"), backups: [], attendees: [] }
+    ]
+  });
+  const next = api.normalizeStore({
+    slots: [
+      { id: "add", date: "2026-06-09", speaker: null, backups: [], attendees: [api.makeVolunteer("Mem", "", "", "t", email)] },
+      { id: "remove", date: "2026-06-09", speaker: null, backups: [], attendees: [] },
+      { id: "change", date: "2026-06-09", speaker: api.makeVolunteer("Mem", "", "", "t", email), backups: [], attendees: [] },
+      { id: "detail", date: "2026-06-09", speaker: api.makeVolunteer("Mem", "new-link", "", "t", email), backups: [], attendees: [] },
+      { id: "other", date: "2026-06-09", speaker: api.makeVolunteer("Someone", "", "", "t", "other@example.com"), backups: [], attendees: [] }
+    ]
+  });
+
+  const deltas = api.diffMemberSignups(prev, next, email);
+  const byId = Object.fromEntries(deltas.map((d) => [d.itemId, d]));
+
+  assert.equal(byId.add.action, "add");
+  assert.equal(byId.add.role, "attendee");
+  assert.equal(byId.remove.action, "remove");
+  assert.equal(byId.change.action, "add");
+  assert.equal(byId.change.role, "speaker");
+  assert.equal(byId.detail.action, "add");
+  assert.equal(byId.detail.link, "new-link");
+  assert.equal(byId.other, undefined); // never reports another member's change
+});

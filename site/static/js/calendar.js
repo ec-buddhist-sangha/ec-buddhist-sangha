@@ -4076,6 +4076,59 @@
     }
   }
 
+  function memberRoleOnSlot(slot, email) {
+    if (!slot) return null;
+    var lc = String(email || "").toLowerCase();
+    if (slot.speaker && String(slot.speaker.email || "").toLowerCase() === lc) return "speaker";
+    if ((slot.backups || []).some(function (b) { return String(b.email || "").toLowerCase() === lc; })) return "backup";
+    if ((slot.attendees || []).some(function (a) { return String(a.email || "").toLowerCase() === lc; })) return "attendee";
+    return null;
+  }
+
+  function memberEntryOnSlot(slot, email, role) {
+    var lc = String(email || "").toLowerCase();
+    if (role === "speaker") return slot.speaker;
+    var list = role === "backup" ? slot.backups : slot.attendees;
+    return (list || []).filter(function (p) { return String(p.email || "").toLowerCase() === lc; })[0] || null;
+  }
+
+  function entriesDiffer(a, b) {
+    if (!a || !b) return Boolean(a) !== Boolean(b);
+    if ((a.link || "") !== (b.link || "")) return true;
+    if ((a.notes || "") !== (b.notes || "")) return true;
+    return (a.reminders || []).join(",") !== (b.reminders || []).join(",");
+  }
+
+  // Returns the changes to THIS member's own participation between two stores.
+  function diffMemberSignups(prevStore, nextStore, email) {
+    var deltas = [];
+    var prevById = {};
+    (prevStore.slots || []).forEach(function (slot) { prevById[slot.id] = slot; });
+    (nextStore.slots || []).forEach(function (slot) {
+      var prevSlot = prevById[slot.id];
+      var before = memberRoleOnSlot(prevSlot, email);
+      var after = memberRoleOnSlot(slot, email);
+      if (!before && !after) return;
+      if (before && !after) {
+        deltas.push({ itemId: slot.id, action: "remove" });
+        return;
+      }
+      if (after && before === after && !entriesDiffer(memberEntryOnSlot(prevSlot, email, before), memberEntryOnSlot(slot, email, after))) {
+        return; // unchanged
+      }
+      var entry = memberEntryOnSlot(slot, email, after) || {};
+      deltas.push({
+        itemId: slot.id,
+        action: "add",
+        role: after,
+        link: entry.link || "",
+        notes: entry.notes || "",
+        reminders: entry.reminders || []
+      });
+    });
+    return deltas;
+  }
+
   if (typeof window !== "undefined") {
     window.ECBSCalendarTest = {
       normalizeStore: normalizeStore,
@@ -4117,7 +4170,9 @@
       renderSchedule: renderSchedule,
       touchSlot: touchSlot,
       addCalendarHistory: addCalendarHistory,
-      shiftDateByDays: shiftDateByDays
+      shiftDateByDays: shiftDateByDays,
+      diffMemberSignups: diffMemberSignups,
+      memberRoleOnSlot: memberRoleOnSlot
     };
   }
 
