@@ -188,7 +188,7 @@ export async function handleDecapCallback(request, env, options = {}) {
   <p>Authorizing Decap CMS...</p>
   <script>
     (function() {
-      const token = ${JSON.stringify(tokenData.access_token)};
+      const token = ${JSON.stringify(tokenData.access_token).replace(/</g, "\\u003c")};
       const receiveMessage = (message) => {
         window.opener.postMessage(
           'authorization:github:success:' + JSON.stringify({ token: token }),
