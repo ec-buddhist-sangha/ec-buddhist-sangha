@@ -1,7 +1,23 @@
 // workers/sangha-worker/src/index.js
-// Entry point — routing will be wired up in Task 8.
+// Single entry point for the Sangha Worker. Later plans register more routes here.
+import { Router } from "itty-router";
+import { handleLogin, handleCallback } from "./auth.js";
+import { handlePreflight, jsonResponse, errorHandler } from "./middleware.js";
+
+const router = Router();
+
+router.options("*", (request, env) => handlePreflight(request, env));
+router.get("/api/health", (request, env) => jsonResponse(env, { status: "ok" }));
+router.get("/auth/login", (request, env) => handleLogin(request, env));
+router.get("/auth/callback", (request, env) => handleCallback(request, env));
+router.all("*", (request, env) => jsonResponse(env, { error: "not_found" }, 404));
+
 export default {
   async fetch(request, env, ctx) {
-    return new Response("sangha-worker", { status: 200 });
-  },
+    try {
+      return await router.fetch(request, env, ctx);
+    } catch (error) {
+      return errorHandler(error, env);
+    }
+  }
 };
