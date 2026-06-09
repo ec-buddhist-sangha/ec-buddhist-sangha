@@ -24,6 +24,7 @@
   var MOBILE_CALENDAR_PAGE_SIZE = 5;
   var MOBILE_CALENDAR_MONTHS_AHEAD = 12;
   var ADMIN_ACCESS_KEY = "ecbs-calendar-admin-access";
+  var serverRevision = 0;
   var ADMIN_ACCESS_MAX_AGE_MS = 8 * 60 * 60 * 1000;
   var REMINDER_OPTIONS = [
     { id: "one-week", label: "One week before", daysBefore: 7 },
@@ -199,11 +200,52 @@
   }
 
   function saveStore(store) {
-    if (window.localStorage) {
-      var normalized = normalizeStore(store);
-      normalized.revision = Number(store.revision || 0) + 1;
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    if (!window.localStorage) return;
+    var previous = loadStore(); // pre-write snapshot, used for the member delta
+    var normalized = normalizeStore(store);
+    normalized.revision = Number(store.revision || 0) + 1;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    syncStoreToServer(previous, normalized);
+  }
+
+  function syncStoreToServer(previousStore, nextStore) {
+    if (!window.ECBS || !window.ECBS.CalendarApi || !window.ECBS.CalendarApi.enabled()) return;
+    var api = window.ECBS.CalendarApi;
+    var auth = window.ECBS.Auth;
+    var user = auth && auth.getUser ? auth.getUser() : null;
+    if (!user) return; // anonymous: cannot persist server-side (read-only)
+
+    if (user.role === "admin") {
+      api.putStore(nextStore, serverRevision).then(function (res) {
+        serverRevision = Number(res.revision || serverRevision);
+      }).catch(function (error) {
+        if (error && error.conflict) {
+          serverRevision = Number(error.conflict.revision || serverRevision);
+          if (error.conflict.store && window.localStorage) {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeStore(error.conflict.store)));
+          }
+          var root = document.getElementById("calendar-app");
+          if (root) renderForView(root, root.getAttribute("data-calendar-view"));
+        } else if (window.console && window.console.warn) {
+          window.console.warn("Admin calendar sync failed; kept local copy.", error);
+        }
+      });
+      return;
     }
+
+    var deltas = diffMemberSignups(previousStore, nextStore, user.email);
+    deltas.forEach(function (delta) {
+      var request = delta.action === "remove"
+        ? api.deleteSignup({ itemId: delta.itemId })
+        : api.postSignup({ itemId: delta.itemId, role: delta.role, link: delta.link, notes: delta.notes, reminders: delta.reminders });
+      request.then(function (res) {
+        if (res && res.revision) serverRevision = Number(res.revision);
+      }).catch(function (error) {
+        if (window.console && window.console.warn) {
+          window.console.warn("Signup sync failed; kept local copy.", error);
+        }
+      });
+    });
   }
 
   function normalizeStore(store) {
@@ -4059,12 +4101,8 @@
       }
       applyUserFromQuery();
       var view = root.getAttribute("data-calendar-view");
-      if (view === "calendar") renderCalendar(root, {});
-      if (view === "admin") {
-        if (hasCalendarAdminAccess()) renderAdmin(root, {});
-        else renderAdminAccessGate(root);
-      }
-      if (view === "schedule") renderSchedule(root);
+      renderForView(root, view);
+      hydrateFromServer(root, view);
     } catch (error) {
       root.innerHTML = '<div class="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">' +
         '<p class="font-bold">Calendar could not load.</p>' +
@@ -4074,6 +4112,32 @@
         window.console.error(error);
       }
     }
+  }
+
+  function renderForView(root, view) {
+    if (view === "calendar") renderCalendar(root, {});
+    if (view === "admin") {
+      if (hasCalendarAdminAccess()) renderAdmin(root, {});
+      else renderAdminAccessGate(root);
+    }
+    if (view === "schedule") renderSchedule(root);
+  }
+
+  function hydrateFromServer(root, view) {
+    if (!window.ECBS || !window.ECBS.CalendarApi || !window.ECBS.CalendarApi.enabled()) return;
+    window.ECBS.CalendarApi.fetchStore().then(function (data) {
+      if (!data || !data.store) return; // server not seeded yet; keep local cache
+      serverRevision = Number(data.revision || 0);
+      if (window.localStorage) {
+        var normalized = normalizeStore(data.store);
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      }
+      renderForView(root, view);
+    }).catch(function (error) {
+      if (window.console && window.console.warn) {
+        window.console.warn("Calendar server hydrate failed; using local cache.", error);
+      }
+    });
   }
 
   function memberRoleOnSlot(slot, email) {

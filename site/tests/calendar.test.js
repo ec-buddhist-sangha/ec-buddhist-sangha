@@ -1845,3 +1845,24 @@ test("diffMemberSignups detects add, remove, role change, and detail edits", () 
   assert.equal(byId.detail.link, "new-link");
   assert.equal(byId.other, undefined); // never reports another member's change
 });
+
+test("admin saveStore pushes the full store via CalendarApi.putStore", () => {
+  const api = loadDomApi();
+  const calls = [];
+  api.__window.ECBS = {
+    Auth: { getUser: () => ({ email: "a@example.com", role: "admin" }), getToken: () => "t" },
+    CalendarApi: {
+      enabled: () => true,
+      putStore: (store, revision) => { calls.push({ store, revision }); return Promise.resolve({ revision: revision + 1 }); },
+      postSignup: () => Promise.resolve({}),
+      deleteSignup: () => Promise.resolve({})
+    }
+  };
+  api.__setStore({ slots: [{ id: "s1", date: "2026-06-09", title: "T", speaker: null, backups: [], attendees: [] }] });
+
+  api.renderAdmin(api.__root, { year: 2026, month: 5, selectedDate: "2026-06-09", selectedSlotId: "s1" });
+  api.__root.querySelector("[data-cancel-meeting]").click();
+  api.__root.querySelector("[data-confirm-admin-action]").click();
+
+  assert.ok(calls.length >= 1, "expected putStore to be called on admin save");
+});
