@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { env, createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
 import worker from "../src/index.js";
+import { signJwt } from "../src/jwt.js";
 
 async function call(path, init) {
   const ctx = createExecutionContext();
@@ -38,5 +39,33 @@ describe("router", () => {
     const res = await call("/decap/auth?provider=github");
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toContain("github.com/login/oauth/authorize");
+  });
+
+  it("GET /api/calendar is public and returns null store initially", async () => {
+    await env.DB.prepare("DELETE FROM calendar_state").run();
+    const res = await call("/api/calendar");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ store: null, revision: 0 });
+  });
+
+  it("PUT /api/calendar requires an admin token", async () => {
+    const res = await call("/api/calendar", { method: "PUT", body: JSON.stringify({ store: {}, revision: 0 }) });
+    expect(res.status).toBe(401);
+
+    const memberToken = await signJwt({ sub: "m@eauclairesangha.org", name: "M", role: "member" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+    const res2 = await call("/api/calendar", { method: "PUT", headers: { Authorization: "Bearer " + memberToken }, body: JSON.stringify({ store: {}, revision: 0 }) });
+    expect(res2.status).toBe(403);
+  });
+
+  it("POST /api/signups works for a member token", async () => {
+    await env.DB.prepare("DELETE FROM calendar_state").run();
+    const adminToken = await signJwt({ sub: "a@eauclairesangha.org", name: "A", role: "admin" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+    const seed = { revision: 0, settings: {}, recurrences: [], history: [], slots: [{ id: "s1", title: "T", speaker: null, backups: [], attendees: [] }] };
+    await call("/api/calendar", { method: "PUT", headers: { Authorization: "Bearer " + adminToken }, body: JSON.stringify({ store: seed, revision: 0 }) });
+
+    const memberToken = await signJwt({ sub: "m@eauclairesangha.org", name: "M", role: "member" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+    const res = await call("/api/signups", { method: "POST", headers: { Authorization: "Bearer " + memberToken }, body: JSON.stringify({ itemId: "s1", role: "attendee" }) });
+    expect(res.status).toBe(200);
+    expect((await res.json()).store.slots[0].attendees[0].email).toBe("m@eauclairesangha.org");
   });
 });
