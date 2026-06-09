@@ -1,7 +1,7 @@
 # Google SSO & Group-Based Access — Design Spec
 
 **Date:** 2026-05-28  
-**Status:** Draft — pending user review
+**Status:** Approved — implementation plans written 2026-06-09 (see Planning Addendum)
 
 ## Overview
 
@@ -286,3 +286,19 @@ The Worker proxies comment actions so users only sign in once (not separately fo
 - Email notifications for calendar (future D1 + Worker enhancement, reference templates already in CALENDAR_SYSTEM.md)
 - Zoom Server-to-Server OAuth (future Worker enhancement, secrets already listed in CALENDAR_SYSTEM.md)
 - Gemini AI assistant for production (needs separate Worker proxy per AGENTS.md security rules)
+
+## Planning Addendum (2026-06-09)
+
+This spec was decomposed into four dependency-ordered implementation plans under `docs/superpowers/plans/`:
+
+1. `2026-06-09-google-sso-01-worker-auth-foundation.md` — `sangha-worker` scaffold, Google OAuth, JWT, group-role check, middleware. **Everything depends on this.**
+2. `2026-06-09-google-sso-02-decap-cms-migration.md` — re-home Decap OAuth into the worker, repoint `config.yml`, archive old proxy.
+3. `2026-06-09-google-sso-03-calendar-d1-backend.md` — D1-backed calendar store, signup API, client hydration + write-through.
+4. `2026-06-09-google-sso-04-site-auth-and-comments.md` — `ECBS.Auth` frontend, sign-in UI, calendar identity wiring, Remark42 comment proxy.
+
+Two reconciliations were made during planning where the spec was internally inconsistent or not implementable as written:
+
+- **Decap stays on GitHub OAuth, not Google.** The spec's §"Admin Login (Decap CMS)" routes Decap auth through Google (`/auth/admin`). That cannot work: Decap's `backend: github` requires a *GitHub* token to commit; a Google token can't authorize git operations. (The spec's own env-var table keeps `GITHUB_CLIENT_ID`/`SECRET` "for the Decap CMS Git backend," which only makes sense with GitHub auth.) Plan 02 keeps GitHub OAuth, re-homed into `sangha-worker` under `/decap/*`. Google SSO gates the *site* and the visibility of the Admin affordance. True Google-gated CMS auth would require a Git Gateway-style proxy — out of scope.
+- **Calendar D1 = one JSON-document table + signup API, not eight normalized tables.** The existing 4150-line client engine round-trips a single normalized store object. Plan 03 persists that document in `calendar_state` with optimistic locking and adds server-authoritative `/api/signups` endpoints, instead of the eight-table normalization in §"D1 Tables." The document still contains all the spec's data (slots, recurrences, settings, history, notifications, reminders); full normalization remains a future option. Granular admin item/settings/recurrence routes collapse into one optimistic `PUT /api/calendar`.
+
+One item needs verification before it can ship: the **Remark42 comment proxy** (Plan 04 Tasks 6–7) assumes Remark42 accepts a Worker-minted `X-JWT`. Plan 04 Task 5 is a spike to confirm this against the live server; if it fails, Remark42's existing GitHub OAuth login remains the working fallback.
