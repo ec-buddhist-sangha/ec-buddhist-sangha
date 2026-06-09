@@ -737,12 +737,25 @@
     return fieldValue(form, "location") || settings.defaultLocation;
   }
 
+  function authUser() {
+    try {
+      if (window.ECBS && window.ECBS.Auth && window.ECBS.Auth.getUser) {
+        return window.ECBS.Auth.getUser();
+      }
+    } catch (error) {
+      return null;
+    }
+    return null;
+  }
+
   function currentUserName() {
     return loggedInUserName();
   }
 
   function loggedInUserName() {
     try {
+      var user = authUser();
+      if (user) return user.name || "";
       return (window.localStorage && window.localStorage.getItem("ecbs-calendar-current-user-name")) || "";
     } catch (error) {
       return "";
@@ -760,6 +773,8 @@
 
   function currentUserEmail() {
     try {
+      var user = authUser();
+      if (user && user.email) return user.email;
       var userName = currentUserName();
       return (window.localStorage && window.localStorage.getItem("ecbs-calendar-current-user-email")) || (userName ? emailFromName(userName) : "");
     } catch (error) {
@@ -1408,6 +1423,10 @@
 
   function hasCalendarAdminAccess() {
     if (isLocalDevelopmentMode()) return true;
+    var user = authUser();
+    if (window.ECBS && window.ECBS.Auth) {
+      return Boolean(user && user.role === "admin");
+    }
     if (typeof window === "undefined" || !window.sessionStorage) return false;
     try {
       var raw = window.sessionStorage.getItem(ADMIN_ACCESS_KEY);

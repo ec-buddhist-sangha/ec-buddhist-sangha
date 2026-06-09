@@ -1866,3 +1866,14 @@ test("admin saveStore pushes the full store via CalendarApi.putStore", () => {
 
   assert.ok(calls.length >= 1, "expected putStore to be called on admin save");
 });
+
+test("calendar identity prefers ECBS.Auth when present", () => {
+  const api = loadDomApi({ localDev: false, url: "https://eauclairesangha.org/admin/calendar/" });
+  api.__window.ECBS = {
+    Auth: { getUser: () => ({ email: "boss@eauclairesangha.org", name: "Boss", role: "admin" }) }
+  };
+  assert.equal(api.hasCalendarAdminAccess(), true);
+
+  api.__window.ECBS.Auth.getUser = () => ({ email: "mem@eauclairesangha.org", name: "Mem", role: "member" });
+  assert.equal(api.hasCalendarAdminAccess(), false);
+});
