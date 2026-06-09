@@ -1,13 +1,17 @@
-import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+import { defineWorkersConfig, readD1Migrations } from "@cloudflare/vitest-pool-workers/config";
+
+const migrations = await readD1Migrations("./migrations");
 
 export default defineWorkersConfig({
   test: {
+    setupFiles: ["./test/apply-migrations.js"],
     poolOptions: {
       workers: {
         wrangler: { configPath: "./wrangler.toml" },
         miniflare: {
-          // Test-only bindings. Production values come from the real Worker env.
+          d1Databases: ["DB"],
           bindings: {
+            TEST_MIGRATIONS: migrations,
             JWT_SIGNING_SECRET: "test-signing-secret-please-change",
             GOOGLE_CLIENT_ID: "test-client-id",
             GOOGLE_CLIENT_SECRET: "test-client-secret",

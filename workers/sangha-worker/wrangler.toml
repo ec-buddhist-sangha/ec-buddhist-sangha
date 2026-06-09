@@ -22,3 +22,10 @@ CORS_ORIGIN = "https://eauclairesangha.org"
 #   Plan 02: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 #   Plan 04: REMARK42_JWT_SECRET, REMARK42_URL
 #   Plan 03 adds the [[d1_databases]] binding below.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sangha-calendar"
+# PLACEHOLDER — only used for local miniflare tests. Replace with the real id from
+# `wrangler d1 create sangha-calendar` before deploying.
+database_id = "PLACEHOLDER_LOCAL_ONLY"
