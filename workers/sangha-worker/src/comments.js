@@ -25,6 +25,16 @@ export async function handlePostComment(request, env, options = {}) {
   let body;
   try { body = await request.json(); } catch (error) { return jsonResponse(env, { error: "bad_json" }, 400); }
   if (!body || !body.text || !body.url) return jsonResponse(env, { error: "bad_request" }, 400);
+  if (body.text.length > 10000) return jsonResponse(env, { error: "text_too_long" }, 400);
+  let locatorUrl;
+  try {
+    locatorUrl = new URL(body.url);
+  } catch (error) {
+    return jsonResponse(env, { error: "bad_request" }, 400);
+  }
+  if (locatorUrl.origin !== new URL(env.CORS_ORIGIN).origin) {
+    return jsonResponse(env, { error: "bad_request" }, 400);
+  }
 
   const now = options.now != null ? options.now : Math.floor(Date.now() / 1000);
   const remarkToken = await signJwt(buildRemarkClaims(request.user, env, now), env.REMARK42_JWT_SECRET, { now });

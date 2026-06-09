@@ -48,4 +48,18 @@ describe("comment proxy", () => {
     const res = await handlePostComment(req, env, { fetch: fetchImpl, now: 1000 });
     expect(res.status).toBe(502);
   });
+
+  it("rejects a cross-origin locator url", async () => {
+    const req = new Request("https://worker.test/api/comments", { method: "POST", body: JSON.stringify({ text: "hi", url: "https://evil.example/x/" }) });
+    req.user = user;
+    const res = await handlePostComment(req, env, { fetch: async () => new Response("{}", { status: 201 }), now: 1000 });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects an over-long comment", async () => {
+    const req = new Request("https://worker.test/api/comments", { method: "POST", body: JSON.stringify({ text: "x".repeat(10001), url: "https://eauclairesangha.org/topics/x/" }) });
+    req.user = user;
+    const res = await handlePostComment(req, env, { fetch: async () => new Response("{}", { status: 201 }), now: 1000 });
+    expect(res.status).toBe(400);
+  });
 });
