@@ -52,4 +52,19 @@ describe("decap github oauth", () => {
     expect(res.status).toBe(400);
     expect(await res.text()).toContain("expired");
   });
+
+  it("escapes </script> in the token so it cannot break out of the inline script", async () => {
+    const fetchImpl = async () =>
+      new Response(JSON.stringify({ access_token: "gho_</script><img src=x onerror=alert(1)>" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    const req = new Request("https://worker.test/decap/callback?code=c&state=s");
+    const res = await handleDecapCallback(req, env, { fetch: fetchImpl });
+    const html = await res.text();
+    // The raw closing tag must NOT appear (it would terminate the <script>).
+    expect(html).not.toContain("</script><img");
+    // The escaped form must be present instead.
+    expect(html).toContain("\\u003c/script>");
+  });
 });
