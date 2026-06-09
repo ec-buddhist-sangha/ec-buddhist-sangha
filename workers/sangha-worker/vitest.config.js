@@ -14,7 +14,9 @@ export default defineWorkersConfig({
             GOOGLE_REDIRECT_URI: "https://worker.test/auth/callback",
             GOOGLE_GROUP_EMAIL: "sangha@eauclairesangha.org",
             GOOGLE_ADMIN_EMAIL: "admin@eauclairesangha.org",
-            CORS_ORIGIN: "https://eauclairesangha.org"
+            CORS_ORIGIN: "https://eauclairesangha.org",
+            GITHUB_CLIENT_ID: "gh-client-id",
+            GITHUB_CLIENT_SECRET: "gh-client-secret"
           }
         }
       }
