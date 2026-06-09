@@ -12,6 +12,7 @@ markup:
 
 params:
   site_description: A calm Buddhist community in Western Wisconsin
+  calendarApiBase: https://sangha-worker.eau-claire-buddhist-sangha.workers.dev
   sangha_navy: '#1B3B5A'
   sangha_gold: '#C59D45'
   sangha_light: '#F5F5F0'
