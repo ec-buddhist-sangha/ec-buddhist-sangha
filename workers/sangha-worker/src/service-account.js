@@ -86,6 +86,7 @@ export async function getAccessToken(env, options = {}) {
   });
   if (!response.ok) throw new Error("Google token exchange failed: " + response.status);
   const data = await response.json();
+  if (!data.access_token) throw new Error("Google token exchange returned no access_token");
   cachedToken = { accessToken: data.access_token, expiresAt: nowSeconds + (data.expires_in || 3600) };
   return cachedToken.accessToken;
 }

@@ -50,4 +50,18 @@ describe("service-account", () => {
     expect(t2).toBe("ya29.test");
     expect(calls).toBe(1); // cached on second call
   });
+
+  it("throws and does not poison the cache when the token endpoint returns 200 without access_token", async () => {
+    const sa = await makeServiceAccount();
+    const env = { GOOGLE_SERVICE_ACCOUNT_KEY: JSON.stringify(sa), GOOGLE_ADMIN_EMAIL: "admin@eauclairesangha.org" };
+    let calls = 0;
+    const badFetch = async () => { calls++; return new Response(JSON.stringify({ error: "temporarily_unavailable" }), { status: 200 }); };
+    await expect(getAccessToken(env, { fetch: badFetch, now: 1000 })).rejects.toThrow();
+
+    // The next call must RETRY (cache must not have been poisoned with undefined).
+    const goodFetch = async () => { calls++; return new Response(JSON.stringify({ access_token: "ya29.ok", expires_in: 3600 }), { status: 200 }); };
+    const token = await getAccessToken(env, { fetch: goodFetch, now: 1000 });
+    expect(token).toBe("ya29.ok");
+    expect(calls).toBe(2);
+  });
 });
