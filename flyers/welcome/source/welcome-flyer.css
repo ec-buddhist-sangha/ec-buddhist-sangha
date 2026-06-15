@@ -1,0 +1,284 @@
+:root {
+  --sangha-navy: #1b3b5a;
+  --sangha-gold: #c59d45;
+  --sangha-light: #f5f5f0;
+  --sangha-paper: #fafaf8;
+  --ink: #233548;
+  --muted: #65717e;
+  --line: #dfd7c6;
+}
+
+@page {
+  size: Letter;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #ece7dc;
+}
+
+body {
+  color: var(--ink);
+  font-family: Lato, "Segoe UI", Arial, sans-serif;
+}
+
+.page {
+  position: relative;
+  width: 8.5in;
+  height: 11in;
+  margin: 0 auto;
+  overflow: hidden;
+  padding: 0.42in 0.58in 0.48in;
+  background:
+    linear-gradient(180deg, rgba(197, 157, 69, 0.12), rgba(197, 157, 69, 0) 1.35in),
+    var(--sangha-paper);
+  border: 0.035in solid var(--sangha-navy);
+}
+
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0.17in;
+  border: 1px solid rgba(27, 59, 90, 0.16);
+  pointer-events: none;
+}
+
+.header,
+.primary-message,
+.schedule,
+.arrival,
+.footer {
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+}
+
+.brand-lockup {
+  display: inline-grid;
+  grid-template-columns: 0.98in auto;
+  align-items: center;
+  gap: 0.14in;
+  margin: 0 auto 0.04in;
+}
+
+.logo {
+  display: block;
+  width: 0.98in;
+  height: 0.98in;
+  object-fit: contain;
+  margin: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--sangha-gold);
+  font-size: 0.17in;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+h1,
+h2 {
+  color: var(--sangha-navy);
+  font-family: Merriweather, Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+h1 {
+  margin: 0.03in 0 0.08in;
+  font-size: 0.58in;
+  line-height: 0.95;
+}
+
+.intro {
+  max-width: 6.05in;
+  margin: 0 auto;
+  font-size: 0.18in;
+  line-height: 1.43;
+}
+
+.primary-message {
+  margin: 0.21in 0 0.31in;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.18in;
+  padding: 0.16in 0.24in 0.14in;
+  background: var(--sangha-navy);
+  color: white;
+  text-align: left;
+}
+
+.primary-message h2 {
+  margin: 0 0 0.04in;
+  color: white;
+  font-size: 0.2in;
+}
+
+.primary-message p {
+  margin: 0;
+  font-size: 0.108in;
+  line-height: 1.42;
+}
+
+.primary-message blockquote {
+  margin: 0.09in auto 0;
+  max-width: 6.4in;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: Merriweather, Georgia, "Times New Roman", serif;
+  font-size: 0.115in;
+  line-height: 1.42;
+}
+
+.primary-message cite {
+  display: block;
+  margin-top: 0.03in;
+  color: rgba(255, 255, 255, 0.82);
+  font-family: Lato, "Segoe UI", Arial, sans-serif;
+  font-size: 0.095in;
+  font-style: normal;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.schedule {
+  width: 5.39in;
+  margin: 0 auto;
+  padding: 0 0.08in;
+}
+
+.schedule h2,
+.arrival h2,
+.footer h2 {
+  margin: 0;
+  font-size: 0.24in;
+  line-height: 1.15;
+}
+
+.location {
+  margin: 0.02in 0 0.09in;
+  color: var(--muted);
+  font-size: 0.14in;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.schedule ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.schedule li {
+  display: grid;
+  grid-template-columns: 0.95in 1fr;
+  align-items: baseline;
+  gap: 0.16in;
+  padding: 0.09in 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.16in;
+  line-height: 1.25;
+}
+
+.schedule li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.schedule time {
+  color: var(--sangha-gold);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.arrival {
+  width: 5.39in;
+  margin: 0.22in auto 0.24in;
+  padding: 0.16in 0.2in;
+  background: var(--sangha-light);
+  border-left: 0.07in solid var(--sangha-gold);
+}
+
+.arrival p,
+.footer p {
+  font-size: 0.155in;
+  line-height: 1.38;
+}
+
+.arrival p {
+  margin: 0.06in 0 0;
+}
+
+.footer {
+  position: absolute;
+  left: 0.5in;
+  right: 0.5in;
+  bottom: 0.45in;
+}
+
+.footer-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: 7.5in;
+  margin: 0 auto;
+  min-height: 1.25in;
+  border: 1px solid var(--line);
+  background: white;
+}
+
+.dana-column,
+.mailing-column {
+  min-width: 0;
+  padding: 0.18in 0.24in;
+}
+
+.mailing-column {
+  display: grid;
+  grid-template-columns: 1fr 0.86in;
+  align-items: center;
+  gap: 0.14in;
+  border-left: 1px solid var(--line);
+}
+
+.qr {
+  justify-self: end;
+  width: 0.86in;
+  height: 0.86in;
+}
+
+.footer h2 {
+  font-size: 0.22in;
+}
+
+.footer p {
+  margin: 0.04in 0 0;
+  font-size: 0.115in;
+  line-height: 1.32;
+}
+
+.url {
+  color: var(--muted);
+  font-size: 0.08in;
+}
+
+@media screen {
+  body {
+    padding: 24px;
+  }
+
+  .page {
+    box-shadow: 0 16px 54px rgba(27, 59, 90, 0.2);
+  }
+}

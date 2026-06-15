@@ -1,0 +1,35 @@
+{
+  "organization": "Eau Claire Buddhist Sangha",
+  "headline": "Welcome",
+  "intro": "You are welcome here, whether you are new to Buddhism, new to meditation,\nreturning after time away, or simply curious.",
+  "primary_heading": "All are welcome.",
+  "primary_body": "You do not need to identify as Buddhist, have prior experience, or wear special clothing. Chairs, cushions, and blankets are available.",
+  "sangha_heading": "What is a sangha?",
+  "sangha_body": "A sangha is a community of practice. We come together to learn, sit, listen, ask questions, and support one another on the path.",
+  "schedule_heading": "Tuesday Evening Gathering",
+  "location": "Unity of Eau Claire",
+  "schedule": [
+    {
+      "time": "6:45 PM",
+      "text": "Optional orientation to sitting practice"
+    },
+    {
+      "time": "7:00 PM",
+      "text": "Silent sitting meditation"
+    },
+    {
+      "time": "7:30 PM",
+      "text": "Dharma talk, Buddhist teaching, or discussion"
+    },
+    {
+      "time": "8:00 PM",
+      "text": "Questions, reflections, and community conversation"
+    }
+  ],
+  "arrival_heading": "Arriving & Getting Settled",
+  "arrival_body": "If you arrive after 7:00, please enter quietly and take any open seat. Chairs are available. Large cushions are under the table inside the hall; small cushions and blankets are in the closet.",
+  "qr_heading": "Join Our Mailing List",
+  "qr_body": "Scan for updates, weekly meeting notes, and community announcements.",
+  "qr_url_display": "groups.google.com/g/eauclairebuddhistsangha",
+  "dana_note": "We operate on dana, the Buddhist practice of generosity. There is no set fee for attendance."
+}
