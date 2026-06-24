@@ -1,6 +1,7 @@
 :root {
   --sangha-navy: #1b3b5a;
   --sangha-gold: #c59d45;
+  --brand-gold: #9b7428;
   --sangha-light: #f5f5f0;
   --sangha-paper: #fafaf8;
   --ink: #233548;
@@ -26,7 +27,7 @@ body {
 
 body {
   color: var(--ink);
-  font-family: Lato, "Segoe UI", Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .page {
@@ -35,19 +36,19 @@ body {
   height: 11in;
   margin: 0 auto;
   overflow: hidden;
-  padding: 0.42in 0.58in 0.48in;
   background:
     linear-gradient(180deg, rgba(197, 157, 69, 0.12), rgba(197, 157, 69, 0) 1.35in),
     var(--sangha-paper);
-  border: 0.035in solid var(--sangha-navy);
+  border: 0.03in solid var(--sangha-navy);
 }
 
 .page::before {
   content: "";
   position: absolute;
-  inset: 0.17in;
+  inset: 0.22in;
   border: 1px solid rgba(27, 59, 90, 0.16);
   pointer-events: none;
+  z-index: 5;
 }
 
 .header,
@@ -55,141 +56,146 @@ body {
 .schedule,
 .arrival,
 .footer {
-  position: relative;
+  position: absolute;
   z-index: 1;
 }
 
-.header {
-  text-align: center;
-}
-
 .brand-lockup {
-  display: inline-grid;
-  grid-template-columns: 0.98in auto;
+  position: absolute;
+  top: 0.42in;
+  left: 0.64in;
+  display: grid;
+  grid-template-columns: 1.42in auto;
   align-items: center;
-  gap: 0.14in;
-  margin: 0 auto 0.04in;
+  gap: 0.45in;
 }
 
 .logo {
   display: block;
-  width: 0.98in;
-  height: 0.98in;
+  width: 1.42in;
+  height: 1.42in;
   object-fit: contain;
-  margin: 0;
 }
 
 .eyebrow {
   margin: 0;
-  color: var(--sangha-gold);
-  font-size: 0.17in;
+  color: var(--brand-gold);
+  font-size: 0.446in;
   font-weight: 800;
+  line-height: 1.2;
   letter-spacing: 0;
   text-transform: uppercase;
   text-align: left;
 }
 
+.eyebrow span {
+  display: block;
+}
+
 h1,
 h2 {
+  margin: 0;
   color: var(--sangha-navy);
-  font-family: Merriweather, Georgia, "Times New Roman", serif;
+  font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
   letter-spacing: 0;
 }
 
 h1 {
-  margin: 0.03in 0 0.08in;
-  font-size: 0.58in;
+  position: absolute;
+  top: 1.78in;
+  left: 0;
+  width: 8.5in;
+  text-align: center;
+  font-size: 0.816in;
   line-height: 0.95;
 }
 
 .intro {
-  max-width: 6.05in;
-  margin: 0 auto;
-  font-size: 0.18in;
-  line-height: 1.43;
+  position: absolute;
+  top: 2.6in;
+  left: 0.64in;
+  width: 7.22in;
+  margin: 0;
+  text-align: center;
+  font-size: 0.202in;
+  line-height: 1.11;
 }
 
 .primary-message {
-  margin: 0.21in 0 0.31in;
+  top: 3.39in;
+  left: 0.58in;
+  width: 7.33in;
+  min-height: 1.72in;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.18in;
-  padding: 0.16in 0.24in 0.14in;
+  gap: 0.36in;
+  padding: 0.25in 0.2in 0.16in;
   background: var(--sangha-navy);
   color: white;
   text-align: left;
 }
 
+.primary-message::before {
+  content: "";
+  position: absolute;
+  top: 0.25in;
+  bottom: 0.14in;
+  left: 50%;
+  border-left: 1px solid rgba(255, 255, 255, 0.32);
+}
+
 .primary-message h2 {
-  margin: 0 0 0.04in;
+  margin: 0 0 0.08in;
   color: white;
-  font-size: 0.2in;
+  font-size: 0.291in;
+  line-height: 1.05;
 }
 
 .primary-message p {
   margin: 0;
-  font-size: 0.108in;
-  line-height: 1.42;
-}
-
-.primary-message blockquote {
-  margin: 0.09in auto 0;
-  max-width: 6.4in;
-  color: rgba(255, 255, 255, 0.92);
-  font-family: Merriweather, Georgia, "Times New Roman", serif;
-  font-size: 0.115in;
-  line-height: 1.42;
-}
-
-.primary-message cite {
-  display: block;
-  margin-top: 0.03in;
-  color: rgba(255, 255, 255, 0.82);
-  font-family: Lato, "Segoe UI", Arial, sans-serif;
-  font-size: 0.095in;
-  font-style: normal;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: 0.166in;
+  line-height: 1.04;
 }
 
 .schedule {
-  width: 5.39in;
-  margin: 0 auto;
-  padding: 0 0.08in;
+  top: 5.43in;
+  left: 1.19in;
+  width: 6.12in;
+  text-align: center;
 }
 
 .schedule h2,
 .arrival h2,
 .footer h2 {
-  margin: 0;
-  font-size: 0.24in;
-  line-height: 1.15;
+  font-size: 0.314in;
+  line-height: 1.05;
 }
 
 .location {
-  margin: 0.02in 0 0.09in;
+  margin: 0.1in 0 0.15in;
   color: var(--muted);
-  font-size: 0.14in;
+  font-size: 0.148in;
   font-weight: 700;
-  text-transform: uppercase;
+  line-height: 1;
 }
 
 .schedule ol {
   margin: 0;
   padding: 0;
   list-style: none;
+  text-align: left;
 }
 
 .schedule li {
   display: grid;
-  grid-template-columns: 0.95in 1fr;
+  grid-template-columns: 1.2in 1fr;
   align-items: baseline;
-  gap: 0.16in;
-  padding: 0.09in 0;
+  gap: 0.22in;
+  padding: 0.067in 0;
   border-top: 1px solid var(--line);
-  font-size: 0.16in;
-  line-height: 1.25;
+  font-size: 0.208in;
+  line-height: 1.05;
 }
 
 .schedule li:last-child {
@@ -203,37 +209,36 @@ h1 {
 }
 
 .arrival {
-  width: 5.39in;
-  margin: 0.22in auto 0.24in;
-  padding: 0.16in 0.2in;
+  top: 7.78in;
+  left: 1.19in;
+  width: 6.12in;
+  min-height: 1.21in;
+  padding: 0.22in 0.35in 0.14in;
   background: var(--sangha-light);
-  border-left: 0.07in solid var(--sangha-gold);
+  border-left: 0.1in solid var(--sangha-gold);
 }
 
-.arrival p,
-.footer p {
-  font-size: 0.155in;
-  line-height: 1.38;
+.arrival h2 {
+  font-size: 0.358in;
 }
 
 .arrival p {
-  margin: 0.06in 0 0;
+  margin: 0.12in 0 0;
+  font-size: 0.174in;
+  line-height: 1.06;
 }
 
 .footer {
-  position: absolute;
-  left: 0.5in;
-  right: 0.5in;
-  bottom: 0.45in;
+  top: 9.15in;
+  left: 0.39in;
+  width: 7.72in;
 }
 
 .footer-card {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  align-items: center;
-  width: 7.5in;
-  margin: 0 auto;
-  min-height: 1.25in;
+  align-items: stretch;
+  min-height: 1.43in;
   border: 1px solid var(--line);
   background: white;
 }
@@ -241,15 +246,20 @@ h1 {
 .dana-column,
 .mailing-column {
   min-width: 0;
-  padding: 0.18in 0.24in;
+  padding: 0.12in 0.2in;
 }
 
 .mailing-column {
   display: grid;
   grid-template-columns: 1fr 0.86in;
+  grid-template-rows: 1fr auto;
   align-items: center;
-  gap: 0.14in;
+  gap: 0.1in;
   border-left: 1px solid var(--line);
+}
+
+.mailing-copy {
+  min-width: 0;
 }
 
 .qr {
@@ -259,18 +269,19 @@ h1 {
 }
 
 .footer h2 {
-  font-size: 0.22in;
+  font-size: 0.259in;
 }
 
 .footer p {
-  margin: 0.04in 0 0;
-  font-size: 0.115in;
-  line-height: 1.32;
+  margin: 0.08in 0 0;
+  font-size: 0.16in;
+  line-height: 1.12;
 }
 
 .url {
+  grid-column: 1 / -1;
   color: var(--muted);
-  font-size: 0.08in;
+  font-size: 0.105in;
 }
 
 @media screen {

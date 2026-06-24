@@ -7,7 +7,7 @@
   "sangha_heading": "What is a sangha?",
   "sangha_body": "A sangha is a community of practice. We come together to learn, sit, listen, ask questions, and support one another on the path.",
   "schedule_heading": "Tuesday Evening Gathering",
-  "location": "Unity of Eau Claire",
+  "location": "UNITY OF EAU CLAIRE - 1808 Folsom St, Eau Claire, WI",
   "schedule": [
     {
       "time": "6:45 PM",
@@ -28,8 +28,8 @@
   ],
   "arrival_heading": "Arriving & Getting Settled",
   "arrival_body": "If you arrive after 7:00, please enter quietly and take any open seat. Chairs are available. Large cushions are under the table inside the hall; small cushions and blankets are in the closet.",
-  "qr_heading": "Join Our Mailing List",
+  "qr_heading": "Join Our Mailing\nList",
   "qr_body": "Scan for updates, weekly meeting notes, and community announcements.",
-  "qr_url_display": "groups.google.com/g/eauclairebuddhistsangha",
+  "qr_url_display": "https://groups.google.com/g/eauclairebuddhistsangha",
   "dana_note": "We operate on dana, the Buddhist practice of generosity. There is no set fee for attendance."
 }
