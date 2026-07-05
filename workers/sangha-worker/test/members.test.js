@@ -50,6 +50,13 @@ describe("upsertReader", () => {
     expect(row.role).toBe("member");
     expect(row.name).toBe("NewName");
   });
+  it("preserves pending request_status on upsert", async () => {
+    await env.DB.prepare("INSERT INTO members (email, name, role, request_status) VALUES ('pend@x.org','Old','reader','pending')").run();
+    await upsertReader(env, "pend@x.org", "NewName", "2026-07-05T00:00:00.000Z");
+    const row = await getMember(env, "pend@x.org");
+    expect(row.request_status).toBe("pending");
+    expect(row.name).toBe("NewName");
+  });
 });
 
 describe("listMembers / listPending", () => {
