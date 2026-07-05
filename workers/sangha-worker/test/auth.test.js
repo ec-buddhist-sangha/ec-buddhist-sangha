@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { env } from "cloudflare:test";
 import { handleLogin, handleCallback } from "../src/auth.js";
 import { verifyJwt } from "../src/jwt.js";
@@ -36,52 +36,57 @@ describe("handleLogin", () => {
 });
 
 describe("handleCallback", () => {
-  function mockFetch(idClaims, groupRole) {
+  beforeEach(async () => { await env.DB.prepare("DELETE FROM members").run(); });
+
+  function mockFetch(idClaims) {
     return async (url) => {
       if (url === "https://oauth2.googleapis.com/token") {
         return new Response(JSON.stringify({ id_token: fakeIdToken(idClaims), access_token: "at" }), { status: 200 });
       }
-      if (String(url).includes("/admin/directory/")) {
-        if (groupRole === null) return new Response("{}", { status: 404 });
-        return new Response(JSON.stringify({ role: groupRole, status: "ACTIVE" }), { status: 200 });
-      }
       throw new Error("unexpected fetch: " + url);
     };
   }
-
-  async function callbackWith(idClaims, groupRole) {
-    const state = await (await import("../src/jwt.js")).signJwt(
+  async function callbackWith(idClaims) {
+    const { signJwt } = await import("../src/jwt.js");
+    const state = await signJwt(
       { kind: "login-state", return_to: "https://eauclairesangha.org/calendar/" },
       env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 }
     );
     const req = new Request("https://worker.test/auth/callback?code=auth-code&state=" + encodeURIComponent(state));
-    return handleCallback(req, env, { fetch: mockFetch(idClaims, groupRole), accessToken: "svc-token" });
+    return handleCallback(req, env, { fetch: mockFetch(idClaims) });
   }
 
-  it("issues a member JWT in the redirect fragment for a group member", async () => {
-    const res = await callbackWith({ email: "member@eauclairesangha.org", name: "Mem" }, "MEMBER");
+  it("signs in any Google user with an identity-only JWT (no role claim)", async () => {
+    const res = await callbackWith({ email: "New.Person@eauclairesangha.org", name: "New" });
     expect(res.status).toBe(302);
     const loc = new URL(res.headers.get("Location"));
     expect(loc.origin + loc.pathname).toBe("https://eauclairesangha.org/calendar/");
-    const token = new URLSearchParams(loc.hash.slice(1)).get("token");
-    const claims = await verifyJwt(token, env.JWT_SIGNING_SECRET);
-    expect(claims.sub).toBe("member@eauclairesangha.org");
-    expect(claims.role).toBe("member");
+    const claims = await verifyJwt(new URLSearchParams(loc.hash.slice(1)).get("token"), env.JWT_SIGNING_SECRET);
+    expect(claims.sub).toBe("new.person@eauclairesangha.org");
+    expect(claims.name).toBe("New");
+    expect(claims.role).toBeUndefined();
   });
 
-  it("issues an admin JWT for an OWNER", async () => {
-    const res = await callbackWith({ email: "boss@eauclairesangha.org", name: "Boss" }, "OWNER");
-    const loc = new URL(res.headers.get("Location"));
-    const token = new URLSearchParams(loc.hash.slice(1)).get("token");
-    const claims = await verifyJwt(token, env.JWT_SIGNING_SECRET);
-    expect(claims.role).toBe("admin");
+  it("upserts a reader row on first sign-in", async () => {
+    const { getMember } = await import("../src/members.js");
+    await callbackWith({ email: "reader@eauclairesangha.org", name: "R" });
+    const row = await getMember(env, "reader@eauclairesangha.org");
+    expect(row.role).toBe("reader");
+    expect(row.request_status).toBe("none");
   });
 
-  it("redirects with an error when the user is not a group member", async () => {
-    const res = await callbackWith({ email: "stranger@example.com", name: "X" }, null);
-    const loc = new URL(res.headers.get("Location"));
-    expect(loc.hash).toContain("auth_error=not_a_member");
-    expect(loc.hash).not.toContain("token=");
+  it("refreshes name but preserves an existing member's role on re-login", async () => {
+    const { getMember } = await import("../src/members.js");
+    await env.DB.prepare("INSERT INTO members (email, name, role, request_status) VALUES ('mem@eauclairesangha.org','Old','member','none')").run();
+    await callbackWith({ email: "mem@eauclairesangha.org", name: "New" });
+    const row = await getMember(env, "mem@eauclairesangha.org");
+    expect(row.role).toBe("member");
+    expect(row.name).toBe("New");
+  });
+
+  it("redirects with no_email when the ID token lacks an email", async () => {
+    const res = await callbackWith({ name: "NoEmail" });
+    expect(new URL(res.headers.get("Location")).hash).toContain("auth_error=no_email");
   });
 
   it("rejects a tampered/absent state", async () => {

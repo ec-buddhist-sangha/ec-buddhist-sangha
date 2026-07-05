@@ -1,9 +1,11 @@
 // workers/sangha-worker/src/auth.js
 // Orchestrates Google login: redirect to consent, then on callback exchange the
-// code, verify Group membership, and issue an 8-hour site JWT in the redirect
-// fragment. State is a signed JWT (CSRF protection, no server-side session).
+// code, upsert the user as a reader, and issue an 8-hour identity-only site JWT
+// in the redirect fragment. State is a signed JWT (CSRF protection, no
+// server-side session). Role is resolved live elsewhere (see members.js), not
+// baked into the JWT.
 import { buildAuthUrl, exchangeCode, decodeIdToken } from "./google-oauth.js";
-import { getGroupRole } from "./groups.js";
+import { upsertReader } from "./members.js";
 import { signJwt, verifyJwt } from "./jwt.js";
 
 const SITE_JWT_TTL_SECONDS = 8 * 60 * 60;
@@ -54,16 +56,14 @@ export async function handleCallback(request, env, options = {}) {
   }
   if (!email) return errorRedirect(env, "no_email");
 
-  let role;
   try {
-    role = await getGroupRole(env, email, options);
+    await upsertReader(env, email, name, new Date().toISOString());
   } catch (error) {
-    return errorRedirect(env, "group_check_failed");
+    return errorRedirect(env, "store_error");
   }
-  if (!role) return errorRedirect(env, "not_a_member");
 
   const siteJwt = await signJwt(
-    { sub: email, name, role },
+    { sub: email, name },
     env.JWT_SIGNING_SECRET,
     { expiresInSeconds: SITE_JWT_TTL_SECONDS }
   );
