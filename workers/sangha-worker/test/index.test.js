@@ -78,4 +78,25 @@ describe("router", () => {
     expect(res.status).toBe(200);
     expect((await res.json()).store.slots[0].attendees[0].email).toBe("m@eauclairesangha.org");
   });
+
+  it("GET /api/me returns identity + role for a signed-in reader", async () => {
+    const token = await signJwt({ sub: "reader@eauclairesangha.org", name: "R" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+    const res = await call("/api/me", { headers: { Authorization: "Bearer " + token } });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.sub).toBe("reader@eauclairesangha.org");
+    expect(body.role).toBe("reader");
+  });
+
+  it("GET /api/members is admin-only", async () => {
+    const token = await signJwt({ sub: "reader@eauclairesangha.org", name: "R" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+    const forbidden = await call("/api/members", { headers: { Authorization: "Bearer " + token } });
+    expect(forbidden.status).toBe(403);
+
+    await seedRole("adm@eauclairesangha.org", "admin");
+    const adminToken = await signJwt({ sub: "adm@eauclairesangha.org", name: "A" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+    const ok = await call("/api/members", { headers: { Authorization: "Bearer " + adminToken } });
+    expect(ok.status).toBe(200);
+    expect(Array.isArray((await ok.json()).members)).toBe(true);
+  });
 });

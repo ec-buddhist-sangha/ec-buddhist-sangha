@@ -7,8 +7,6 @@ keep_vars = true
 # Non-secret vars (may also be set in the dashboard). Secrets are set with
 # `wrangler secret put <NAME>` and are NEVER committed.
 [vars]
-GOOGLE_GROUP_EMAIL = "sangha@eauclairesangha.org"
-GOOGLE_ADMIN_EMAIL = "admin@eauclairesangha.org"
 GOOGLE_REDIRECT_URI = "https://sangha-worker.eau-claire-buddhist-sangha.workers.dev/auth/callback"
 CORS_ORIGIN = "https://eauclairesangha.org"
 REMARK42_URL = "https://comments.eauclairesangha.org"
@@ -17,7 +15,6 @@ REMARK42_SITE_ID = "ec-buddhist-sangha"
 # Secrets (set via `wrangler secret put`):
 #   GOOGLE_CLIENT_ID
 #   GOOGLE_CLIENT_SECRET
-#   GOOGLE_SERVICE_ACCOUNT_KEY   (entire service-account JSON, one line)
 #   JWT_SIGNING_SECRET
 #
 # Added in later plans:
