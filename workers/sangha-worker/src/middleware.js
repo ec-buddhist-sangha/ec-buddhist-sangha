@@ -1,6 +1,7 @@
 // workers/sangha-worker/src/middleware.js
 // Shared HTTP concerns: CORS, JSON responses, JWT authentication, role gating.
 import { verifyJwt } from "./jwt.js";
+import { resolveRole } from "./members.js";
 
 export function corsHeaders(env) {
   return {
@@ -31,13 +32,16 @@ export async function authenticate(request, env) {
   return verifyJwt(match[1], env.JWT_SIGNING_SECRET);
 }
 
-// Wraps a handler so it only runs for an authenticated user whose role is in `roles`.
+// Wraps a handler so it only runs for a user whose LIVE role (config -> D1 ->
+// reader) is in `roles`. The JWT carries identity only; role is never trusted
+// from the token.
 export function requireRole(roles, handler) {
   return async (request, env, ctx) => {
     const user = await authenticate(request, env);
     if (!user) return jsonResponse(env, { error: "unauthorized" }, 401);
-    if (!roles.includes(user.role)) return jsonResponse(env, { error: "forbidden" }, 403);
-    request.user = user;
+    const role = await resolveRole(env, user.sub);
+    if (!roles.includes(role)) return jsonResponse(env, { error: "forbidden" }, 403);
+    request.user = { sub: user.sub, name: user.name, role };
     return handler(request, env, ctx);
   };
 }

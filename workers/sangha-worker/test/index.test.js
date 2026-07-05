@@ -10,6 +10,13 @@ async function call(path, init) {
   return res;
 }
 
+async function seedRole(email, role) {
+  await env.DB
+    .prepare("INSERT INTO members (email, name, role, request_status) VALUES (?, 'U', ?, 'none') ON CONFLICT(email) DO UPDATE SET role = excluded.role")
+    .bind(email.toLowerCase(), role)
+    .run();
+}
+
 describe("router", () => {
   it("health check returns ok", async () => {
     const res = await call("/api/health");
@@ -52,6 +59,7 @@ describe("router", () => {
     const res = await call("/api/calendar", { method: "PUT", body: JSON.stringify({ store: {}, revision: 0 }) });
     expect(res.status).toBe(401);
 
+    await seedRole("m@eauclairesangha.org", "member");
     const memberToken = await signJwt({ sub: "m@eauclairesangha.org", name: "M", role: "member" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
     const res2 = await call("/api/calendar", { method: "PUT", headers: { Authorization: "Bearer " + memberToken }, body: JSON.stringify({ store: {}, revision: 0 }) });
     expect(res2.status).toBe(403);
@@ -59,6 +67,8 @@ describe("router", () => {
 
   it("POST /api/signups works for a member token", async () => {
     await env.DB.prepare("DELETE FROM calendar_state").run();
+    await seedRole("a@eauclairesangha.org", "admin");
+    await seedRole("m@eauclairesangha.org", "member");
     const adminToken = await signJwt({ sub: "a@eauclairesangha.org", name: "A", role: "admin" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
     const seed = { revision: 0, settings: {}, recurrences: [], history: [], slots: [{ id: "s1", title: "T", speaker: null, backups: [], attendees: [] }] };
     await call("/api/calendar", { method: "PUT", headers: { Authorization: "Bearer " + adminToken }, body: JSON.stringify({ store: seed, revision: 0 }) });
