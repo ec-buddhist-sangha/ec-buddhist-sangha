@@ -30,3 +30,31 @@ export async function getMember(env, email) {
     .bind(lc)
     .first();
 }
+
+export async function upsertReader(env, email, name, nowIso) {
+  const lc = String(email || "").toLowerCase();
+  await env.DB
+    .prepare(
+      `INSERT INTO members (email, name, role, request_status, created_at, updated_at)
+       VALUES (?, ?, 'reader', 'none', ?, ?)
+       ON CONFLICT(email) DO UPDATE SET name = excluded.name, updated_at = excluded.updated_at`
+    )
+    .bind(lc, name || lc, nowIso, nowIso)
+    .run();
+}
+
+export async function listMembers(env) {
+  const { results } = await env.DB
+    .prepare("SELECT email, name, role, request_status, created_at, updated_at FROM members ORDER BY email")
+    .all();
+  return results || [];
+}
+
+export async function listPending(env) {
+  const { results } = await env.DB
+    .prepare(
+      "SELECT email, name, role, request_status, created_at, updated_at FROM members WHERE request_status = 'pending' ORDER BY updated_at"
+    )
+    .all();
+  return results || [];
+}

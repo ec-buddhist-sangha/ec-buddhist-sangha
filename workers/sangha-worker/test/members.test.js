@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { env } from "cloudflare:test";
-import { getBootstrapAdmins, resolveRole, getMember } from "../src/members.js";
+import { getBootstrapAdmins, resolveRole, getMember, upsertReader, listMembers, listPending } from "../src/members.js";
 
 beforeEach(async () => { await env.DB.prepare("DELETE FROM members").run(); });
 
@@ -32,5 +32,32 @@ describe("getMember", () => {
     expect(await getMember(env, "ghost@x.org")).toBeNull();
     await env.DB.prepare("INSERT INTO members (email, name, role, request_status) VALUES ('a@x.org','A','reader','none')").run();
     expect((await getMember(env, "A@x.org")).name).toBe("A");
+  });
+});
+
+describe("upsertReader", () => {
+  it("creates a reader row on first call", async () => {
+    await upsertReader(env, "New@x.org", "New", "2026-07-05T00:00:00.000Z");
+    const row = await getMember(env, "new@x.org");
+    expect(row.role).toBe("reader");
+    expect(row.request_status).toBe("none");
+    expect(row.name).toBe("New");
+  });
+  it("refreshes name but never downgrades an existing role", async () => {
+    await env.DB.prepare("INSERT INTO members (email, name, role, request_status) VALUES ('m@x.org','Old','member','none')").run();
+    await upsertReader(env, "m@x.org", "NewName", "2026-07-05T00:00:00.000Z");
+    const row = await getMember(env, "m@x.org");
+    expect(row.role).toBe("member");
+    expect(row.name).toBe("NewName");
+  });
+});
+
+describe("listMembers / listPending", () => {
+  it("lists all members and only pending ones", async () => {
+    await env.DB.prepare("INSERT INTO members (email, name, role, request_status, updated_at) VALUES ('a@x.org','A','reader','none','1')").run();
+    await env.DB.prepare("INSERT INTO members (email, name, role, request_status, updated_at) VALUES ('b@x.org','B','reader','pending','2')").run();
+    expect((await listMembers(env)).length).toBe(2);
+    const pending = await listPending(env);
+    expect(pending.map((r) => r.email)).toEqual(["b@x.org"]);
   });
 });
