@@ -23,7 +23,9 @@ export default defineWorkersConfig({
             GITHUB_CLIENT_SECRET: "gh-client-secret",
             REMARK42_URL: "https://comments.test",
             REMARK42_SITE_ID: "ec-buddhist-sangha",
-            REMARK42_JWT_SECRET: "remark-shared-secret"
+            REMARK42_JWT_SECRET: "remark-shared-secret",
+            BOOTSTRAP_ADMINS: "boss@eauclairesangha.org",
+            NOTIFY_SENDER: "noreply@eauclairesangha.org"
           }
         }
       }
