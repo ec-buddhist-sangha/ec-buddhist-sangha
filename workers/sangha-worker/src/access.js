@@ -13,7 +13,7 @@ async function readJson(request) {
   try { return await request.json(); } catch (error) { return null; }
 }
 
-export async function handleMe(request, env) {
+export async function handleMe(request, env, options = {}) {
   const email = request.user.sub;
   const row = await getMember(env, email);
   return jsonResponse(env, {
@@ -40,7 +40,7 @@ export async function handleAccessRequest(request, env, options = {}) {
   return jsonResponse(env, { status: result.status });
 }
 
-export async function handleListMembers(request, env) {
+export async function handleListMembers(request, env, options = {}) {
   const [members, pending] = await Promise.all([listMembers(env), listPending(env)]);
   return jsonResponse(env, { members, pending });
 }

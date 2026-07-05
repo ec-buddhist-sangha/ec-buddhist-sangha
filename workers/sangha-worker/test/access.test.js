@@ -35,10 +35,15 @@ describe("handleAccessRequest", () => {
   });
 
   it("does not notify on a repeat request", async () => {
-    const opts = { nowIso: "2026-07-05T00:00:00.000Z", notify: { transport: async () => { throw new Error("no"); } } };
     await env.DB.prepare("INSERT INTO members (email, name, role, request_status) VALUES ('r@x.org','R','reader','pending')").run();
-    const res = await handleAccessRequest(req(null, { sub: "r@x.org", name: "R", role: "reader" }), env, opts);
+    let notified = 0;
+    const res = await handleAccessRequest(
+      req(null, { sub: "r@x.org", name: "R", role: "reader" }),
+      env,
+      { nowIso: "2026-07-05T00:00:00.000Z", notify: { transport: async () => { notified += 1; } } }
+    );
     expect(await res.json()).toEqual({ status: "pending" });
+    expect(notified).toBe(0);
   });
 
   it("no-ops for a member", async () => {
@@ -77,6 +82,7 @@ describe("admin handlers", () => {
 
   it("deny 404s on unknown and sets denied otherwise", async () => {
     await env.DB.prepare("INSERT INTO members (email, name, role, request_status) VALUES ('p@x.org','P','reader','pending')").run();
+    expect((await handleDeny(req({ email: "ghost@x.org" }, { role: "admin" }), env, {})).status).toBe(404);
     expect((await handleDeny(req({ email: "p@x.org" }, { role: "admin" }), env, {})).status).toBe(200);
     expect((await getMember(env, "p@x.org")).request_status).toBe("denied");
   });
@@ -91,5 +97,7 @@ describe("admin handlers", () => {
 
   it("rejects a bad body", async () => {
     expect((await handleApprove(req({}, { role: "admin" }), env, {})).status).toBe(400);
+    expect((await handleDeny(req({}, { role: "admin" }), env, {})).status).toBe(400);
+    expect((await handleSetRole(req({}, { role: "admin" }), env, {})).status).toBe(400);
   });
 });
