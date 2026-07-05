@@ -11,6 +11,11 @@ GOOGLE_REDIRECT_URI = "https://sangha-worker.eau-claire-buddhist-sangha.workers.
 CORS_ORIGIN = "https://eauclairesangha.org"
 REMARK42_URL = "https://comments.eauclairesangha.org"
 REMARK42_SITE_ID = "ec-buddhist-sangha"
+# Comma-separated, lowercased admin emails. These accounts are ALWAYS admin
+# (lockout recovery) and receive access-request notifications.
+BOOTSTRAP_ADMINS = ""
+# From-address for notification email; must be on the Email-Routing-enabled domain.
+NOTIFY_SENDER = "noreply@eauclairesangha.org"
 
 # Secrets (set via `wrangler secret put`):
 #   GOOGLE_CLIENT_ID
@@ -29,3 +34,9 @@ database_name = "sangha-calendar"
 # PLACEHOLDER — only used for local miniflare tests. Replace with the real id from
 # `wrangler d1 create sangha-calendar` before deploying.
 database_id = "PLACEHOLDER_LOCAL_ONLY"
+
+# Cloudflare Email Routing: send notification email to admins. Each address in
+# allowed_destination_addresses must be verified once in the Email Routing UI.
+[[send_email]]
+name = "SEND_EMAIL"
+allowed_destination_addresses = []
