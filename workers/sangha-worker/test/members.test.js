@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { env } from "cloudflare:test";
-import { getBootstrapAdmins, resolveRole, getMember, upsertReader, listMembers, listPending } from "../src/members.js";
+import { getBootstrapAdmins, resolveRole, getMember, upsertReader, listMembers, listPending, requestAccess, approveMember, denyMember, setRole } from "../src/members.js";
 
 beforeEach(async () => { await env.DB.prepare("DELETE FROM members").run(); });
 
@@ -66,5 +66,55 @@ describe("listMembers / listPending", () => {
     expect((await listMembers(env)).length).toBe(2);
     const pending = await listPending(env);
     expect(pending.map((r) => r.email)).toEqual(["b@x.org"]);
+  });
+});
+
+const NOW = "2026-07-05T00:00:00.000Z";
+
+describe("requestAccess", () => {
+  it("creates a pending request for a fresh email", async () => {
+    const r = await requestAccess(env, "r@x.org", NOW);
+    expect(r).toEqual({ status: "pending", created: true });
+    expect((await getMember(env, "r@x.org")).request_status).toBe("pending");
+  });
+  it("is idempotent when already pending (no second create)", async () => {
+    await requestAccess(env, "r@x.org", NOW);
+    expect(await requestAccess(env, "r@x.org", NOW)).toEqual({ status: "pending", created: false });
+  });
+  it("re-requests after a denial", async () => {
+    await requestAccess(env, "r@x.org", NOW);
+    await denyMember(env, "r@x.org", NOW);
+    expect(await requestAccess(env, "r@x.org", NOW)).toEqual({ status: "pending", created: true });
+  });
+  it("no-ops for an existing member", async () => {
+    await env.DB.prepare("INSERT INTO members (email, name, role, request_status) VALUES ('m@x.org','M','member','none')").run();
+    expect(await requestAccess(env, "m@x.org", NOW)).toEqual({ status: "already_member", created: false });
+  });
+});
+
+describe("approve / deny / setRole", () => {
+  it("approve promotes a pending reader to member", async () => {
+    await requestAccess(env, "r@x.org", NOW);
+    expect(await approveMember(env, "r@x.org", NOW)).toBe(true);
+    const row = await getMember(env, "r@x.org");
+    expect(row.role).toBe("member");
+    expect(row.request_status).toBe("none");
+  });
+  it("approve returns false for an unknown email", async () => {
+    expect(await approveMember(env, "ghost@x.org", NOW)).toBe(false);
+  });
+  it("deny leaves the role as reader", async () => {
+    await requestAccess(env, "r@x.org", NOW);
+    expect(await denyMember(env, "r@x.org", NOW)).toBe(true);
+    const row = await getMember(env, "r@x.org");
+    expect(row.role).toBe("reader");
+    expect(row.request_status).toBe("denied");
+  });
+  it("setRole assigns a valid role and rejects an invalid one", async () => {
+    await upsertReader(env, "a@x.org", "A", NOW);
+    expect(await setRole(env, "a@x.org", "admin", NOW)).toEqual({ ok: true });
+    expect((await getMember(env, "a@x.org")).role).toBe("admin");
+    expect(await setRole(env, "a@x.org", "wizard", NOW)).toEqual({ ok: false, error: "bad_role" });
+    expect(await setRole(env, "ghost@x.org", "member", NOW)).toEqual({ ok: false });
   });
 });

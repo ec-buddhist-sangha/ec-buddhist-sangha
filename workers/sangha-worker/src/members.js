@@ -58,3 +58,57 @@ export async function listPending(env) {
     .all();
   return results || [];
 }
+
+export async function requestAccess(env, email, nowIso) {
+  const lc = String(email || "").toLowerCase();
+  const row = await getMember(env, lc);
+  if (row && (row.role === "member" || row.role === "admin")) {
+    return { status: "already_member", created: false };
+  }
+  if (row && row.request_status === "pending") {
+    return { status: "pending", created: false };
+  }
+  if (!row) {
+    await env.DB
+      .prepare(
+        `INSERT INTO members (email, name, role, request_status, created_at, updated_at)
+         VALUES (?, ?, 'reader', 'pending', ?, ?)`
+      )
+      .bind(lc, lc, nowIso, nowIso)
+      .run();
+  } else {
+    await env.DB
+      .prepare("UPDATE members SET request_status = 'pending', updated_at = ? WHERE email = ?")
+      .bind(nowIso, lc)
+      .run();
+  }
+  return { status: "pending", created: true };
+}
+
+export async function approveMember(env, email, nowIso) {
+  const lc = String(email || "").toLowerCase();
+  const result = await env.DB
+    .prepare("UPDATE members SET role = 'member', request_status = 'none', updated_at = ? WHERE email = ?")
+    .bind(nowIso, lc)
+    .run();
+  return result.meta.changes > 0;
+}
+
+export async function denyMember(env, email, nowIso) {
+  const lc = String(email || "").toLowerCase();
+  const result = await env.DB
+    .prepare("UPDATE members SET request_status = 'denied', updated_at = ? WHERE email = ?")
+    .bind(nowIso, lc)
+    .run();
+  return result.meta.changes > 0;
+}
+
+export async function setRole(env, email, role, nowIso) {
+  if (!VALID_ROLES.includes(role)) return { ok: false, error: "bad_role" };
+  const lc = String(email || "").toLowerCase();
+  const result = await env.DB
+    .prepare("UPDATE members SET role = ?, updated_at = ? WHERE email = ?")
+    .bind(role, nowIso, lc)
+    .run();
+  return { ok: result.meta.changes > 0 };
+}
