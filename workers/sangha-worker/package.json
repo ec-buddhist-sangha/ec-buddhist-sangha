@@ -11,7 +11,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "itty-router": "^4.0.0"
+    "itty-router": "^4.0.0",
+    "mimetext": "^3.0.28"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.5.2",
