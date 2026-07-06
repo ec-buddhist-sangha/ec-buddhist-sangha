@@ -53,3 +53,12 @@ test("shows edit/delete for own comments and, for admin, all", () => {
 test("empty state", () => {
   assert.ok(/no comments/i.test(load().renderCommentsHtml([], { canComment: false, isAdmin: false })));
 });
+
+test("edit control carries the escaped comment body for pre-fill", () => {
+  const withMarkup = [
+    { id: 5, author_name: "Mem", body: "<i>hi</i>", created_at: "2026-07-05", own: true, replies: [] }
+  ];
+  const html = load().renderCommentsHtml(withMarkup, { canComment: true, isAdmin: false });
+  assert.ok(html.includes('data-edit-body="&lt;i&gt;hi&lt;/i&gt;"'));
+  assert.ok(!html.includes("<i>hi</i>"));
+});

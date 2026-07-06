@@ -16,11 +16,17 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  function showError(root, msg) {
+    root.insertAdjacentHTML(
+      "afterbegin",
+      '<div class="mb-4 rounded bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2">' + esc(msg) + "</div>"
+    );
+  }
 
   function controls(c, ctx) {
     if (!(c.own || ctx.isAdmin)) return "";
     return '<span class="ml-3 text-xs">' +
-      '<button type="button" data-edit="' + c.id + '" class="text-sangha-navy underline">edit</button> ' +
+      '<button type="button" data-edit="' + c.id + '" data-edit-body="' + esc(c.body) + '" class="text-sangha-navy underline">edit</button> ' +
       '<button type="button" data-delete="' + c.id + '" class="text-red-600 underline">delete</button></span>';
   }
   function commentHtml(c, ctx, isReply) {
@@ -73,13 +79,21 @@
       wire();
     }
     async function send(method, payload) {
-      var res = await auth.fetch(base + "/api/comments", { method: method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      await load();
-      return res.ok;
+      var res;
+      try {
+        res = await auth.fetch(base + "/api/comments", { method: method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        await load();
+        if (!res.ok) showError(root, "That action couldn't be completed. Please try again.");
+        return res.ok;
+      } catch (e) {
+        showError(root, "That action couldn't be completed. Please try again.");
+        return false;
+      }
     }
     function wire() {
-      var composerForm = root.querySelector("[data-composer]");
       root.querySelectorAll("[data-composer]").forEach(function (form) {
+        if (form.getAttribute("data-wired")) return;
+        form.setAttribute("data-wired", "1");
         form.addEventListener("submit", function (e) {
           e.preventDefault();
           var text = form.querySelector('[name="body"]').value;
@@ -91,6 +105,8 @@
         });
       });
       root.querySelectorAll("[data-reply]").forEach(function (b) {
+        if (b.getAttribute("data-wired")) return;
+        b.setAttribute("data-wired", "1");
         b.addEventListener("click", function () {
           if (b.nextElementSibling && b.nextElementSibling.getAttribute && b.nextElementSibling.getAttribute("data-composer") !== null) return;
           b.insertAdjacentHTML("afterend", composer(b.getAttribute("data-reply"), "", null));
@@ -98,16 +114,19 @@
         });
       });
       root.querySelectorAll("[data-delete]").forEach(function (b) {
+        if (b.getAttribute("data-wired")) return;
+        b.setAttribute("data-wired", "1");
         b.addEventListener("click", function () { if (window.confirm("Delete this comment?")) send("DELETE", { id: Number(b.getAttribute("data-delete")) }); });
       });
       // edit handled inline: replace body with an edit composer
       root.querySelectorAll("[data-edit]").forEach(function (b) {
+        if (b.getAttribute("data-wired")) return;
+        b.setAttribute("data-wired", "1");
         b.addEventListener("click", function () {
-          b.insertAdjacentHTML("afterend", composer(null, "", b.getAttribute("data-edit")));
+          b.insertAdjacentHTML("afterend", composer(null, b.getAttribute("data-edit-body"), b.getAttribute("data-edit")));
           wire();
         });
       });
-      if (composerForm) { /* top composer already wired above */ }
     }
     await load();
   }
