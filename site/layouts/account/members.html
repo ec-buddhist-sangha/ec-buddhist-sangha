@@ -1,0 +1,14 @@
+{{ define "main" }}
+<section class="bg-sangha-light min-h-screen py-10 md:py-14">
+  <div class="container mx-auto px-4 max-w-3xl">
+    <div class="mb-8">
+      <p class="text-[10px] uppercase tracking-widest text-sangha-gold font-bold mb-2">Membership</p>
+      <h1 class="font-serif text-3xl md:text-4xl font-bold text-sangha-navy">{{ .Title }}</h1>
+      <p class="text-sm text-gray-500 mt-2">Approve access requests and assign roles.</p>
+    </div>
+    <div id="ecbs-members-app"><p class="text-sm text-gray-500">Loading…</p></div>
+  </div>
+</section>
+{{ $v := readFile "static/js/members-admin.js" | md5 }}
+<script src="{{ "js/members-admin.js" | relURL }}?v={{ $v }}"></script>
+{{ end }}
