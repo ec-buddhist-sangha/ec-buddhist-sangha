@@ -1,6 +1,0 @@
-comments.eauclairesangha.org {
-	log {
-		output stdout
-	}
-	reverse_proxy remark42:8080
-}
