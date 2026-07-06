@@ -99,4 +99,24 @@ describe("router", () => {
     expect(ok.status).toBe(200);
     expect(Array.isArray((await ok.json()).members)).toBe(true);
   });
+
+  it("GET /api/comments is public and returns an empty list for a fresh thread", async () => {
+    await env.DB.prepare("DELETE FROM comments").run();
+    const res = await call("/api/comments?thread=/topics/x/");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ comments: [] });
+  });
+
+  it("POST /api/comments requires member+, then persists", async () => {
+    await env.DB.prepare("DELETE FROM comments").run();
+    const anon = await call("/api/comments", { method: "POST", body: JSON.stringify({ thread: "/t/", body: "hi" }) });
+    expect(anon.status).toBe(401);
+
+    await seedRole("cm@eauclairesangha.org", "member");
+    const token = await signJwt({ sub: "cm@eauclairesangha.org", name: "CM" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+    const ok = await call("/api/comments", { method: "POST", headers: { Authorization: "Bearer " + token }, body: JSON.stringify({ thread: "/t/", body: "hi" }) });
+    expect(ok.status).toBe(201);
+    const list = await call("/api/comments?thread=/t/");
+    expect((await list.json()).comments.length).toBe(1);
+  });
 });

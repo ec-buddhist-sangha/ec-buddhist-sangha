@@ -8,7 +8,9 @@ import {
   handleGetCalendar, handlePutCalendar,
   handlePostSignup, handleDeleteSignup, handleGetSignup
 } from "./calendar.js";
-import { handlePostComment } from "./comments.js";
+import {
+  handleGetComments, handlePostComment, handlePatchComment, handleDeleteComment
+} from "./comments.js";
 import {
   handleMe, handleAccessRequest, handleListMembers,
   handleApprove, handleDeny, handleSetRole
@@ -33,7 +35,10 @@ router.put("/api/calendar", requireRole(["admin"], handlePutCalendar));
 router.post("/api/signups", requireRole(["member", "admin"], handlePostSignup));
 router.delete("/api/signups", requireRole(["member", "admin"], handleDeleteSignup));
 router.get("/api/signups", requireRole(["member", "admin"], handleGetSignup));
+router.get("/api/comments", (request, env) => handleGetComments(request, env));
 router.post("/api/comments", requireRole(["member", "admin"], handlePostComment));
+router.patch("/api/comments", requireRole(["member", "admin"], handlePatchComment));
+router.delete("/api/comments", requireRole(["member", "admin"], handleDeleteComment));
 router.all("*", (request, env) => jsonResponse(env, { error: "not_found" }, 404));
 
 export default {

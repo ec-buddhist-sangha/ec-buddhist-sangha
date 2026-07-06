@@ -9,8 +9,6 @@ keep_vars = true
 [vars]
 GOOGLE_REDIRECT_URI = "https://sangha-worker.eau-claire-buddhist-sangha.workers.dev/auth/callback"
 CORS_ORIGIN = "https://eauclairesangha.org"
-REMARK42_URL = "https://comments.eauclairesangha.org"
-REMARK42_SITE_ID = "ec-buddhist-sangha"
 # Comma-separated, lowercased admin emails. These accounts are ALWAYS admin
 # (lockout recovery) and receive access-request notifications.
 # WARNING: keep_vars = true does NOT protect vars defined in this file — BOOTSTRAP_ADMINS must be set HERE (committed), not only in the Cloudflare dashboard, or a deploy will reset it and remove the lockout-recovery admins.
@@ -24,7 +22,6 @@ NOTIFY_SENDER = "noreply@eauclairesangha.org"
 #   JWT_SIGNING_SECRET
 #   GITHUB_CLIENT_ID
 #   GITHUB_CLIENT_SECRET
-#   REMARK42_JWT_SECRET   (must equal Remark42's SECRET; used by the comment proxy)
 
 [[d1_databases]]
 binding = "DB"
