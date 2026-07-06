@@ -15,8 +15,9 @@ export function nestComments(rows) {
   var roots = [];
   (rows || []).forEach(function (r) { r.replies = []; byId[r.id] = r; });
   (rows || []).forEach(function (r) {
-    if (r.parent_id != null && byId[r.parent_id]) byId[r.parent_id].replies.push(r);
-    else roots.push(r);
+    if (r.parent_id == null) roots.push(r);
+    else if (byId[r.parent_id]) byId[r.parent_id].replies.push(r);
+    // else: parent not in the published set -> orphaned reply, dropped
   });
   return roots;
 }

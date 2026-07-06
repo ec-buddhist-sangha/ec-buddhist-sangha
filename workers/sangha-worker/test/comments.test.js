@@ -75,6 +75,24 @@ describe("post + get", () => {
     expect(body.comments.length).toBe(1);
     expect(body.comments[0].replies.map((r) => r.body)).toEqual(["reply"]);
   });
+
+  it("rejects a reply to a comment that is itself a reply", async () => {
+    const c = await handlePostComment(post(member, { thread: "/t/", body: "root" }), env, { nowIso: NOW });
+    const rootId = (await c.json()).id;
+    const r = await handlePostComment(post(member, { thread: "/t/", parent_id: rootId, body: "reply" }), env, { nowIso: NOW });
+    const replyId = (await r.json()).id;
+    const nested = await handlePostComment(post(member, { thread: "/t/", parent_id: replyId, body: "reply-to-reply" }), env, { nowIso: NOW });
+    expect(nested.status).toBe(400);
+  });
+
+  it("drops an orphaned reply when its parent is later hidden", async () => {
+    const c = await handlePostComment(post(member, { thread: "/t/", body: "root" }), env, { nowIso: NOW });
+    const parentId = (await c.json()).id;
+    await handlePostComment(post(member, { thread: "/t/", parent_id: parentId, body: "reply" }), env, { nowIso: NOW });
+    await env.DB.prepare("UPDATE comments SET status='hidden' WHERE id = ?").bind(parentId).run();
+    const body = await (await getFor("/t/")).json();
+    expect(body.comments.length).toBe(0);
+  });
 });
 
 describe("edit + delete", () => {
@@ -97,6 +115,11 @@ describe("edit + delete", () => {
     const id = await seed(member, "/t/", "orig");
     const res = await handlePatchComment(withUser(admin, { id: id, body: "modded" }), env, { nowIso: NOW });
     expect(res.status).toBe(200);
+  });
+
+  it("patch of unknown id is 404", async () => {
+    const res = await handlePatchComment(withUser(admin, { id: 999999, body: "x" }), env, { nowIso: NOW });
+    expect(res.status).toBe(404);
   });
 
   it("author delete hides the comment from GET", async () => {
