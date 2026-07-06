@@ -28,11 +28,14 @@ export async function notifyAdminsOfRequest(env, requester, options = {}) {
   const recipients = [...getBootstrapAdmins(env)];
   if (recipients.length === 0) return { sent: 0 };
   const transport = options.transport || defaultTransport;
-  let sent = 0;
-  for (const to of recipients) {
-    const mime = buildRequestMime(requester, env, to);
-    await transport(env, env.NOTIFY_SENDER, to, mime.asRaw());
-    sent += 1;
-  }
+  // Attempt all recipients even if some throw (e.g. an unverified Email
+  // Routing destination address), so one bad address can't suppress
+  // notifications to the rest of the admins.
+  const results = await Promise.allSettled(
+    recipients.map((to) =>
+      transport(env, env.NOTIFY_SENDER, to, buildRequestMime(requester, env, to).asRaw())
+    )
+  );
+  const sent = results.filter((result) => result.status === "fulfilled").length;
   return { sent };
 }

@@ -59,6 +59,7 @@ export async function handleCallback(request, env, options = {}) {
   try {
     await upsertReader(env, email, name, new Date().toISOString());
   } catch (error) {
+    console.error("sign-in upsert failed:", error && error.message);
     return errorRedirect(env, "store_error");
   }
 

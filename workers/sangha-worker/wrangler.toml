@@ -13,20 +13,18 @@ REMARK42_URL = "https://comments.eauclairesangha.org"
 REMARK42_SITE_ID = "ec-buddhist-sangha"
 # Comma-separated, lowercased admin emails. These accounts are ALWAYS admin
 # (lockout recovery) and receive access-request notifications.
+# WARNING: keep_vars = true does NOT protect vars defined in this file — BOOTSTRAP_ADMINS must be set HERE (committed), not only in the Cloudflare dashboard, or a deploy will reset it and remove the lockout-recovery admins.
 BOOTSTRAP_ADMINS = ""
 # From-address for notification email; must be on the Email-Routing-enabled domain.
 NOTIFY_SENDER = "noreply@eauclairesangha.org"
 
-# Secrets (set via `wrangler secret put`):
+# Secrets (set via `wrangler secret put`, never committed):
 #   GOOGLE_CLIENT_ID
 #   GOOGLE_CLIENT_SECRET
 #   JWT_SIGNING_SECRET
-#
-# Added in later plans:
-#   Plan 02: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-#   Plan 04: REMARK42_JWT_SECRET, REMARK42_URL
-#   REMARK42_JWT_SECRET   (must equal Remark42's SECRET)  -> Plan 04 comments proxy
-#   Plan 03 adds the [[d1_databases]] binding below.
+#   GITHUB_CLIENT_ID
+#   GITHUB_CLIENT_SECRET
+#   REMARK42_JWT_SECRET   (must equal Remark42's SECRET; used by the comment proxy)
 
 [[d1_databases]]
 binding = "DB"

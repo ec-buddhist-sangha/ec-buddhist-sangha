@@ -30,4 +30,20 @@ describe("notifyAdminsOfRequest", () => {
     });
     expect(res).toEqual({ sent: 0 });
   });
+
+  it("still notifies the other admins when one recipient's send throws", async () => {
+    const calls = [];
+    const res = await notifyAdminsOfRequest(
+      { ...env, BOOTSTRAP_ADMINS: "a@x.org,b@x.org" },
+      requester,
+      {
+        transport: async (e, from, to, raw) => {
+          if (to === "a@x.org") throw new Error("unverified destination address");
+          calls.push({ from, to });
+        }
+      }
+    );
+    expect(res).toEqual({ sent: 1 });
+    expect(calls).toContainEqual({ from: "noreply@eauclairesangha.org", to: "b@x.org" });
+  });
 });
