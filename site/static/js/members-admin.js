@@ -86,8 +86,16 @@
       wire();
     }
     async function post(path, body) {
-      var res = await auth.fetch(base + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      var res;
+      try {
+        res = await auth.fetch(base + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      } catch (e) {
+        await load();
+        showError(root, "That action couldn't be completed. Please try again.");
+        return;
+      }
       if (!res.ok) {
+        await load();
         showError(root, "That action couldn't be completed. Please try again.");
         return;
       }

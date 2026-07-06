@@ -80,6 +80,7 @@
     clearAuth();
     readyPromise = null;
     renderButtons();
+    dispatchSession();
   }
 
   async function authedFetch(url, options) {
@@ -125,13 +126,17 @@
   async function requestAccess() {
     var base = workerBase();
     if (!getToken() || !base) return null;
-    var res = await authedFetch(base + "/api/access-request", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
-    });
-    if (!res.ok) return null;
-    var data = await res.json();
-    await refreshSession();
-    return data;
+    try {
+      var res = await authedFetch(base + "/api/access-request", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
+      });
+      if (!res.ok) return null;
+      var data = await res.json();
+      await refreshSession();
+      return data;
+    } catch (e) {
+      return null;
+    }
   }
 
   function consumeHash() {

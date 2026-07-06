@@ -140,9 +140,6 @@ test("requestAccess posts and refreshes to pending", async () => {
   const { Auth } = load({ hash: "#token=" + makeToken({ sub: "r@x.org", name: "R", exp: future() }), fetch });
   await Auth.ready();
   // after the request, /api/me should now report pending
-  fetch.calls.length = 0;
-  const meAfter = apiFetch({ sub: "r@x.org", name: "R", role: "reader", request_status: "pending" });
-  Auth.__setFetchForTest && Auth.__setFetchForTest(meAfter); // no-op if not provided; see note
   const res = await Auth.requestAccess();
   assert.equal(res.status, "pending");
 });
