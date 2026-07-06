@@ -7,7 +7,7 @@
     "build": "hugo",
     "css:build": "npx tailwindcss -i ./static/css/main.css -o ./static/css/output.css --watch",
     "css:prod": "npx tailwindcss -i ./static/css/main.css -o ./static/css/output.css --minify",
-    "test": "node --test tests/calendar.test.js tests/calendar-api.test.js tests/auth.test.js"
+    "test": "node --test tests/calendar.test.js tests/calendar-api.test.js tests/auth.test.js tests/members-admin.test.js"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.23",
