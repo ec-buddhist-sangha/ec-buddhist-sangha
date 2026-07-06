@@ -12,7 +12,7 @@ CORS_ORIGIN = "https://eauclairesangha.org"
 # Comma-separated, lowercased admin emails. These accounts are ALWAYS admin
 # (lockout recovery) and receive access-request notifications.
 # WARNING: keep_vars = true does NOT protect vars defined in this file — BOOTSTRAP_ADMINS must be set HERE (committed), not only in the Cloudflare dashboard, or a deploy will reset it and remove the lockout-recovery admins.
-BOOTSTRAP_ADMINS = ""
+BOOTSTRAP_ADMINS = "jcortner@gmail.com,ccortner@gmail.com"
 # From-address for notification email; must be on the Email-Routing-enabled domain.
 NOTIFY_SENDER = "noreply@eauclairesangha.org"
 
@@ -26,12 +26,11 @@ NOTIFY_SENDER = "noreply@eauclairesangha.org"
 [[d1_databases]]
 binding = "DB"
 database_name = "sangha-calendar"
-# PLACEHOLDER — only used for local miniflare tests. Replace with the real id from
-# `wrangler d1 create sangha-calendar` before deploying.
-database_id = "PLACEHOLDER_LOCAL_ONLY"
+# Real D1 database id (from `wrangler d1 create sangha-calendar`).
+database_id = "634e9933-fe12-45c9-aada-e7ce14b595e7"
 
 # Cloudflare Email Routing: send notification email to admins. Each address in
 # allowed_destination_addresses must be verified once in the Email Routing UI.
 [[send_email]]
 name = "SEND_EMAIL"
-allowed_destination_addresses = []
+allowed_destination_addresses = ["jcortner@gmail.com", "ccortner@gmail.com"]
