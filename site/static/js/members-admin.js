@@ -19,6 +19,17 @@
     });
   }
 
+  function memberLabel(m) {
+    return esc(m.name || m.email) + " &lt;" + esc(m.email) + "&gt;";
+  }
+
+  function showError(root, msg) {
+    root.insertAdjacentHTML(
+      "afterbegin",
+      '<div class="mb-4 rounded bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2">' + esc(msg) + "</div>"
+    );
+  }
+
   function roleSelect(member) {
     var opts = ROLES.map(function (r) {
       return '<option value="' + r + '"' + (member.role === r ? " selected" : "") + ">" + r + "</option>";
@@ -32,7 +43,7 @@
     var pendingRows = pending.length
       ? pending.map(function (m) {
           return '<li class="flex items-center justify-between gap-3 py-2 border-b border-gray-100">' +
-            '<span class="text-sm text-sangha-navy">' + esc(m.name || m.email) + ' &lt;' + esc(m.email) + '&gt;</span>' +
+            '<span class="text-sm text-sangha-navy">' + memberLabel(m) + '</span>' +
             '<span class="flex gap-2">' +
               '<button type="button" data-approve="' + esc(m.email) + '" class="rounded bg-sangha-navy text-white text-xs px-3 py-1">Approve</button>' +
               '<button type="button" data-deny="' + esc(m.email) + '" class="rounded border border-gray-300 text-xs px-3 py-1">Deny</button>' +
@@ -42,7 +53,7 @@
     var memberRows = members.length
       ? members.map(function (m) {
           return '<li class="flex items-center justify-between gap-3 py-2 border-b border-gray-100">' +
-            '<span class="text-sm text-sangha-navy">' + esc(m.name || m.email) + ' &lt;' + esc(m.email) + '&gt;</span>' +
+            '<span class="text-sm text-sangha-navy">' + memberLabel(m) + '</span>' +
             roleSelect(m) + '</li>';
         }).join("")
       : '<li class="py-2 text-sm text-gray-500">No members yet.</li>';
@@ -75,7 +86,11 @@
       wire();
     }
     async function post(path, body) {
-      await auth.fetch(base + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      var res = await auth.fetch(base + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (!res.ok) {
+        showError(root, "That action couldn't be completed. Please try again.");
+        return;
+      }
       await load();
     }
     function wire() {

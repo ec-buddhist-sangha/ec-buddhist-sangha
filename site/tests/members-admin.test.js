@@ -47,3 +47,13 @@ test("escapes member-provided values", () => {
   assert.ok(!html.includes("<script>bad"));
   assert.ok(html.includes("&lt;script&gt;"));
 });
+
+test("escapes member-provided email values", () => {
+  const maliciousEmail = 'a"><img src=x>@x.org';
+  const html = load().renderMembersHtml({
+    pending: [],
+    members: [{ email: maliciousEmail, name: "Pat", role: "reader", request_status: "none" }]
+  });
+  assert.ok(!html.includes('<img src=x>'));
+  assert.ok(html.includes("&quot;&gt;&lt;img"));
+});
