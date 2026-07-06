@@ -2,33 +2,14 @@
 <section id="comments" class="bg-sangha-light py-12">
   <div class="container mx-auto px-4 max-w-3xl">
     <h3 class="font-serif text-2xl font-bold text-sangha-navy mb-6">Discussion</h3>
-    <div id="remark42"></div>
+    <div id="ecbs-comments" data-thread="{{ .RelPermalink }}"><p class="text-sm text-gray-500">Loading…</p></div>
     <noscript>
       <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
-        <p class="text-gray-500 text-sm">Please enable JavaScript to view comments.</p>
+        <p class="text-gray-500 text-sm">Please enable JavaScript to view the discussion.</p>
       </div>
     </noscript>
   </div>
 </section>
-
-<script>
-  var remark_config = {
-    host: 'https://comments.eauclairesangha.org',
-    site_id: 'ec-buddhist-sangha',
-    theme: 'light',
-    locale: 'en'
-  };
-</script>
-<script>
-(function() {
-  var s = document.createElement('script');
-  s.src = remark_config.host + '/web/embed.js';
-  s.defer = true;
-  s.onerror = function() {
-    var el = document.getElementById('remark42');
-    if (el) el.innerHTML = '<div class="bg-white rounded-xl border border-gray-200 p-6 text-center"><p class="text-gray-500 text-sm">Comments are temporarily unavailable. Please check back later.</p></div>';
-  };
-  (document.head || document.body).appendChild(s);
-})();
-</script>
+{{ $v := readFile "static/js/comments.js" | md5 }}
+<script src="{{ "js/comments.js" | relURL }}?v={{ $v }}"></script>
 {{ end }}
