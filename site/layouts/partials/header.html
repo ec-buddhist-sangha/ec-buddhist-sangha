@@ -53,12 +53,7 @@
       this.setAttribute('aria-expanded', !expanded);
     });
     if (window.ECBS && window.ECBS.Auth) {
-      var mobileAuth = document.getElementById('ecbs-auth-mobile');
-      var desktopAuth = document.getElementById('ecbs-auth');
-      if (mobileAuth && desktopAuth) {
-        window.ECBS.Auth.renderButtons();
-        mobileAuth.innerHTML = desktopAuth.innerHTML;
-      }
+      window.ECBS.Auth.renderButtons();
     }
   </script>
 </header>
