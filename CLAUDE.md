@@ -39,7 +39,7 @@ This affects:
 2. **Phase 2:** Hugo scaffold with Tailwind CSS compiled at build time, port Sangha design system
 3. **Phase 3:** Decap CMS configuration with GitHub backend and collections (events, announcements, pages, topics)
 4. **Phase 4:** OAuth proxy Worker with Wrangler CLI for Decap auth
-5. **Phase 5:** Isso comments deployment, embed on Topics and Pages only
+5. **Phase 5:** ~~Isso comments deployment~~ Replaced with native comments in Cloudflare D1 (Worker CRUD, role-gated), rendered on Topics and Pages only
 6. **Phase 6:** ~~Google Calendar embed on homepage~~ Replaced with Community Updates feed (events + announcements)
 7. **Phase 7:** Cloudflare Pages deployment with Hugo build
 8. **Phase 8:** Content migration from prototype to Markdown
@@ -54,7 +54,7 @@ This affects:
 | Static Site Generator | Hugo | Build via Cloudflare Pages |
 | CMS | Decap CMS | GitHub backend, admin at /admin |
 | Auth | GitHub OAuth | Via Cloudflare Worker proxy (Wrangler) |
-| Comments | Isso | Self-hosted on DigitalOcean, Topics + Pages only |
+| Comments | Native (Cloudflare D1) | Worker CRUD, role-gated (members post; authors/admins edit/delete), Topics + Pages only |
 | Community Updates | Hugo-generated feed | Events + announcements on homepage, no external embeds |
 | Hosting | Cloudflare Pages | Free tier, Hugo builds |
 | Styling | Tailwind CSS | Compiled at build time |
@@ -105,9 +105,9 @@ Store in Worker environment:
 - `GITHUB_CLIENT_SECRET`
 - `GITHUB_OAUTH_REDIRECT_URL`
 
-### Isso
-- No secrets for basic operation
-- Admin/moderation config stays local
+### Comments (native, Cloudflare D1)
+- No separate service or secrets — comments live in the `comments` D1 table via the Worker
+- Moderation (hide/delete) is an admin action through the same role system
 
 ---
 
@@ -192,7 +192,7 @@ hugo server -D --baseURL "http://127.0.0.1:1313/ec-buddhist-sangha/"
 ## Security / privacy
 
 - Never commit secrets
-- User-generated content (comments) handled by Isso - no direct HTML injection
+- User-generated content (comments) stored in D1 and rendered as escaped plain text - no direct HTML injection
 - OAuth secrets stored in Cloudflare Worker environment only
 
 ---
@@ -203,10 +203,10 @@ hugo server -D --baseURL "http://127.0.0.1:1313/ec-buddhist-sangha/"
 |---------|------|--------------|
 | Cloudflare Pages | Free | $0 |
 | Cloudflare Worker | Free | $0 |
-| Isso hosting | Basic Droplet | ~$4-6 |
+| Cloudflare D1 (comments + calendar) | Free tier | $0 |
 | Domain | (if new) | ~$12/year |
 
-**Total: ~$4-6/month** (or $0 if reusing existing server for Isso)
+**Total: $0/month** (native D1 comments replaced the self-hosted Isso droplet)
 
 ---
 

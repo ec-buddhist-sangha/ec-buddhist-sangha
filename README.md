@@ -2,7 +2,7 @@
 
 A calm, "Zen"-inspired community portal for the Eau Claire Buddhist Sangha.
 
-This repo contains a **high-fidelity React prototype** being migrated to a low-maintenance production stack: **Hugo + Decap CMS + Cloudflare Pages** with **self-hosted Isso comments**.
+This repo contains a **high-fidelity React prototype** being migrated to a low-maintenance production stack: **Hugo + Decap CMS + Cloudflare Pages** with **native comments stored in Cloudflare D1**.
 
 ---
 
@@ -36,7 +36,7 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - **Cloudflare Pages** for build + deploy + CDN
 - **GitHub** as the content/source of truth
 - **Cloudflare Worker** (via Wrangler) for Decap↔GitHub OAuth proxy
-- **Isso** self-hosted comments on DigitalOcean droplet (Topics + Pages only)
+- **Native comments** stored in Cloudflare D1 via the Worker, gated by member roles (Topics + Pages only)
 
 ---
 
@@ -48,7 +48,7 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 | CMS | Decap CMS (GitHub backend) |
 | Hosting | Cloudflare Pages (free) |
 | Auth | GitHub OAuth via Cloudflare Worker |
-| Comments | Isso (self-hosted on DigitalOcean) |
+| Comments | Native (Cloudflare D1 via Worker) |
 | Calendar | Google Calendar embed |
 | Styling | Tailwind CSS (compiled at build time) |
 
@@ -59,8 +59,7 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 ```
 /prototype/        # React/Vite app (UI reference)
 /site/             # Hugo site (production)
-/workers/          # Cloudflare Workers (OAuth proxy)
-/infra/            # docker-compose for Isso
+/workers/          # Cloudflare Workers (auth, calendar, comments)
 /docs/             # Architecture documentation
 ```
 
@@ -72,10 +71,10 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 |---------|------|--------------|
 | Cloudflare Pages | Free | $0 |
 | Cloudflare Worker | Free | $0 |
-| Isso hosting | Basic Droplet | ~$4-6 |
+| Cloudflare D1 (comments + calendar) | Free tier | $0 |
 | Domain | (if new) | ~$12/year |
 
-**Total: ~$4-6/month**
+**Total: $0/month** (native D1 comments replaced the self-hosted Isso droplet)
 
 ---
 
@@ -99,10 +98,10 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - Create `/workers/oauth-proxy/` with Wrangler
 - Deploy to Cloudflare for Decap auth
 
-### Phase 5: Isso comments
-- Set up `/infra/isso/` with Docker config
-- Deploy to DigitalOcean droplet
-- Embed on Topics and Pages only
+### Phase 5: Native comments
+- `comments` table in Cloudflare D1 with CRUD in the Worker
+- Role-gated (members post; authors/admins edit/delete)
+- Rendered on Topics and Pages only (no self-hosted server)
 
 ### Phase 6: Google Calendar
 - Create calendar partial
@@ -149,10 +148,12 @@ npm install
 npx wrangler deploy
 ```
 
-### Isso (local dev)
+### Worker (auth, calendar, comments)
 ```bash
-cd infra/isso
-docker compose up -d
+cd workers/sangha-worker
+npm install
+npm test          # vitest suite
+npx wrangler dev  # local worker
 ```
 
 ---
@@ -166,7 +167,7 @@ docker compose up -d
 | `pages/` | Static content (About, Contact, etc.) |
 | `topics/` | Forum discussion starters |
 
-Comments via Isso are enabled on **Topics and Pages only**.
+Native (Cloudflare D1) comments are enabled on **Topics and Pages only**.
 
 ---
 
