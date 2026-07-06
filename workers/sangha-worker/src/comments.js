@@ -1,54 +1,96 @@
 // workers/sangha-worker/src/comments.js
-// Lets a Google-signed-in member comment without a second login: mint a
-// Remark42-compatible JWT (signed with the shared Remark42 SECRET) and forward
-// the comment to Remark42's REST API. REMARK42_JWT_SECRET must equal Remark42's SECRET.
-// NOTE: the exact claim shape is verified by the Remark42 spike (Plan 04 Task 5)
-// before this is wired into the UI; adjust here to match what the live server accepts.
-import { signJwt } from "./jwt.js";
-import { jsonResponse } from "./middleware.js";
+// Native D1-backed comments (replaces the Remark42 proxy). Single-level
+// threading via parent_id; only 'published' rows are ever returned. Bodies are
+// plain text — the client escapes them on render (no HTML is stored or trusted).
+import { jsonResponse, authenticate } from "./middleware.js";
 
-export function buildRemarkClaims(user, env, nowSeconds) {
-  const siteId = env.REMARK42_SITE_ID || "ec-buddhist-sangha";
-  const id = "google_" + user.sub;
-  return {
-    user: { name: user.name, id: id, picture: "", admin: user.role === "admin", site_id: siteId },
-    iss: "remark42",
-    aud: siteId,
-    iat: nowSeconds,
-    exp: nowSeconds + 3600,
-    jti: id + "-" + nowSeconds
-  };
+const MAX_BODY = 10000;
+
+async function readJson(request) {
+  try { return await request.json(); } catch (error) { return null; }
+}
+
+export function nestComments(rows) {
+  var byId = {};
+  var roots = [];
+  (rows || []).forEach(function (r) { r.replies = []; byId[r.id] = r; });
+  (rows || []).forEach(function (r) {
+    if (r.parent_id != null && byId[r.parent_id]) byId[r.parent_id].replies.push(r);
+    else roots.push(r);
+  });
+  return roots;
+}
+
+export async function handleGetComments(request, env) {
+  const thread = new URL(request.url).searchParams.get("thread");
+  if (!thread) return jsonResponse(env, { error: "bad_request" }, 400);
+  const viewer = await authenticate(request, env); // soft auth: may be null
+  const viewerEmail = viewer ? String(viewer.sub || "").toLowerCase() : null;
+  const { results } = await env.DB
+    .prepare("SELECT id, parent_id, author_email, author_name, body, created_at, updated_at FROM comments WHERE thread = ? AND status = 'published' ORDER BY created_at")
+    .bind(thread).all();
+  const rows = (results || []).map(function (r) {
+    return {
+      id: r.id, parent_id: r.parent_id, author_name: r.author_name, body: r.body,
+      created_at: r.created_at, updated_at: r.updated_at,
+      own: viewerEmail != null && String(r.author_email || "").toLowerCase() === viewerEmail
+    };
+  });
+  return jsonResponse(env, { comments: nestComments(rows) });
 }
 
 export async function handlePostComment(request, env, options = {}) {
-  const fetchImpl = options.fetch || fetch;
-  let body;
-  try { body = await request.json(); } catch (error) { return jsonResponse(env, { error: "bad_json" }, 400); }
-  if (!body || !body.text || !body.url) return jsonResponse(env, { error: "bad_request" }, 400);
-  if (body.text.length > 10000) return jsonResponse(env, { error: "text_too_long" }, 400);
-  let locatorUrl;
-  try {
-    locatorUrl = new URL(body.url);
-  } catch (error) {
+  const body = await readJson(request);
+  if (!body || !body.thread || typeof body.body !== "string" || !body.body.trim()) {
     return jsonResponse(env, { error: "bad_request" }, 400);
   }
-  if (locatorUrl.origin !== new URL(env.CORS_ORIGIN).origin) {
-    return jsonResponse(env, { error: "bad_request" }, 400);
+  if (body.body.length > MAX_BODY) return jsonResponse(env, { error: "text_too_long" }, 400);
+  let parentId = null;
+  if (body.parent_id != null && body.parent_id !== "") {
+    parentId = Number(body.parent_id);
+    const parent = await env.DB.prepare("SELECT thread, parent_id FROM comments WHERE id = ? AND status = 'published'").bind(parentId).first();
+    if (!parent || parent.parent_id != null || parent.thread !== body.thread) {
+      return jsonResponse(env, { error: "bad_parent" }, 400);
+    }
   }
+  const nowIso = options.nowIso || new Date().toISOString();
+  const res = await env.DB
+    .prepare("INSERT INTO comments (thread, parent_id, author_email, author_name, body, status, created_at) VALUES (?, ?, ?, ?, ?, 'published', ?)")
+    .bind(body.thread, parentId, String(request.user.sub).toLowerCase(), request.user.name, body.body, nowIso)
+    .run();
+  return jsonResponse(env, { id: res.meta.last_row_id }, 201);
+}
 
-  const now = options.now != null ? options.now : Math.floor(Date.now() / 1000);
-  const remarkToken = await signJwt(buildRemarkClaims(request.user, env, now), env.REMARK42_JWT_SECRET, { now });
+async function ownerOrAdmin(request, env, id) {
+  const row = await env.DB.prepare("SELECT author_email FROM comments WHERE id = ? AND status != 'deleted'").bind(id).first();
+  if (!row) return { notFound: true };
+  const isAdmin = request.user.role === "admin";
+  const isOwner = String(row.author_email || "").toLowerCase() === String(request.user.sub).toLowerCase();
+  return { ok: isAdmin || isOwner, isAdmin: isAdmin };
+}
 
-  const url = (env.REMARK42_URL || "").replace(/\/+$/, "") + "/api/v1/comment";
-  const res = await fetchImpl(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-JWT": remarkToken },
-    body: JSON.stringify({
-      text: body.text,
-      locator: { site: env.REMARK42_SITE_ID || "ec-buddhist-sangha", url: body.url },
-      pid: body.pid || ""
-    })
-  });
-  if (!res.ok) return jsonResponse(env, { error: "remark_error", status: res.status }, 502);
-  return jsonResponse(env, await res.json(), 201);
+export async function handlePatchComment(request, env, options = {}) {
+  const body = await readJson(request);
+  const id = body && body.id != null ? Number(body.id) : 0;
+  if (!id || !body || typeof body.body !== "string" || !body.body.trim()) return jsonResponse(env, { error: "bad_request" }, 400);
+  if (body.body.length > MAX_BODY) return jsonResponse(env, { error: "text_too_long" }, 400);
+  const perm = await ownerOrAdmin(request, env, id);
+  if (perm.notFound) return jsonResponse(env, { error: "not_found" }, 404);
+  if (!perm.ok) return jsonResponse(env, { error: "forbidden" }, 403);
+  const nowIso = options.nowIso || new Date().toISOString();
+  await env.DB.prepare("UPDATE comments SET body = ?, updated_at = ? WHERE id = ?").bind(body.body, nowIso, id).run();
+  return jsonResponse(env, { ok: true });
+}
+
+export async function handleDeleteComment(request, env, options = {}) {
+  const body = await readJson(request);
+  const id = body && body.id != null ? Number(body.id) : 0;
+  if (!id) return jsonResponse(env, { error: "bad_request" }, 400);
+  const perm = await ownerOrAdmin(request, env, id);
+  if (perm.notFound) return jsonResponse(env, { error: "not_found" }, 404);
+  if (!perm.ok) return jsonResponse(env, { error: "forbidden" }, 403);
+  const nowIso = options.nowIso || new Date().toISOString();
+  const status = perm.isAdmin ? "hidden" : "deleted";
+  await env.DB.prepare("UPDATE comments SET status = ?, updated_at = ? WHERE id = ?").bind(status, nowIso, id).run();
+  return jsonResponse(env, { ok: true });
 }

@@ -1,65 +1,118 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { env } from "cloudflare:test";
-import { buildRemarkClaims, handlePostComment } from "../src/comments.js";
+import { signJwt } from "../src/jwt.js";
+import {
+  nestComments, handleGetComments, handlePostComment, handlePatchComment, handleDeleteComment
+} from "../src/comments.js";
 
-const user = { sub: "mem@eauclairesangha.org", name: "Mem", role: "member" };
+const NOW = "2026-07-05T12:00:00.000Z";
+beforeEach(async () => { await env.DB.prepare("DELETE FROM comments").run(); });
 
-describe("comment proxy", () => {
-  it("builds Remark42 claims from the site user", () => {
-    const claims = buildRemarkClaims(user, env, 1000);
-    expect(claims.user.name).toBe("Mem");
-    expect(claims.user.id).toContain("mem@eauclairesangha.org");
-    expect(claims.user.admin).toBe(false);
-    expect(claims.aud).toBe("ec-buddhist-sangha");
-    expect(claims.exp).toBe(1000 + 3600);
+function post(user, body) {
+  const r = new Request("https://worker.test/api/comments", { method: "POST", body: JSON.stringify(body) });
+  r.user = user;
+  return r;
+}
+async function getFor(thread, authHeader) {
+  const init = authHeader ? { headers: { Authorization: authHeader } } : {};
+  return handleGetComments(new Request("https://worker.test/api/comments?thread=" + encodeURIComponent(thread), init), env);
+}
+async function idToken(sub, name) {
+  return "Bearer " + await signJwt({ sub, name }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
+}
+const member = { sub: "m@x.org", name: "Mem", role: "member" };
+const admin = { sub: "a@x.org", name: "Adm", role: "admin" };
+
+describe("nestComments", () => {
+  it("attaches replies to their top-level parent", () => {
+    const roots = nestComments([
+      { id: 1, parent_id: null }, { id: 2, parent_id: 1 }, { id: 3, parent_id: null }
+    ]);
+    expect(roots.map((r) => r.id)).toEqual([1, 3]);
+    expect(roots[0].replies.map((r) => r.id)).toEqual([2]);
+  });
+});
+
+describe("post + get", () => {
+  it("member posts and anyone reads published comments (no email leak)", async () => {
+    const created = await handlePostComment(post(member, { thread: "/topics/a/", body: "hello" }), env, { nowIso: NOW });
+    expect(created.status).toBe(201);
+    const res = await getFor("/topics/a/");
+    const body = await res.json();
+    expect(body.comments.length).toBe(1);
+    expect(body.comments[0].body).toBe("hello");
+    expect(body.comments[0].author_name).toBe("Mem");
+    expect(body.comments[0].author_email).toBeUndefined();
+    expect(body.comments[0].own).toBe(false); // anonymous reader
   });
 
-  it("forwards the comment to Remark42 with an X-JWT header", async () => {
-    let seen;
-    const fetchImpl = async (url, init) => {
-      seen = { url, init };
-      return new Response(JSON.stringify({ id: "c1" }), { status: 201 });
-    };
-    const req = new Request("https://worker.test/api/comments", {
-      method: "POST",
-      body: JSON.stringify({ text: "hello", url: "https://eauclairesangha.org/topics/x/" })
-    });
-    req.user = user;
-    const res = await handlePostComment(req, env, { fetch: fetchImpl, now: 1000 });
-    expect(res.status).toBe(201);
-    expect(seen.url).toBe("https://comments.test/api/v1/comment");
-    expect(seen.init.headers["X-JWT"].split(".").length).toBe(3);
-    const body = JSON.parse(seen.init.body);
-    expect(body.text).toBe("hello");
-    expect(body.locator.url).toBe("https://eauclairesangha.org/topics/x/");
+  it("marks the caller's own comments when authenticated", async () => {
+    await handlePostComment(post(member, { thread: "/t/", body: "mine" }), env, { nowIso: NOW });
+    const res = await getFor("/t/", await idToken("m@x.org", "Mem"));
+    expect((await res.json()).comments[0].own).toBe(true);
   });
 
-  it("400s on a missing text/url", async () => {
-    const req = new Request("https://worker.test/api/comments", { method: "POST", body: JSON.stringify({ text: "" }) });
-    req.user = user;
-    const res = await handlePostComment(req, env, { fetch: async () => new Response("", { status: 201 }) });
+  it("rejects an over-length body", async () => {
+    const big = "x".repeat(10001);
+    const res = await handlePostComment(post(member, { thread: "/t/", body: big }), env, { nowIso: NOW });
     expect(res.status).toBe(400);
   });
 
-  it("502s when Remark42 rejects the comment", async () => {
-    const fetchImpl = async () => new Response("nope", { status: 401 });
-    const req = new Request("https://worker.test/api/comments", { method: "POST", body: JSON.stringify({ text: "hi", url: "https://eauclairesangha.org/topics/x/" }) });
-    req.user = user;
-    const res = await handlePostComment(req, env, { fetch: fetchImpl, now: 1000 });
-    expect(res.status).toBe(502);
+  it("rejects a reply to a non-existent or cross-thread parent", async () => {
+    const c = await handlePostComment(post(member, { thread: "/t/", body: "root" }), env, { nowIso: NOW });
+    const rootId = (await c.json()).id;
+    const bad = await handlePostComment(post(member, { thread: "/other/", parent_id: rootId, body: "x" }), env, { nowIso: NOW });
+    expect(bad.status).toBe(400);
+    const missing = await handlePostComment(post(member, { thread: "/t/", parent_id: 9999, body: "x" }), env, { nowIso: NOW });
+    expect(missing.status).toBe(400);
   });
 
-  it("rejects a cross-origin locator url", async () => {
-    const req = new Request("https://worker.test/api/comments", { method: "POST", body: JSON.stringify({ text: "hi", url: "https://evil.example/x/" }) });
-    req.user = user;
-    const res = await handlePostComment(req, env, { fetch: async () => new Response("{}", { status: 201 }), now: 1000 });
-    expect(res.status).toBe(400);
+  it("nests a valid reply under its parent", async () => {
+    const c = await handlePostComment(post(member, { thread: "/t/", body: "root" }), env, { nowIso: NOW });
+    const rootId = (await c.json()).id;
+    await handlePostComment(post(admin, { thread: "/t/", parent_id: rootId, body: "reply" }), env, { nowIso: NOW });
+    const body = await (await getFor("/t/")).json();
+    expect(body.comments.length).toBe(1);
+    expect(body.comments[0].replies.map((r) => r.body)).toEqual(["reply"]);
+  });
+});
+
+describe("edit + delete", () => {
+  async function seed(user, thread, text) {
+    const res = await handlePostComment(post(user, { thread: thread, body: text }), env, { nowIso: NOW });
+    return (await res.json()).id;
+  }
+  function withUser(user, body) { const r = new Request("https://worker.test/api/comments", { method: "PATCH", body: JSON.stringify(body) }); r.user = user; return r; }
+
+  it("author edits own comment; a different member cannot", async () => {
+    const id = await seed(member, "/t/", "orig");
+    const ok = await handlePatchComment(withUser(member, { id: id, body: "edited" }), env, { nowIso: NOW });
+    expect(ok.status).toBe(200);
+    expect((await (await getFor("/t/")).json()).comments[0].body).toBe("edited");
+    const other = await handlePatchComment(withUser({ sub: "z@x.org", name: "Z", role: "member" }, { id: id, body: "hax" }), env, { nowIso: NOW });
+    expect(other.status).toBe(403);
   });
 
-  it("rejects an over-long comment", async () => {
-    const req = new Request("https://worker.test/api/comments", { method: "POST", body: JSON.stringify({ text: "x".repeat(10001), url: "https://eauclairesangha.org/topics/x/" }) });
-    req.user = user;
-    const res = await handlePostComment(req, env, { fetch: async () => new Response("{}", { status: 201 }), now: 1000 });
-    expect(res.status).toBe(400);
+  it("admin can edit anyone's comment", async () => {
+    const id = await seed(member, "/t/", "orig");
+    const res = await handlePatchComment(withUser(admin, { id: id, body: "modded" }), env, { nowIso: NOW });
+    expect(res.status).toBe(200);
+  });
+
+  it("author delete hides the comment from GET", async () => {
+    const id = await seed(member, "/t/", "bye");
+    const del = new Request("https://worker.test/api/comments", { method: "DELETE", body: JSON.stringify({ id: id }) });
+    del.user = member;
+    expect((await handleDeleteComment(del, env, { nowIso: NOW })).status).toBe(200);
+    expect((await (await getFor("/t/")).json()).comments.length).toBe(0);
+  });
+
+  it("delete of unknown id is 404; missing id is 400", async () => {
+    const del = new Request("https://worker.test/api/comments", { method: "DELETE", body: JSON.stringify({ id: 4242 }) });
+    del.user = admin;
+    expect((await handleDeleteComment(del, env, { nowIso: NOW })).status).toBe(404);
+    const bad = new Request("https://worker.test/api/comments", { method: "DELETE", body: JSON.stringify({}) });
+    bad.user = admin;
+    expect((await handleDeleteComment(bad, env, { nowIso: NOW })).status).toBe(400);
   });
 });
