@@ -109,12 +109,30 @@ test("refresh dispatches an ecbs:session event", async () => {
   assert.ok(events.some((e) => e.type === "ecbs:session"));
 });
 
-test("a 401 from /api/me clears the token", async () => {
+test("a 401 from /api/me clears the token and session", async () => {
   const fetch = apiFetch({}, { meStatus: 401 });
   const { Auth, sessionData } = load({ hash: "#token=" + makeToken({ sub: "x@x.org", name: "X", exp: future() }), fetch });
   await Auth.ready();
   assert.equal(Auth.getToken(), null);
   assert.equal(sessionData.has("ecbs-auth-token"), false);
+  assert.equal(sessionData.has("ecbs-auth-session"), false);
+});
+
+test("ready() is idempotent and only fetches /api/me once", async () => {
+  const fetch = apiFetch({ sub: "r@x.org", name: "R", role: "reader", request_status: "none" });
+  const { Auth } = load({ hash: "#token=" + makeToken({ sub: "r@x.org", name: "R", exp: future() }), fetch });
+  await Promise.all([Auth.ready(), Auth.ready()]);
+  const meCalls = fetch.calls.filter((c) => c.url.endsWith("/api/me"));
+  assert.equal(meCalls.length, 1);
+});
+
+test("after logout, ready() resolves to null", async () => {
+  const fetch = apiFetch({ sub: "r@x.org", name: "R", role: "reader", request_status: "none" });
+  const { Auth } = load({ hash: "#token=" + makeToken({ sub: "r@x.org", name: "R", exp: future() }), fetch });
+  await Auth.ready();
+  assert.notEqual(Auth.getUser(), null);
+  Auth.logout();
+  assert.equal(await Auth.ready(), null);
 });
 
 test("requestAccess posts and refreshes to pending", async () => {

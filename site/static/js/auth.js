@@ -19,6 +19,11 @@
   function sessionStore() { try { return window.sessionStorage; } catch (e) { return null; } }
   function nowSeconds() { return Math.floor(Date.now() / 1000); }
 
+  function clearAuth() {
+    var s = sessionStore();
+    if (s) { s.removeItem(TOKEN_KEY); s.removeItem(SESSION_KEY); }
+  }
+
   function decodePayload(token) {
     try {
       var part = String(token).split(".")[1];
@@ -35,8 +40,7 @@
     if (!token) return null;
     var claims = decodePayload(token);
     if (!claims || (claims.exp != null && nowSeconds() >= claims.exp)) {
-      s.removeItem(TOKEN_KEY);
-      s.removeItem(SESSION_KEY);
+      clearAuth();
       return null;
     }
     return token;
@@ -51,7 +55,7 @@
   }
   function writeSession(sess) {
     var s = sessionStore();
-    if (s) s.setItem(SESSION_KEY, JSON.stringify({ role: sess.role, request_status: sess.request_status }));
+    if (s) s.setItem(SESSION_KEY, JSON.stringify({ role: sess.role || null, request_status: sess.request_status || "none" }));
   }
   function clearSession() { var s = sessionStore(); if (s) s.removeItem(SESSION_KEY); }
 
@@ -73,8 +77,8 @@
     window.location.href = base + "/auth/login?return_to=" + encodeURIComponent(window.location.href);
   }
   function logout() {
-    var s = sessionStore();
-    if (s) { s.removeItem(TOKEN_KEY); s.removeItem(SESSION_KEY); }
+    clearAuth();
+    readyPromise = null;
     renderButtons();
   }
 
@@ -84,7 +88,7 @@
     var token = getToken();
     if (token) headers["Authorization"] = "Bearer " + token;
     var res = await window.fetch(url, Object.assign({}, options, { headers: headers }));
-    if (res.status === 401) { var s = sessionStore(); if (s) { s.removeItem(TOKEN_KEY); s.removeItem(SESSION_KEY); } }
+    if (res.status === 401) clearAuth();
     return res;
   }
 
