@@ -4267,6 +4267,15 @@
     }
   }
 
+  if (typeof window !== "undefined" && window.addEventListener) {
+    // Role arrives asynchronously from /api/me; re-render once it does so the
+    // admin view (or member controls) reflects the resolved role.
+    window.addEventListener("ecbs:session", function () {
+      var root = typeof document !== "undefined" ? document.getElementById("calendar-app") : null;
+      if (root) renderForView(root, root.getAttribute("data-calendar-view"));
+    });
+  }
+
   function applyUserFromQuery() {
     var params = new URLSearchParams(window.location.search);
     var name = params.get("as");
