@@ -130,6 +130,7 @@
       defaultLocation: DEFAULT_LOCATION,
       signupWindowMonths: DEFAULT_SIGNUP_WINDOW_MONTHS,
       hideAttendingBlock: true,
+      emailFooter: "",
       zoomName: "",
       zoomEmail: "",
       zoomLink: ""
@@ -148,6 +149,7 @@
       defaultLocation: textValueOrDefault(settings, "defaultLocation", DEFAULT_LOCATION) || DEFAULT_LOCATION,
       signupWindowMonths: normalizeSignupWindowMonths(settings.signupWindowMonths),
       hideAttendingBlock: settings.hideAttendingBlock !== false,
+      emailFooter: textValueOrDefault(settings, "emailFooter", ""),
       zoomName: textValueOrDefault(settings, "zoomName", ""),
       zoomEmail: textValueOrDefault(settings, "zoomEmail", ""),
       zoomLink: textValueOrDefault(settings, "zoomLink", "")
@@ -1703,7 +1705,7 @@
       renderLocalDevelopmentLogin() +
       '<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">' +
         '<div class="hidden lg:block">' +
-          renderMonthControls(year, month, MONTH_LABELS[month] + " " + year, "Recurring meetings appear automatically from the admin schedule.") +
+          renderMonthControls(year, month, MONTH_LABELS[month] + " " + year, "All are welcome to attend &amp; encouraged to join the sangha meetings.") +
           calendarGridHtml(year, month, store, "public") +
         '</div>' +
         '<div class="lg:hidden">' +
@@ -1883,7 +1885,7 @@
 
     wireAdminConfirmActions(root, confirmAction, year, month, selectedDate, selectedSlot);
     wireMonthControls(root, renderAdmin, year, month);
-    wireAdminCopyBlock(root);
+    wireAdminCopyBlock(root, year, month);
     wireCalendarSettingsBlock(root, year, month);
     wireRecurringMeetingsBlock(root, year, month);
     wireLocationControls(root);
@@ -2332,19 +2334,20 @@
 
   function upcomingCalendarEmailText(store) {
     var rows = upcomingCalendarEmailRows(store);
-    if (!rows.length) return "No upcoming calendar items are currently scheduled.";
-    return rows.map(function (row) {
+    var body = rows.length ? rows.map(function (row) {
       var title = row.titleHref ? row.title + " (" + row.titleHref + ")" : row.title;
       return row.date + ": " + title + ": " + row.actions.map(function (action) {
         return action.href ? action.text + " (" + action.href + ")" : action.text;
       }).join(", ");
-    }).join("\n");
+    }).join("\n") : "No upcoming calendar items are currently scheduled.";
+    return [body, upcomingMeetingEmailSentence(store), normalizeCalendarSettings(store.settings).emailFooter]
+      .filter(Boolean)
+      .join("\n\n");
   }
 
   function upcomingCalendarEmailHtml(store) {
     var rows = upcomingCalendarEmailRows(store);
-    if (!rows.length) return '<p>No upcoming calendar items are currently scheduled.</p>';
-    return rows.map(function (row) {
+    var body = rows.length ? rows.map(function (row) {
       var titleMarkup = row.titleHref
         ? '<a href="' + escapeHtml(row.titleHref) + '" style="color:inherit;text-decoration:none;">' + escapeHtml(row.title) + '</a>'
         : escapeHtml(row.title);
@@ -2353,7 +2356,45 @@
         if (action.kind === "name") return '<span style="color:#c76a00;font-weight:700;">' + escapeHtml(action.text) + '</span>';
         return escapeHtml(action.text);
       }).join(", ") + '</p>';
-    }).join("");
+    }).join("") : '<p>No upcoming calendar items are currently scheduled.</p>';
+    var meetingSentence = upcomingMeetingEmailSentence(store);
+    var footer = normalizeCalendarSettings(store.settings).emailFooter;
+    return body +
+      (meetingSentence ? '<p style="margin-top:16px;">' + escapeHtml(meetingSentence) + '</p>' : '') +
+      (footer ? '<p style="margin-top:16px;">' + escapeHtml(footer).replace(/\r?\n/g, "<br>") + '</p>' : '');
+  }
+
+  function nextTuesdayCalendarItem(store) {
+    var today = dateKey(new Date());
+    return store.slots.filter(function (slot) {
+      return slot.date >= today && !slot.canceled && parseDate(slot.date).getDay() === 2;
+    }).sort(byDateTime)[0] || null;
+  }
+
+  function emailStartTime(slot) {
+    var parts = String(slot.startTime || DEFAULT_START_TIME).split(":");
+    var hour = Number(parts[0] || 0);
+    var minute = parts[1] || "00";
+    return (hour % 12 || 12) + (minute === "00" ? "" : ":" + minute) + (hour >= 12 ? "PM" : "AM");
+  }
+
+  function emailMeetingDate(dateValue) {
+    var date = parseDate(dateValue);
+    return FULL_WEEKDAY_LABELS[date.getDay()] + ", " + MONTH_LABELS[date.getMonth()] + " " + date.getDate();
+  }
+
+  function emailMeetingLocation(slot, settings) {
+    var location = slot.usePhysicalLocation === false ? "" : String(slot.location || settings.defaultLocation || "").trim();
+    if (!location) return "";
+    return location.split(/\r?\n/).map(function (line) { return line.trim(); }).filter(Boolean).join(", ");
+  }
+
+  function upcomingMeetingEmailSentence(store) {
+    var slot = nextTuesdayCalendarItem(store);
+    if (!slot) return "";
+    var location = emailMeetingLocation(slot, normalizeCalendarSettings(store.settings));
+    return "We will meet at " + emailStartTime(slot) + " on " + emailMeetingDate(slot.date) +
+      (location ? ", at " + location.replace(/\.+$/, "") : "") + ". All are welcome.";
   }
 
   function renderAdminEmailCopyBlock(store) {
@@ -2368,6 +2409,11 @@
         '<button type="button" data-copy-upcoming-talks class="rounded-lg bg-sangha-navy px-4 py-3 text-xs uppercase tracking-widest font-bold text-white hover:bg-blue-900">Copy</button>' +
       '</div>' +
       '<div data-upcoming-talks-html class="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700">' + html + '</div>' +
+      '<form data-upcoming-email-footer-form class="mt-4 grid gap-3 rounded-lg border border-gray-200 bg-white p-4">' +
+        textareaMarkup("Common Footer", "emailFooter", false, normalizeCalendarSettings(store.settings).emailFooter) +
+        '<p class="text-xs leading-relaxed text-gray-500">This text is appended after the automatically generated next-Tuesday meeting information.</p>' +
+        '<button type="submit" class="rounded-lg border border-sangha-navy px-4 py-3 text-xs uppercase tracking-widest font-bold text-sangha-navy hover:bg-sangha-light">Save Footer</button>' +
+      '</form>' +
       '<textarea readonly data-upcoming-talks-text aria-hidden="true" tabindex="-1" class="absolute h-px w-px overflow-hidden opacity-0 pointer-events-none">' + escapeHtml(text) + '</textarea>' +
       '<textarea readonly data-upcoming-talks-html-source aria-hidden="true" tabindex="-1" class="absolute h-px w-px overflow-hidden opacity-0 pointer-events-none">' + escapeHtml(html) + '</textarea>' +
       '<p data-copy-upcoming-talks-status class="mt-2 text-xs text-gray-500"></p>' +
@@ -2493,6 +2539,7 @@
           defaultLocation: fieldValue(form, "defaultLocation") || DEFAULT_LOCATION,
           signupWindowMonths: fieldValue(form, "signupWindowMonths"),
           hideAttendingBlock: checkboxValue(form, "hideAttendingBlock"),
+          emailFooter: store.settings.emailFooter,
           zoomName: store.settings.zoomName,
           zoomEmail: store.settings.zoomEmail,
           zoomLink: store.settings.zoomLink
@@ -2513,6 +2560,7 @@
           defaultLocation: store.settings.defaultLocation,
           signupWindowMonths: store.settings.signupWindowMonths,
           hideAttendingBlock: store.settings.hideAttendingBlock,
+          emailFooter: store.settings.emailFooter,
           zoomName: fieldValue(zoomForm, "zoomName"),
           zoomEmail: fieldValue(zoomForm, "zoomEmail"),
           zoomLink: fieldValue(zoomForm, "zoomLink")
@@ -2588,7 +2636,7 @@
     '</div>';
   }
 
-  function wireAdminCopyBlock(root) {
+  function wireAdminCopyBlock(root, year, month) {
     var button = root.querySelector("[data-copy-upcoming-talks]");
     var textarea = root.querySelector("[data-upcoming-talks-text]");
     var htmlSource = root.querySelector("[data-upcoming-talks-html-source]");
@@ -2601,7 +2649,7 @@
         navigator.clipboard.write([
           new ClipboardItem({
             "text/html": new Blob([htmlBlock.innerHTML], { type: "text/html" }),
-            "text/plain": new Blob([htmlSource ? htmlSource.value : htmlBlock.innerHTML], { type: "text/plain" })
+            "text/plain": new Blob([textarea.value], { type: "text/plain" })
           })
         ]).then(function () {
           if (status) status.textContent = "Copied HTML to clipboard.";
@@ -2612,6 +2660,27 @@
       }
       if (!copied) copyPlainEmailText(htmlSource || textarea, status, "Copied HTML source to clipboard.");
     });
+
+    var footerForm = root.querySelector("[data-upcoming-email-footer-form]");
+    if (footerForm) {
+      footerForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var store = loadStore();
+        applyCalendarSettingsUpdate(store, {
+          defaultLocation: store.settings.defaultLocation,
+          signupWindowMonths: store.settings.signupWindowMonths,
+          hideAttendingBlock: store.settings.hideAttendingBlock,
+          emailFooter: fieldValue(footerForm, "emailFooter"),
+          zoomName: store.settings.zoomName,
+          zoomEmail: store.settings.zoomEmail,
+          zoomLink: store.settings.zoomLink
+        });
+        addCalendarHistory(store, "Updated email footer", null, "Updated the common calendar email footer.");
+        saveStoreAndThen(store, root, function () {
+          renderAdmin(root, { year: year, month: month, notice: "Calendar email footer updated." });
+        });
+      });
+    }
   }
 
   function copyPlainEmailText(textarea, status, successText) {

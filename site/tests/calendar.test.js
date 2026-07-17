@@ -675,6 +675,35 @@ test("upcomingCalendarEmailHtml styles names orange and links blue", () => {
   assert.match(html, /<span style="color:#c76a00;font-weight:700;">Chris M\.<\/span>/);
 });
 
+test("upcoming calendar email includes next Tuesday details and the editable footer", () => {
+  const api = loadApi();
+  const store = api.normalizeStore({
+    settings: {
+      emailFooter: "Visit our website for updates.\nWith appreciation,"
+    },
+    recurrences: [],
+    slots: [{
+      id: "tuesday-july-21",
+      date: "2026-07-21",
+      startTime: "19:00",
+      endTime: "20:30",
+      title: "Sangha Meeting",
+      location: "Unity of Eau Claire\n1808 Folsom Street\nEau Claire, WI 54703",
+      usePhysicalLocation: true,
+      speaker: null,
+      backups: []
+    }]
+  });
+
+  const text = api.upcomingCalendarEmailText(store);
+  const html = api.upcomingCalendarEmailHtml(store);
+
+  assert.match(text, /We will meet at 7PM on Tuesday, July 21, at Unity of Eau Claire, 1808 Folsom Street, Eau Claire, WI 54703\. All are welcome\./);
+  assert.match(text, /Visit our website for updates\.\nWith appreciation,$/);
+  assert.match(html, /We will meet at 7PM on Tuesday, July 21, at Unity of Eau Claire, 1808 Folsom Street, Eau Claire, WI 54703\. All are welcome\./);
+  assert.match(html, /Visit our website for updates\.<br>With appreciation,/);
+});
+
 test("calendar settings update future default locations only", () => {
   const api = loadApi();
   const store = api.normalizeStore({
@@ -1587,6 +1616,27 @@ test("admin utility sections are collapsed by default", () => {
   api.renderAdmin(api.__root, { year: 2026, month: 5, editRecurrenceId: "weekly-talks" });
 
   assert.equal(api.__root.querySelector('details[data-admin-section="recurrence-form"]').open, true);
+});
+
+test("admin can save a common upcoming-email footer", () => {
+  const api = loadDomApi();
+  api.__setStore({
+    slots: [],
+    recurrences: [],
+    history: [],
+    settings: { emailFooter: "Old footer" }
+  });
+
+  api.renderAdmin(api.__root, { year: 2026, month: 6 });
+  const form = api.__root.querySelector("[data-upcoming-email-footer-form]");
+  assert.ok(form);
+  assert.equal(form.querySelector('[name="emailFooter"]').value, "Old footer");
+
+  form.querySelector('[name="emailFooter"]').value = "Shared closing text";
+  form.dispatchEvent(new api.__window.Event("submit", { bubbles: true, cancelable: true }));
+
+  assert.equal(api.__getStore().settings.emailFooter, "Shared closing text");
+  assert.match(api.__root.textContent, /Calendar email footer updated/);
 });
 
 test("saving a calendar item closes without opening item-level reminder prompts", () => {

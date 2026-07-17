@@ -72,6 +72,8 @@ Eau Claire, WI 54703
 
 Changing the default location updates future items and recurrence rules still marked to use it. Manual Zoom links are supported. Automatic Zoom meeting creation is deferred.
 
+The Upcoming Calendar Email Block automatically adds the next active Tuesday meeting's time, full date, concise physical location, and an all-are-welcome note. Administrators can save a common footer beneath that generated sentence; both are included in the copied plain-text and HTML versions.
+
 The admin page retains email templates and reminder fields for a later implementation, but production does not display send-email controls or promise reminder delivery. Calendar email delivery is deferred.
 
 ## Initialization
