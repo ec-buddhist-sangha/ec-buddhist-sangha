@@ -34,6 +34,12 @@
   .prose a {
     @apply text-sangha-gold hover:text-yellow-600 underline transition-colors;
   }
+  .prose a.sangha-action {
+    @apply text-sangha-navy no-underline;
+  }
+  .prose a.sangha-action:hover {
+    @apply text-sangha-navy no-underline;
+  }
   .prose blockquote {
     @apply bg-sangha-light p-6 rounded-xl border-l-4 border-sangha-gold my-8 not-italic;
   }

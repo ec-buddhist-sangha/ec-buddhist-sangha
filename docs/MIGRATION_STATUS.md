@@ -169,13 +169,12 @@
    - Needs: DigitalOcean droplet ($4-6/mo) + DNS setup
    - Update comments.html partial with production URL
 
-3. **Create Donate Page**
-   - Currently 404 at `/donate/`
-   - Add donation info and payment links
+3. ~~**Create Donate Page**~~ ✅ **DONE**
+   - `/donate/` includes dana information and the PayPal donation link
 
 ### 🟡 High Priority
 
-5. **Real Footer Links** - Facebook Community, Email Newsletter
+5. ~~**Real Footer Links**~~ ✅ **DONE** - Facebook Community and Email Newsletter
 6. **Content Migration** - More events, announcements, topics
 7. **Favicon** - Add to baseof.html
 

@@ -6,7 +6,7 @@ from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.graphics.shapes import Drawing
 
 
-MAILING_LIST_URL = "https://groups.google.com/g/eauclairebuddhistsangha"
+MAILING_LIST_URL = "https://groups.google.com/g/eauclairebuddhistsangha/about"
 
 
 def main() -> None:

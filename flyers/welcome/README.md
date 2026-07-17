@@ -25,7 +25,7 @@ Edit `source/flyer-content.json`, then run:
 The QR code points to:
 
 ```text
-https://groups.google.com/g/eauclairebuddhistsangha
+https://groups.google.com/g/eauclairebuddhistsangha/about
 ```
 
 If the mailing list URL changes, update `MAILING_LIST_URL` in `scripts/make_qr.py`, then rebuild.
