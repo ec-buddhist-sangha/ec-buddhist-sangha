@@ -176,7 +176,6 @@
     var role = user.role;
     if (role === "admin") {
       items += '<a href="' + joinPath(siteBase(), "account/members/") + '" ' + link + '>Members</a>';
-      items += '<a href="' + joinPath(siteBase(), "admin/") + '" ' + link + '>CMS</a>';
     } else if (role === "reader" || role === null) {
       var sess = getSession();
       if (sess && sess.request_status === "pending") {

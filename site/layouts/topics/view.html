@@ -1,0 +1,20 @@
+{{ define "main" }}
+<section class="bg-sangha-light py-12 md:py-16">
+  <div class="max-w-3xl mx-auto px-4">
+    <div id="ecbs-topic">
+      <p class="text-gray-500 text-center py-16">Loading…</p>
+    </div>
+    <noscript>
+      <p class="text-gray-500 text-center py-16">Please enable JavaScript to view this discussion.</p>
+    </noscript>
+  </div>
+</section>
+
+<!-- Discussion thread is injected here by topics.js, keyed to topic:<slug>. -->
+<section id="ecbs-topic-comments" class="bg-sangha-light pb-12"></section>
+
+{{ $c := readFile "static/js/comments.js" | md5 }}
+<script src="{{ "js/comments.js" | relURL }}?v={{ $c }}"></script>
+{{ $v := readFile "static/js/topics.js" | md5 }}
+<script src="{{ "js/topics.js" | relURL }}?v={{ $v }}"></script>
+{{ end }}
