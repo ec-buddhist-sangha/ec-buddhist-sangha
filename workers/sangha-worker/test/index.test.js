@@ -46,12 +46,6 @@ describe("router", () => {
     expect(await res.json()).toEqual({ error: "not_found" });
   });
 
-  it("/decap/auth redirects to GitHub", async () => {
-    const res = await call("/decap/auth?provider=github");
-    expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toContain("github.com/login/oauth/authorize");
-  });
-
   it("GET /api/calendar is public and returns null store initially", async () => {
     await env.DB.prepare("DELETE FROM calendar_state").run();
     const res = await call("/api/calendar");

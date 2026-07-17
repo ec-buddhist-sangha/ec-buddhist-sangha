@@ -59,6 +59,11 @@ export async function handlePostComment(request, env, options = {}) {
     .prepare("INSERT INTO comments (thread, parent_id, author_email, author_name, body, status, created_at) VALUES (?, ?, ?, ?, ?, 'published', ?)")
     .bind(body.thread, parentId, String(request.user.sub).toLowerCase(), request.user.name, body.body, nowIso)
     .run();
+  // Surface forum activity: bump the parent topic's last_active_at.
+  if (body.thread.startsWith("topic:")) {
+    await env.DB.prepare("UPDATE topics SET last_active_at = ? WHERE slug = ?")
+      .bind(nowIso, body.thread.slice("topic:".length)).run();
+  }
   return jsonResponse(env, { id: res.meta.last_row_id }, 201);
 }
 
