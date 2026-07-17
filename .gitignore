@@ -31,3 +31,5 @@ site/hugo_stats.json
 workers/*/.dev.vars
 workers/*/node_modules/
 workers/*/.wrangler/
+# Wrangler local state when run from the repo root
+/.wrangler/

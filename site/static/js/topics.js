@@ -60,21 +60,33 @@
     return (await res.json()).topic;
   }
 
-  function rowHtml(t) {
+  function rowHtml(t, opts) {
+    opts = opts || {};
     var replies = t.reply_count || 0;
-    return '<a href="' + detailHref(t.slug) + '" class="block p-6 hover:bg-gray-50 transition-colors group">' +
-      '<div class="flex items-start justify-between gap-4"><div class="flex-1 min-w-0">' +
-        tagPills(t.tags) +
-        '<h2 class="text-lg font-bold text-gray-800 group-hover:text-sangha-navy transition-colors mb-1">' + esc(t.title) + "</h2>" +
-        '<p class="text-gray-600 text-sm mb-3">' + esc(truncate(t.body, 160)) + "</p>" +
-        '<div class="flex items-center gap-4 text-xs text-gray-400">' +
-          '<span class="font-medium text-gray-600">By ' + esc(t.author_name) + "</span>" +
-          "<span>" + esc(fmtDate(t.last_active_at || t.created_at)) + "</span>" +
-          "<span>" + replies + (replies === 1 ? " reply" : " replies") + "</span>" +
+    // Manage controls live OUTSIDE the row's <a> so clicking them never
+    // navigates. Visibility: admins (any topic) or the author (own topic);
+    // the worker enforces owner/admin on every write regardless.
+    var manage = opts.manage
+      ? '<div class="px-6 pb-4 -mt-2 flex gap-4 text-xs">' +
+          '<button type="button" data-edit-topic="' + esc(t.id) + '" class="text-sangha-navy underline">Edit</button>' +
+          '<button type="button" data-delete-topic="' + esc(t.id) + '" class="text-red-600 underline">Delete</button>' +
+        "</div>"
+      : "";
+    return "<div>" +
+      '<a href="' + detailHref(t.slug) + '" class="block p-6 hover:bg-gray-50 transition-colors group">' +
+        '<div class="flex items-start justify-between gap-4"><div class="flex-1 min-w-0">' +
+          tagPills(t.tags) +
+          '<h2 class="text-lg font-bold text-gray-800 group-hover:text-sangha-navy transition-colors mb-1">' + esc(t.title) + "</h2>" +
+          '<p class="text-gray-600 text-sm mb-3">' + esc(truncate(t.body, 160)) + "</p>" +
+          '<div class="flex items-center gap-4 text-xs text-gray-400">' +
+            '<span class="font-medium text-gray-600">By ' + esc(t.author_name) + "</span>" +
+            "<span>" + esc(fmtDate(t.last_active_at || t.created_at)) + "</span>" +
+            "<span>" + replies + (replies === 1 ? " reply" : " replies") + "</span>" +
+          "</div>" +
         "</div>" +
-      "</div>" +
-      '<div class="hidden sm:flex items-center text-gray-300 group-hover:translate-x-1 transition-transform mt-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>' +
-    "</div></a>";
+        '<div class="hidden sm:flex items-center text-gray-300 group-hover:translate-x-1 transition-transform mt-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>' +
+      "</div></a>" + manage +
+    "</div>";
   }
 
   // ---- Composer (create / edit) --------------------------------------------
@@ -132,12 +144,28 @@
     try { topics = await fetchTopics(); }
     catch (e) { root.innerHTML = '<p class="text-sm text-red-600 text-center py-8">The forum is unavailable right now.</p>'; return; }
 
+    async function refresh() { topics = await fetchTopics(); draw(); }
+
     function draw() {
       var list = topics.length
-        ? '<div class="grid grid-cols-1 divide-y divide-gray-100">' + topics.map(rowHtml).join("") + "</div>"
+        ? '<div class="grid grid-cols-1 divide-y divide-gray-100">' + topics.map(function (t) { return rowHtml(t, { manage: canManage(t) }); }).join("") + "</div>"
         : '<div class="p-12 text-center"><p class="text-gray-400 text-sm">No topics yet. Be the first to start a discussion!</p></div>';
       root.innerHTML = '<div data-compose-slot></div><div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">' + list + "</div>";
       mountCompose();
+      wireRowControls();
+    }
+
+    // The compose slot toggles between the "New Topic" button and the composer,
+    // which is reused for both creating a new topic and editing an existing one.
+    function openComposer(topic) {
+      var slot = root.querySelector("[data-compose-slot]");
+      if (!slot) return;
+      slot.innerHTML = composerHtml(topic || null);
+      if (slot.scrollIntoView) slot.scrollIntoView({ behavior: "smooth", block: "start" });
+      wireComposer(slot.querySelector("[data-topic-form]"), function (result) {
+        if (!(topic && topic.id) && result && result.slug) { window.location.href = detailHref(result.slug); return; }
+        if (result) refresh(); else draw();
+      });
     }
     function mountCompose() {
       var slot = root.querySelector("[data-compose-slot]");
@@ -145,21 +173,33 @@
       var signedIn = ECBS.Auth && ECBS.Auth.isSignedIn && ECBS.Auth.isSignedIn();
       if (canPost()) {
         slot.innerHTML = '<div class="mb-6 text-right"><button type="button" data-new-topic class="bg-sangha-navy text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-blue-900 transition-colors shadow-md text-sm font-medium"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>New Topic</button></div>';
-        slot.querySelector("[data-new-topic]").addEventListener("click", function () {
-          slot.innerHTML = composerHtml(null);
-          wireComposer(slot.querySelector("[data-topic-form]"), function (created) {
-            if (created && created.slug) { window.location.href = detailHref(created.slug); }
-            else { mountCompose(); }
-          });
-        });
+        slot.querySelector("[data-new-topic]").addEventListener("click", function () { openComposer(null); });
       } else if (signedIn) {
         slot.innerHTML = '<div class="mb-6 text-right text-sm text-gray-500">Request access to start a topic.</div>';
       } else {
         slot.innerHTML = '<div class="mb-6 text-right text-sm text-gray-500">Sign in and request access to start a topic.</div>';
       }
     }
+    function wireRowControls() {
+      root.querySelectorAll("[data-edit-topic]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var id = Number(b.getAttribute("data-edit-topic"));
+          var t = topics.filter(function (x) { return x.id === id; })[0];
+          if (t) openComposer(t);
+        });
+      });
+      root.querySelectorAll("[data-delete-topic]").forEach(function (b) {
+        b.addEventListener("click", async function () {
+          if (!window.confirm("Delete this topic?")) return;
+          var res = await ECBS.Auth.fetch(workerBase() + "/api/topics", {
+            method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: Number(b.getAttribute("data-delete-topic")) })
+          });
+          if (res.ok) await refresh();
+        });
+      });
+    }
     draw();
-    if (ECBS.Auth && ECBS.Auth.ready) { await ECBS.Auth.ready(); mountCompose(); }
+    if (ECBS.Auth && ECBS.Auth.ready) { await ECBS.Auth.ready(); draw(); }
   }
 
   // ---- Detail ---------------------------------------------------------------

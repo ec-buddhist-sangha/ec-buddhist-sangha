@@ -4,7 +4,7 @@ This file is the authoritative instructions for agentic coding in this repo.
 
 The repo has two "modes":
 1) **Prototype** (React/Vite) — current UI reference, located in `/prototype/`
-2) **Production** (Hugo + Cloudflare Pages/Worker/D1) — migration target, located in `/site/`
+2) **Production** (Hugo on GitHub Pages; Cloudflare Worker + D1) — migration target, located in `/site/`
 
 Agents should keep both working during transition, but prioritize decisions that reduce future migration effort.
 
@@ -41,7 +41,7 @@ This affects:
 4. **Phase 4:** ~~OAuth proxy Worker for Decap auth~~ Removed — content authoring reuses the existing Google SSO + role system
 5. **Phase 5:** ~~Isso comments deployment~~ Replaced with native comments in Cloudflare D1 (Worker CRUD, role-gated), rendered on Topics and Pages only
 6. **Phase 6:** ~~Google Calendar embed on homepage~~ Replaced with Community Updates feed (events + announcements)
-7. **Phase 7:** Cloudflare Pages deployment with Hugo build
+7. **Phase 7:** GitHub Pages deployment via GitHub Actions (Tailwind + Hugo build) on push to `main`
 8. **Phase 8:** Content migration from prototype to Markdown
 9. **Phase 9:** DNS switchover and prototype decommission
 
@@ -51,12 +51,12 @@ This affects:
 
 | Component | Technology | Notes |
 |-----------|-----------|-------|
-| Static Site Generator | Hugo | Build via Cloudflare Pages; renders page shells only |
+| Static Site Generator | Hugo | Built by GitHub Actions; renders page shells only |
 | Content (updates + topics) | Native (Cloudflare D1) | Worker CRUD at `/api/posts` + `/api/topics`; admins author updates, members start topics; authors/admins edit/delete |
 | Auth | Google SSO | Via Cloudflare Worker (Wrangler); identity-only JWT, roles from `/api/me` |
 | Comments | Native (Cloudflare D1) | Worker CRUD, role-gated (members post; authors/admins edit/delete), Topics + Pages only |
 | Community Updates | Client-rendered feed | Events + announcements from `/api/posts`, no external embeds |
-| Hosting | Cloudflare Pages | Free tier, Hugo builds |
+| Hosting | GitHub Pages | Free; built & deployed by GitHub Actions (Hugo) on push to `main` |
 | Styling | Tailwind CSS | Compiled at build time |
 | Comment moderation | Auto-publish | Can be changed later |
 
@@ -174,7 +174,7 @@ hugo server -D --baseURL "http://127.0.0.1:1313/ec-buddhist-sangha/"
 
 - Maintain "Sangha" palette: sangha-navy (#1B3B5A), sangha-gold (#C59D45), sangha-light (#F5F5F0), sangha-paper (#FAFAF8)
 - Typography: Merriweather (serif) for headings, Lato/sans-serif for body
-- Tailwind CSS compiled during Cloudflare Pages build
+- Tailwind CSS compiled during the GitHub Actions build
 - Quiet UI: subtle transitions, no aggressive animations
 
 ---
@@ -199,7 +199,7 @@ hugo server -D --baseURL "http://127.0.0.1:1313/ec-buddhist-sangha/"
 
 | Service | Tier | Monthly Cost |
 |---------|------|--------------|
-| Cloudflare Pages | Free | $0 |
+| GitHub Pages | Free | $0 |
 | Cloudflare Worker | Free | $0 |
 | Cloudflare D1 (comments + calendar) | Free tier | $0 |
 | Domain | (if new) | ~$12/year |

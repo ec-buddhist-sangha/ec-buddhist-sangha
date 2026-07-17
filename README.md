@@ -2,7 +2,7 @@
 
 A calm, "Zen"-inspired community portal for the Eau Claire Buddhist Sangha.
 
-This repo contains a **high-fidelity React prototype** being migrated to a low-maintenance production stack: **Hugo + Cloudflare Pages** with **native content and comments stored in Cloudflare D1** (community updates and forum topics are served by the Worker, not a Git-based CMS).
+This repo contains a **high-fidelity React prototype** being migrated to a low-maintenance production stack: **Hugo on GitHub Pages** (built by GitHub Actions) with a **Cloudflare Worker + D1** serving auth, calendar, comments, and native content (community updates and forum topics are served by the Worker, not a Git-based CMS).
 
 ---
 
@@ -32,7 +32,7 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 
 ### Target (Production)
 - **Hugo** for static site generation (page shells + design system)
-- **Cloudflare Pages** for build + deploy + CDN
+- **GitHub Pages** for hosting, built and deployed by a **GitHub Actions** workflow ([.github/workflows/hugo.yaml](.github/workflows/hugo.yaml)) on push to `main`
 - **Cloudflare Worker** (via Wrangler) for member auth, shared calendar, comments, and native content
 - **Native content** — community updates (announcements + events) and forum topics stored in Cloudflare D1, authored through the site (admins via an inline composer, members start topics), rendered client-side against `/api/posts` and `/api/topics`
 - **Native comments** stored in Cloudflare D1 via the Worker, gated by member roles (Topics + Pages only)
@@ -45,7 +45,7 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 |-----------|-----------|
 | Static Site Generator | Hugo |
 | Content (updates + topics) | Native (Cloudflare D1 via Worker) |
-| Hosting | Cloudflare Pages (free) |
+| Hosting | GitHub Pages (free), built via GitHub Actions |
 | Member Auth | Google SSO via Cloudflare Worker |
 | Comments | Native (Cloudflare D1 via Worker) |
 | Calendar | Native Hugo UI + Cloudflare D1 |
@@ -68,7 +68,7 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 
 | Service | Tier | Monthly Cost |
 |---------|------|--------------|
-| Cloudflare Pages | Free | $0 |
+| GitHub Pages | Free | $0 |
 | Cloudflare Worker | Free | $0 |
 | Cloudflare D1 (comments + calendar) | Free tier | $0 |
 | Domain | (if new) | ~$12/year |
@@ -105,17 +105,16 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - Shared D1 calendar with recurring meetings, volunteering, backups, and attendance
 - Role-aware public/member/admin API projections
 
-### Phase 7: Cloudflare Pages deployment
-- Connect GitHub repo
-- Configure build: `hugo`, output: `public/`
-- Set custom domain
+### Phase 7: GitHub Pages deployment
+- GitHub Actions workflow builds Tailwind + Hugo and deploys to GitHub Pages on push to `main`
+- Custom domain `eauclairesangha.org` (CNAME), HTTPS via GitHub Pages
 
 ### Phase 8: Content migration
 - Seed existing Markdown into D1 (`migrations/0006_seed_content.sql`)
 - Author new updates/topics through the site UI
 
 ### Phase 9: Switchover
-- Update DNS to Cloudflare Pages
+- Point DNS / custom domain at GitHub Pages
 - Decommission prototype
 
 ---

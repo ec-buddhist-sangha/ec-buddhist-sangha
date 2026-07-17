@@ -53,6 +53,15 @@ test("reply_count pluralizes correctly", () => {
   assert.ok(zero.includes("0 replies"));
 });
 
+test("manage option adds edit/delete controls outside the row anchor; default hides them", () => {
+  const plain = load().rowHtml(base);
+  assert.ok(!plain.includes("data-edit-topic") && !plain.includes("data-delete-topic"), "no controls by default");
+  const managed = load().rowHtml(Object.assign({ id: 5 }, base), { manage: true });
+  assert.ok(managed.includes('data-edit-topic="5"') && managed.includes('data-delete-topic="5"'), "controls present when manage");
+  // Controls must sit after the closing </a> so clicking them doesn't navigate.
+  assert.ok(managed.indexOf("data-edit-topic") > managed.lastIndexOf("</a>"), "controls are outside the anchor");
+});
+
 test("tags render as escaped pills", () => {
   const html = load().rowHtml(Object.assign({}, base, { tags: ["metta", "<x>"] }));
   assert.ok(html.includes(">metta<") || html.includes("metta"));

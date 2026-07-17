@@ -69,3 +69,11 @@ test("summary is preferred over body for the card preview", () => {
   const html = load().cardHtml({ kind: "announcement", slug: "s", title: "T", summary: "SHORT SUMMARY", body: "long body text", published_at: "2026-07-14T17:00:00.000Z", tags: [] });
   assert.ok(html.includes("SHORT SUMMARY"));
 });
+
+test("admin option adds edit/delete controls keyed by post id; default hides them", () => {
+  const P = { id: 7, kind: "announcement", slug: "s", title: "T", body: "b", published_at: "2026-07-14T17:00:00.000Z", tags: [] };
+  const plain = load().cardHtml(P);
+  assert.ok(!plain.includes("data-edit-post") && !plain.includes("data-delete-post"), "no controls by default");
+  const admin = load().cardHtml(P, { admin: true });
+  assert.ok(admin.includes('data-edit-post="7"') && admin.includes('data-delete-post="7"'), "controls present for admin");
+});

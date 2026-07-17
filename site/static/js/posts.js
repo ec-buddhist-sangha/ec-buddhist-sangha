@@ -47,10 +47,17 @@
     }).join("") + "</div>";
   }
 
-  function cardHtml(p) {
+  function cardHtml(p, opts) {
+    opts = opts || {};
     var isEvent = p.kind === "event";
     var preview = p.summary || truncate(p.body, 200);
     var when = isEvent && p.start_at ? fmtDateTime(p.start_at) : fmtDate(p.published_at);
+    var controls = opts.admin
+      ? '<div class="mt-3 flex gap-4 text-xs">' +
+          '<button type="button" data-edit-post="' + esc(p.id) + '" class="text-sangha-navy underline">Edit</button>' +
+          '<button type="button" data-delete-post="' + esc(p.id) + '" class="text-red-600 underline">Delete</button>' +
+        "</div>"
+      : "";
     return '<article class="update-card">' +
       '<div class="flex items-start gap-4">' +
         '<div class="w-12 h-12 bg-sangha-light rounded-full flex items-center justify-center flex-shrink-0">' + (isEvent ? EVENT_ICON : ANN_ICON) + "</div>" +
@@ -64,6 +71,7 @@
           "</h3>" +
           (isEvent && p.location ? '<p class="text-xs text-gray-500 mb-1">' + esc(p.location) + "</p>" : "") +
           '<p class="text-gray-600 text-sm leading-relaxed">' + esc(preview) + "</p>" +
+          controls +
         "</div>" +
       "</div>" +
     "</article>";
@@ -182,26 +190,55 @@
     catch (e) { root.innerHTML = '<p class="text-sm text-red-600 text-center py-8">Updates are unavailable right now.</p>'; return; }
     if (limit > 0) posts = posts.slice(0, limit);
 
+    function isAdmin() { return Boolean(allowCreate && ECBS.Auth && ECBS.Auth.isAdmin && ECBS.Auth.isAdmin()); }
+    async function refresh() { posts = await fetchPosts(); if (limit > 0) posts = posts.slice(0, limit); draw(); }
+
     function draw() {
+      var admin = isAdmin();
       var cards = posts.length
-        ? '<div class="grid gap-6">' + posts.map(cardHtml).join("") + "</div>"
+        ? '<div class="grid gap-6">' + posts.map(function (p) { return cardHtml(p, { admin: admin }); }).join("") + "</div>"
         : '<p class="text-gray-500 text-center py-12">' + esc(empty) + "</p>";
       var viewAllLink = viewAll ? '<div class="text-center mt-8"><a href="' + esc(viewAll) + '" class="text-sangha-gold hover:text-yellow-600 font-bold text-sm uppercase tracking-widest">View All Updates →</a></div>' : "";
       root.innerHTML = '<div data-admin-slot></div>' + cards + viewAllLink;
-      if (allowCreate && ECBS.Auth && ECBS.Auth.isAdmin && ECBS.Auth.isAdmin()) mountAdmin();
+      if (admin) { mountNewButton(); wireCardControls(); }
     }
-    function mountAdmin() {
+
+    // The admin slot toggles between the "New update" button and the composer
+    // (used for both create and edit); both live at the top of the list.
+    function openComposer(post) {
+      var slot = root.querySelector("[data-admin-slot]");
+      if (!slot) return;
+      slot.innerHTML = composerHtml(post || null);
+      if (slot.scrollIntoView) slot.scrollIntoView({ behavior: "smooth", block: "start" });
+      wireComposer(slot.querySelector("[data-post-form]"), async function (saved) {
+        if (saved) await refresh(); else draw();
+      });
+    }
+    function mountNewButton() {
       var slot = root.querySelector("[data-admin-slot]");
       if (!slot) return;
       slot.innerHTML = '<div class="mb-6 text-right"><button type="button" data-new-post class="bg-sangha-navy text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">+ New update</button></div>';
-      slot.querySelector("[data-new-post]").addEventListener("click", function () {
-        slot.innerHTML = composerHtml(null);
-        wireComposer(slot.querySelector("[data-post-form]"), async function (saved) {
-          if (saved) { posts = await fetchPosts(); if (limit > 0) posts = posts.slice(0, limit); }
-          draw();
+      slot.querySelector("[data-new-post]").addEventListener("click", function () { openComposer(null); });
+    }
+    function wireCardControls() {
+      root.querySelectorAll("[data-edit-post]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var id = Number(b.getAttribute("data-edit-post"));
+          var post = posts.filter(function (p) { return p.id === id; })[0];
+          if (post) openComposer(post);
+        });
+      });
+      root.querySelectorAll("[data-delete-post]").forEach(function (b) {
+        b.addEventListener("click", async function () {
+          if (!window.confirm("Delete this update?")) return;
+          var res = await ECBS.Auth.fetch(workerBase() + "/api/posts", {
+            method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: Number(b.getAttribute("data-delete-post")) })
+          });
+          if (res.ok) await refresh();
         });
       });
     }
+
     draw();
     if (allowCreate && ECBS.Auth && ECBS.Auth.ready) { await ECBS.Auth.ready(); draw(); }
   }
