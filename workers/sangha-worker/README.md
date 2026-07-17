@@ -1,16 +1,21 @@
 # sangha-worker
 
-Single Cloudflare Worker for Eau Claire Buddhist Sangha: Google SSO, site JWT
-issuance, Google Group role checks. Decap OAuth (Plan 02), calendar D1 API
-(Plan 03), and comment proxy (Plan 04) are added to this same Worker.
+Single Cloudflare Worker for Eau Claire Buddhist Sangha: Google SSO, live roles,
+Decap OAuth, the shared D1 calendar, and native comments.
 
-## Endpoints (this plan)
+## Calendar endpoints
 
-| Method + Path        | Auth | Description                          |
-|----------------------|------|--------------------------------------|
-| `GET /api/health`    | None | Health check                         |
-| `GET /auth/login`    | None | Start Google login (`?return_to=`)   |
-| `GET /auth/callback` | None | Token exchange + group check + JWT   |
+| Method + Path | Auth | Description |
+|---|---|---|
+| `GET /api/calendar` | Public | Role-aware calendar projection |
+| `PUT /api/calendar` | Admin | Optimistically locked full-store write |
+| `POST /api/signups` | Member | Add or update the caller's signup |
+| `DELETE /api/signups` | Member | Remove the caller's signup |
+| `GET /api/signups` | Member | Read the caller's signup |
+
+Calendar state is a versioned JSON document in D1. See
+`../../docs/CALENDAR_SYSTEM.md` for its privacy, recurrence, and initialization
+contract.
 
 ## Environment
 
@@ -35,8 +40,22 @@ npm run dev              # wrangler dev
 ## Deploy
 
 ```bash
+npx wrangler login
 npm run deploy
 ```
+
+For first calendar initialization, deploy the Worker and matching site before
+applying migration `0004_initialize_calendar.sql`. Confirm `calendar_state` is
+empty, then run:
+
+```bash
+npx wrangler d1 execute sangha-db --remote --command "SELECT id, revision, updated_at FROM calendar_state"
+npx wrangler d1 migrations apply sangha-db --remote
+```
+
+Stop without applying migrations if the query unexpectedly returns a calendar
+row. Do not reset or delete the production database. Migration `0004` is
+idempotent and seeds revision 1 only when the row is absent.
 
 After deploy, set the OAuth client's authorized redirect URI to the deployed
 `/auth/callback` URL, and verify:

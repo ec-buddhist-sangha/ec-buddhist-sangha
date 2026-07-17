@@ -20,12 +20,14 @@ describe("middleware", () => {
     const res = jsonResponse(env, { ok: true }, 201);
     expect(res.status).toBe(201);
     expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://eauclairesangha.org");
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
   });
 
   it("handlePreflight returns 204 with CORS headers", () => {
     const res = handlePreflight(new Request("https://worker.test/api/x", { method: "OPTIONS" }), env);
     expect(res.status).toBe(204);
     expect(res.headers.get("Access-Control-Allow-Methods")).toContain("POST");
+    expect(res.headers.get("Access-Control-Allow-Methods")).toContain("PUT");
   });
 
   it("authenticate returns identity claims for a valid Bearer token", async () => {

@@ -18,7 +18,7 @@
   - `header.html` - Responsive navigation
   - `footer.html` - Footer with location/links
   - `hero.html` - Homepage hero section
-  - `calendar.html` - Calendar embed
+  - `calendar.html` - Native calendar interface
   - `community-feed.html` - Content listing
   - `comments.html` - Isso comments embed
 
@@ -51,10 +51,12 @@
 - Created `comments.html` partial
 - Comments enabled on Topics and Pages only
 
-### Phase 6: Google Calendar ✅
-- Created calendar partial with embed
-- Added calendar preview to homepage
-- Created dedicated calendar page
+### Phase 6: Native Shared Calendar
+- Dedicated Hugo calendar, calendar-item, and administrator pages
+- Cloudflare Worker API with a versioned D1 JSON document
+- Google member authentication and administrator role enforcement
+- Deterministic recurring meetings, volunteering, backups, and attendance
+- Calendar remains hidden from the main navigation during inception
 
 ### Phase 7: GitHub Pages Deployment ✅
 - Using GitHub Pages (not Cloudflare Pages as originally planned)
@@ -180,70 +182,15 @@
 
 ### 🟢 Medium Priority
 
-8. **Google Calendar Visibility** - Currently requires auth
+8. **Calendar production acceptance** - Verify shared state on two browsers/devices after D1 initialization
 9. **SEO Meta Tags** - Open Graph, Twitter Cards
 10. **Analytics** - Optional (Google Analytics or Plausible)
 
 ---
 
-## 📝 Immediate Next Steps (Content Display)
+## Superseded Content Display Notes
 
-**Status:** Ready to implement - Homepage feed needs fixes
-
-### 1. Fix Homepage Community Feed
-**Issue:** `community-feed.html` partial has `{{ define "main" }}` which conflicts with homepage layout, preventing feed from rendering
-
-**Tasks:**
-- [ ] Remove `{{ define "main" }}` wrapper from `community-feed.html`
-- [ ] Verify feed shows 5 most recent items (events + announcements, sorted by date)
-- [ ] Test feed displays on homepage between "New to Meditation" CTA and Google Calendar section
-
-### 2. Create Combined Events/Announcements Page
-**Goal:** Replace Google Calendar with a dedicated page showing all events and announcements chronologically
-
-**Tasks:**
-- [ ] Create new layout or modify existing list layout to show both events and announcements
-- [ ] Sort all items chronologically (newest first)
-- [ ] Keep visual distinction between events (gold icon) and announcements (navy icon)
-- [ ] Add "View All Updates →" link from homepage feed to this page
-
-**URL Options:** (Choose one)
-- `/updates/` - Neutral, covers both types
-- `/news/` - Traditional news/announcements feel  
-- `/events/` - Expand existing events page to include announcements
-
-### 3. Update Navigation Menu
-**Changes needed in `hugo.yaml`:**
-- [ ] Rename "Calendar" menu item to "Events" (or chosen name from above)
-- [ ] Change URL from `/calendar/` to new combined page URL
-- [ ] Remove or hide Google Calendar page from navigation
-
-### 4. Remove Google Calendar Section
-**From homepage (`home.html`):**
-- [ ] Remove Google Calendar iframe section (currently shows "Upcoming Events")
-- [ ] Optional: Keep calendar page but remove from menu, or delete entirely
-
-### 5. Update Feed Link
-**In `community-feed.html`:**
-- [ ] Change "View Forum →" link to "View All Updates →"
-- [ ] Link to new combined events/announcements page
-
----
-
-## Questions to Resolve
-
-1. **Page Name:** What should the combined events/announcements page be called?
-   - Options: "Events", "News", "Updates", or other?
-
-2. **Google Calendar:** 
-   - Remove completely, or keep as hidden page?
-   - If kept, should it be linked from anywhere?
-
-3. **Content Display:**
-   - Should events and announcements be visually distinct (current: different icons)?
-   - Should they be mixed chronologically or grouped by type?
-
-**Decision needed before implementation**
+The former Google Calendar replacement checklist was completed and superseded by the native D1 calendar described in `CALENDAR_SYSTEM.md`. The calendar remains outside the main navigation while production initialization and cross-device acceptance are completed.
 
 ---
 

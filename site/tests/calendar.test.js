@@ -5,18 +5,30 @@ const test = require("node:test");
 const vm = require("node:vm");
 const { JSDOM } = require("jsdom");
 
+const TEST_NOW = "2026-05-20T12:00:00.000-05:00";
+const RealDate = Date;
+class FixedDate extends RealDate {
+  constructor(...args) {
+    super(...(args.length ? args : [TEST_NOW]));
+  }
+  static now() {
+    return new RealDate(TEST_NOW).getTime();
+  }
+}
+
 function loadApi() {
   const storage = new Map();
   const context = {
     URL,
     URLSearchParams,
-    Date,
+    Date: FixedDate,
     Math,
     console,
     window: {
       location: {
         href: "http://127.0.0.1:1313/ec-buddhist-sangha/admin/calendar/",
-        origin: "http://127.0.0.1:1313"
+        origin: "http://127.0.0.1:1313",
+        hostname: "127.0.0.1"
       },
       crypto: {
         randomUUID: () => "test-" + Math.random().toString(16).slice(2)
@@ -28,7 +40,7 @@ function loadApi() {
     },
     document: {
       addEventListener: () => {},
-      getElementById: () => null
+      getElementById: (id) => id === "calendar-app" ? { getAttribute: (name) => name === "data-calendar-local-dev" ? "true" : null } : null
     },
     navigator: {}
   };
@@ -52,6 +64,7 @@ function loadDomApi(options = {}) {
     }
   );
   dom.window.console = console;
+  dom.window.Date = FixedDate;
   dom.window.scrollTo = () => {};
   const scriptPath = path.join(__dirname, "..", "static", "js", "calendar.js");
   dom.window.eval(fs.readFileSync(scriptPath, "utf8"));
@@ -155,14 +168,14 @@ test("calendar admin ignores guessed cms query outside local development", () =>
   assert.equal(api.hasCalendarAdminAccess(), false);
 });
 
-test("calendar admin accepts Decap session handoff outside local development", () => {
+test("calendar admin rejects obsolete Decap session handoff outside local development", () => {
   const api = loadDomApi({
     localDev: false,
     url: "https://eauclairesangha.org/admin/calendar/"
   });
   api.__window.sessionStorage.setItem("ecbs-calendar-admin-access", String(Date.now()));
 
-  assert.equal(api.hasCalendarAdminAccess(), true);
+  assert.equal(api.hasCalendarAdminAccess(), false);
 });
 
 test("public regular meeting attend link opens details and auto-attends", () => {
@@ -408,7 +421,7 @@ test("admin push-forward confirmation moves a recurring group when people are si
   const movedSlot = store.slots.find((slot) => slot.id === "slot-a");
 
   assert.equal(movedSlot.date, "2026-06-09");
-  assert.ok(movedSlot.notifications.length > 0);
+  assert.equal(movedSlot.notifications.length, 0);
   assert.match(api.__root.textContent, /Schedule moved forward one week/);
 });
 
@@ -681,27 +694,19 @@ test("calendar settings store signup window months", () => {
   assert.equal(store.settings.signupWindowMonths, 3);
 });
 
-test("default calendar store seeds one weekly Sangha meeting recurrence with the next three talks", () => {
+test("default local calendar starts clean with the weekly Sangha meeting recurrence", () => {
   const api = loadApi();
   const store = api.defaultCalendarStore();
 
-  assert.equal(store.slots.length, 3);
+  assert.equal(store.slots.length, 0);
   assert.equal(store.history.length, 0);
   assert.equal(store.recurrences.length, 1);
   assert.equal(store.recurrences[0].itemType, "talk");
   assert.equal(store.recurrences[0].frequency, "weekly");
-  assert.equal(store.recurrences[0].startDate, "2026-05-26");
+  assert.equal(store.recurrences[0].startDate, "2026-07-21");
   assert.equal(store.recurrences[0].startTime, "19:00");
   assert.equal(store.recurrences[0].endTime, "20:30");
   assert.equal(store.settings.signupWindowMonths, 1);
-  assert.deepEqual(
-    Array.from(store.slots.map((slot) => ({ date: slot.date, title: slot.title, speaker: slot.speaker && slot.speaker.name }))),
-    [
-      { date: "2026-05-26", title: "Third Hindrance: Sloth & Torpor", speaker: "Chris" },
-      { date: "2026-06-02", title: "Fourth Hindrance: Restlessness & Worry", speaker: null },
-      { date: "2026-06-09", title: "Fifth Hindrance: Skeptical Doubt", speaker: "Mary" }
-    ]
-  );
 });
 
 test("calendar supports physical only zoom only and hybrid items", () => {
@@ -1128,8 +1133,8 @@ test("speaker and backup signup remove duplicate direct attendance", () => {
 
 test("calendar history keeps only the last 30 days", () => {
   const api = loadApi();
-  const recent = new Date();
-  const old = new Date();
+  const recent = new FixedDate();
+  const old = new FixedDate();
   old.setDate(old.getDate() - 31);
 
   const store = api.normalizeStore({
@@ -1538,13 +1543,8 @@ test("admin utility sections are collapsed by default", () => {
   const templatesSection = api.__root.querySelector('details[data-admin-section="email-templates"]');
   const historySection = api.__root.querySelector('details[data-admin-section="calendar-history"]');
   const allNodes = Array.from(api.__root.querySelectorAll("*"));
-  assert.ok(emailSection);
-  assert.equal(emailSection.open, false);
-  assert.match(emailSection.className, /border-gray-200/);
-  assert.doesNotMatch(emailSection.className, /border-blue-100/);
-  assert.match(emailSection.textContent, /1 queued/);
+  assert.equal(emailSection, null);
   assert.ok(historySection);
-  assert.ok(allNodes.indexOf(emailSection) < allNodes.indexOf(historySection));
   assert.ok(templatesSection);
   assert.equal(templatesSection.open, false);
   assert.match(templatesSection.textContent, /Talk Signup Confirmation/);
@@ -1846,25 +1846,55 @@ test("diffMemberSignups detects add, remove, role change, and detail edits", () 
   assert.equal(byId.other, undefined); // never reports another member's change
 });
 
-test("admin saveStore pushes the full store via CalendarApi.putStore", () => {
-  const api = loadDomApi();
+test("admin saveStore pushes the full store via CalendarApi.putStore", async () => {
+  const api = loadDomApi({ localDev: false, url: "https://eauclairesangha.org/admin/calendar/" });
   const calls = [];
+  let finishWrite;
+  const delayedWrite = new Promise((resolve) => { finishWrite = resolve; });
   api.__window.ECBS = {
     Auth: { getUser: () => ({ email: "a@example.com", role: "admin" }), getToken: () => "t" },
     CalendarApi: {
       enabled: () => true,
-      putStore: (store, revision) => { calls.push({ store, revision }); return Promise.resolve({ revision: revision + 1 }); },
+      fetchStore: () => Promise.resolve({ store: JSON.parse(api.__window.localStorage.getItem("ecbs-calendar-server-cache-v1:admin:a@example.com")), revision: 1 }),
+      putStore: (store, revision) => { calls.push({ store, revision }); return delayedWrite; },
       postSignup: () => Promise.resolve({}),
       deleteSignup: () => Promise.resolve({})
     }
   };
-  api.__setStore({ slots: [{ id: "s1", date: "2026-06-09", title: "T", speaker: null, backups: [], attendees: [] }] });
+  api.__window.localStorage.setItem("ecbs-calendar-server-cache-v1:admin:a@example.com", JSON.stringify({
+    revision: 1,
+    slots: [{ id: "s1", date: "2026-06-09", title: "T", speaker: null, backups: [], attendees: [] }],
+    recurrences: [],
+    history: [],
+    settings: { signupWindowMonths: 1 }
+  }));
+  await new Promise((resolve) => setImmediate(resolve));
 
   api.renderAdmin(api.__root, { year: 2026, month: 5, selectedDate: "2026-06-09", selectedSlotId: "s1" });
   api.__root.querySelector("[data-cancel-meeting]").click();
   api.__root.querySelector("[data-confirm-admin-action]").click();
+  await new Promise((resolve) => setImmediate(resolve));
 
   assert.ok(calls.length >= 1, "expected putStore to be called on admin save");
+  assert.match(api.__root.textContent, /Saving calendar changes/);
+  finishWrite({ store: calls[0].store, revision: calls[0].revision + 1 });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.doesNotMatch(api.__root.textContent, /Saving calendar changes/);
+});
+
+test("choosing a new item type does not persist a draft before basics are saved", () => {
+  const api = loadDomApi();
+  api.__setStore({ slots: [], recurrences: [], history: [], settings: { signupWindowMonths: 1 } });
+
+  api.renderAdmin(api.__root, { year: 2026, month: 6, selectedDate: "2026-07-22", itemTypePrompt: true });
+  api.__root.querySelector('[data-select-item-type="talk"]').click();
+
+  assert.ok(api.__root.querySelector("#calendar-basics-form"));
+  assert.equal(api.__getStore().slots.length, 0);
+
+  api.__root.querySelector("[data-close-admin-modal]").click();
+  assert.equal(api.__getStore().slots.length, 0);
+  assert.equal(api.__root.querySelector("[data-calendar-modal]"), null);
 });
 
 test("calendar identity prefers ECBS.Auth when present", () => {
@@ -1876,4 +1906,81 @@ test("calendar identity prefers ECBS.Auth when present", () => {
 
   api.__window.ECBS.Auth.getUser = () => ({ email: "mem@eauclairesangha.org", name: "Mem", role: "member" });
   assert.equal(api.hasCalendarAdminAccess(), false);
+});
+
+test("recurring occurrence IDs are deterministic and rendering does not persist them", () => {
+  const api = loadApi();
+  const store = api.normalizeStore({
+    slots: [],
+    recurrences: [{ id: "weekly-main", frequency: "weekly", interval: 1, startDate: "2026-07-21", itemType: "talk", active: true }],
+    history: [],
+    settings: { signupWindowMonths: 1 }
+  });
+
+  api.ensureRecurringSlots(store, 2026, 6);
+  const firstIds = Array.from(store.slots.map((slot) => slot.id));
+  api.ensureRecurringSlots(store, 2026, 6);
+
+  assert.ok(firstIds.includes("occ-weekly-main-2026-07-21"));
+  assert.deepEqual(Array.from(store.slots.map((slot) => slot.id)), firstIds);
+  assert.equal(api.__storage.size, 0);
+});
+
+test("production ignores mock query and browser identity", () => {
+  const api = loadDomApi({
+    localDev: false,
+    url: "https://eauclairesangha.org/calendar-item/?as=Imposter&email=imposter@example.com"
+  });
+  api.__window.localStorage.setItem("ecbs-calendar-current-user-name", "Imposter");
+  api.__window.localStorage.setItem("ecbs-calendar-current-user-email", "imposter@example.com");
+  const slot = api.normalizeSlot({ id: "future", itemType: "talk", date: "2026-06-02", speaker: null, backups: [] });
+
+  assert.match(api.renderPrimaryPanel(slot, { signupWindowMonths: 1 }), /Sign In Required/);
+  assert.doesNotMatch(api.renderPrimaryPanel(slot, { signupWindowMonths: 1 }), /id="talk-primary-form"/);
+});
+
+test("production fetch failure uses the identity-scoped cache read-only", async () => {
+  const api = loadDomApi({ localDev: false, url: "https://eauclairesangha.org/calendar/?month=2026-06" });
+  api.__root.setAttribute("data-calendar-view", "calendar");
+  api.__window.localStorage.setItem("ecbs-calendar-server-cache-v1:public", JSON.stringify({
+    revision: 4,
+    slots: [{ id: "cached", itemType: "meeting", date: "2026-06-02", title: "Cached gathering", attendees: [] }],
+    recurrences: [], history: [], settings: { signupWindowMonths: 1 }
+  }));
+  api.__window.ECBS = {
+    Auth: { getUser: () => null },
+    CalendarApi: { enabled: () => true, fetchStore: () => Promise.reject(new Error("offline")) }
+  };
+
+  await api.hydrateFromServer(api.__root, "calendar");
+
+  assert.match(api.__root.textContent, /temporarily unavailable/i);
+  assert.match(api.__root.textContent, /Cached gathering/);
+});
+
+test("revision conflict adopts the authoritative server state", async () => {
+  const api = loadDomApi({ localDev: false, url: "https://eauclairesangha.org/admin/calendar/" });
+  const initial = {
+    revision: 2,
+    slots: [{ id: "s1", itemType: "talk", date: "2026-06-02", title: "Initial", speaker: null, backups: [], attendees: [] }],
+    recurrences: [], history: [], settings: { signupWindowMonths: 1 }
+  };
+  const authoritative = JSON.parse(JSON.stringify(initial));
+  authoritative.revision = 3;
+  authoritative.slots[0].title = "Saved elsewhere";
+  api.__window.ECBS = {
+    Auth: { getUser: () => ({ email: "admin@example.com", role: "admin", name: "Admin" }) },
+    CalendarApi: {
+      enabled: () => true,
+      putStore: () => Promise.reject({ conflict: { store: authoritative, revision: 3 } })
+    }
+  };
+  api.__window.localStorage.setItem("ecbs-calendar-server-cache-v1:admin:admin@example.com", JSON.stringify(initial));
+  const edited = api.loadStore();
+  edited.slots[0].title = "My stale edit";
+
+  await api.saveStore(edited);
+
+  assert.equal(api.loadStore().revision, 3);
+  assert.equal(api.loadStore().slots[0].title, "Saved elsewhere");
 });

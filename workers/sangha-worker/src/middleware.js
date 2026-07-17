@@ -6,7 +6,7 @@ import { resolveRole } from "./members.js";
 export function corsHeaders(env) {
   return {
     "Access-Control-Allow-Origin": env.CORS_ORIGIN || "*",
-    "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Authorization,Content-Type",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
@@ -20,7 +20,7 @@ export function handlePreflight(request, env) {
 export function jsonResponse(env, data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json", ...corsHeaders(env) }
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...corsHeaders(env) }
   });
 }
 

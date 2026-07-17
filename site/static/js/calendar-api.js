@@ -32,9 +32,19 @@
     return (options && options.fetch) || window.fetch.bind(window);
   }
 
+  async function responseError(res, fallback) {
+    var payload = null;
+    try { payload = await res.json(); } catch (error) {}
+    var err = new Error(payload && payload.error ? payload.error : fallback + ": " + res.status);
+    err.status = res.status;
+    err.code = payload && payload.error ? payload.error : "";
+    err.payload = payload;
+    return err;
+  }
+
   async function fetchStore(options) {
     var res = await fetchImplFrom(options)(apiBase() + "/api/calendar", { headers: headers(false) });
-    if (!res.ok) throw new Error("fetch calendar failed: " + res.status);
+    if (!res.ok) throw await responseError(res, "fetch calendar failed");
     return res.json();
   }
 
@@ -50,7 +60,7 @@
       err.conflict = conflict;
       throw err;
     }
-    if (!res.ok) throw new Error("put calendar failed: " + res.status);
+    if (!res.ok) throw await responseError(res, "put calendar failed");
     return res.json();
   }
 
@@ -60,7 +70,7 @@
       headers: headers(true),
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error("signup failed: " + res.status);
+    if (!res.ok) throw await responseError(res, "signup failed");
     return res.json();
   }
 
@@ -70,7 +80,7 @@
       headers: headers(true),
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error("cancel signup failed: " + res.status);
+    if (!res.ok) throw await responseError(res, "cancel signup failed");
     return res.json();
   }
 

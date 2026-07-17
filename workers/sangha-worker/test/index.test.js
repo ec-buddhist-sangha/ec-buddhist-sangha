@@ -32,8 +32,12 @@ describe("router", () => {
   });
 
   it("OPTIONS preflight returns 204", async () => {
-    const res = await call("/api/health", { method: "OPTIONS" });
+    const res = await call("/api/calendar", {
+      method: "OPTIONS",
+      headers: { Origin: "https://eauclairesangha.org", "Access-Control-Request-Method": "PUT" }
+    });
     expect(res.status).toBe(204);
+    expect(res.headers.get("Access-Control-Allow-Methods")).toContain("PUT");
   });
 
   it("unknown route returns 404 JSON", async () => {
@@ -70,7 +74,8 @@ describe("router", () => {
     await seedRole("a@eauclairesangha.org", "admin");
     await seedRole("m@eauclairesangha.org", "member");
     const adminToken = await signJwt({ sub: "a@eauclairesangha.org", name: "A", role: "admin" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
-    const seed = { revision: 0, settings: {}, recurrences: [], history: [], slots: [{ id: "s1", title: "T", speaker: null, backups: [], attendees: [] }] };
+    const date = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+    const seed = { revision: 0, settings: { signupWindowMonths: 1 }, recurrences: [], history: [], slots: [{ id: "s1", itemType: "talk", date, endTime: "23:59", title: "T", speaker: null, backups: [], attendees: [] }] };
     await call("/api/calendar", { method: "PUT", headers: { Authorization: "Bearer " + adminToken }, body: JSON.stringify({ store: seed, revision: 0 }) });
 
     const memberToken = await signJwt({ sub: "m@eauclairesangha.org", name: "M", role: "member" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });

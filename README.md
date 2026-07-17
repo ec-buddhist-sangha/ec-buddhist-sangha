@@ -35,7 +35,7 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - **Decap CMS** for Git-based editing of Markdown content at `/admin`
 - **Cloudflare Pages** for build + deploy + CDN
 - **GitHub** as the content/source of truth
-- **Cloudflare Worker** (via Wrangler) for Decap↔GitHub OAuth proxy
+- **Cloudflare Worker** (via Wrangler) for member auth, shared calendar, comments, and Decap GitHub OAuth
 - **Native comments** stored in Cloudflare D1 via the Worker, gated by member roles (Topics + Pages only)
 
 ---
@@ -47,9 +47,10 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 | Static Site Generator | Hugo |
 | CMS | Decap CMS (GitHub backend) |
 | Hosting | Cloudflare Pages (free) |
-| Auth | GitHub OAuth via Cloudflare Worker |
+| Member Auth | Google SSO via Cloudflare Worker |
+| CMS Auth | GitHub OAuth via Cloudflare Worker |
 | Comments | Native (Cloudflare D1 via Worker) |
-| Calendar | Google Calendar embed |
+| Calendar | Native Hugo UI + Cloudflare D1 |
 | Styling | Tailwind CSS (compiled at build time) |
 
 ---
@@ -103,9 +104,9 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - Role-gated (members post; authors/admins edit/delete)
 - Rendered on Topics and Pages only (no self-hosted server)
 
-### Phase 6: Google Calendar
-- Create calendar partial
-- Embed on homepage and dedicated calendar page
+### Phase 6: Native calendar
+- Shared D1 calendar with recurring meetings, volunteering, backups, and attendance
+- Role-aware public/member/admin API projections
 
 ### Phase 7: Cloudflare Pages deployment
 - Connect GitHub repo
@@ -154,6 +155,8 @@ cd workers/sangha-worker
 npm install
 npm test          # vitest suite
 npx wrangler dev  # local worker
+npx wrangler deploy
+npx wrangler d1 migrations apply sangha-db --remote
 ```
 
 ---

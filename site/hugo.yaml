@@ -1,5 +1,5 @@
 baseURL: https://eauclairesangha.org/
-languageCode: en-us
+locale: en-US
 title: Eau Claire Buddhist Sangha
 
 build:

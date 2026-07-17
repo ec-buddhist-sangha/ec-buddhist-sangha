@@ -2,6 +2,7 @@
   "use strict";
 
   var STORAGE_KEY = "ecbs-calendar-v1";
+  var SERVER_CACHE_KEY = "ecbs-calendar-server-cache-v1";
   var DEMO_SEEDED_KEY = "ecbs-calendar-demo-seeded-v1";
   var WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var FULL_WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -23,9 +24,7 @@
   var CALENDAR_DESCRIPTION_LIMIT = 92;
   var MOBILE_CALENDAR_PAGE_SIZE = 5;
   var MOBILE_CALENDAR_MONTHS_AHEAD = 12;
-  var ADMIN_ACCESS_KEY = "ecbs-calendar-admin-access";
   var serverRevision = 0;
-  var ADMIN_ACCESS_MAX_AGE_MS = 8 * 60 * 60 * 1000;
   var REMINDER_OPTIONS = [
     { id: "one-week", label: "One week before", daysBefore: 7 },
     { id: "one-day", label: "One day before", daysBefore: 1 },
@@ -34,6 +33,11 @@
   var appBaseUrl = null;
   var localDevelopmentPage = false;
   var modalScrollLock = null;
+  var serverAvailable = null;
+  var serverStore = null;
+  var serverWriteQueue = Promise.resolve();
+  var calendarServiceNotice = "";
+  var pendingDraftSlot = null;
 
   function pad(value) {
     return String(value).padStart(2, "0");
@@ -150,7 +154,7 @@
 
   function defaultCalendarStore() {
     return normalizeStore({
-      slots: defaultSeedTalkSlots(),
+      slots: [],
       recurrences: [defaultTuesdayRecurrence()],
       history: [],
       settings: defaultCalendarSettings()
@@ -189,6 +193,14 @@
   }
 
   function loadStore() {
+    if (isServerBackedProduction()) {
+      if (serverStore) return normalizeStore(JSON.parse(JSON.stringify(serverStore)));
+      try {
+        var cached = window.localStorage && window.localStorage.getItem(serverCacheKey());
+        if (cached) return normalizeStore(JSON.parse(cached));
+      } catch (error) {}
+      return normalizeStore({ slots: [], recurrences: [], history: [], settings: defaultCalendarSettings() });
+    }
     try {
       var raw = window.localStorage && window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return defaultCalendarStore();
@@ -200,59 +212,120 @@
   }
 
   function saveStore(store) {
-    if (!window.localStorage) return;
-    var previous = loadStore(); // pre-write snapshot, used for the member delta
+    var previous = loadStore();
     var normalized = normalizeStore(store);
     normalized.revision = Number(store.revision || 0) + 1;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-    syncStoreToServer(previous, normalized);
+    if (!isServerBackedProduction()) {
+      if (window.localStorage) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      return Promise.resolve({ store: normalized, revision: normalized.revision });
+    }
+    if (serverAvailable === false) {
+      handleServerWriteError(new Error("calendar_unavailable"));
+      return Promise.resolve({ error: "calendar_unavailable" });
+    }
+    serverStore = normalized;
+    calendarServiceNotice = "Saving calendar changes...";
+    serverWriteQueue = serverWriteQueue.then(function () {
+      return syncStoreToServer(previous, normalized);
+    }).catch(function (error) {
+      handleServerWriteError(error);
+      return { error: error && error.message ? error.message : "calendar_sync_failed" };
+    });
+    return serverWriteQueue;
+  }
+
+  function saveStoreAndThen(store, root, onSuccess) {
+    var write = saveStore(store);
+    if (!isServerBackedProduction()) {
+      if (onSuccess) onSuccess();
+      return write;
+    }
+    if (root && !root.querySelector("[data-calendar-saving]")) {
+      root.insertAdjacentHTML("afterbegin", '<div data-calendar-saving role="status" class="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-sangha-navy">Saving calendar changes...</div>');
+    }
+    return write.then(function (result) {
+      if (result && result.error) return result;
+      if (onSuccess) onSuccess(result);
+      return result;
+    });
   }
 
   function syncStoreToServer(previousStore, nextStore) {
-    if (!window.ECBS || !window.ECBS.CalendarApi || !window.ECBS.CalendarApi.enabled()) return;
     var api = window.ECBS.CalendarApi;
     var auth = window.ECBS.Auth;
     var user = auth && auth.getUser ? auth.getUser() : null;
-    if (!user) return; // anonymous: cannot persist server-side (read-only)
+    if (!user) return Promise.resolve({ store: nextStore, revision: serverRevision });
 
     if (user.role === "admin") {
-      api.putStore(nextStore, serverRevision).then(function (res) {
-        serverRevision = Number(res.revision || serverRevision);
-      }).catch(function (error) {
-        if (error && error.conflict) {
-          serverRevision = Number(error.conflict.revision || serverRevision);
-          if (error.conflict.store && window.localStorage) {
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeStore(error.conflict.store)));
-          }
-          var root = document.getElementById("calendar-app");
-          if (root) renderForView(root, root.getAttribute("data-calendar-view"));
-        } else if (window.console && window.console.warn) {
-          window.console.warn("Admin calendar sync failed; kept local copy.", error);
-        }
+      return api.putStore(nextStore, serverRevision).then(function (res) {
+        adoptServerResponse(res);
+        return res;
       });
-      return;
     }
 
     var deltas = diffMemberSignups(previousStore, nextStore, user.email);
-    deltas.forEach(function (delta) {
-      var request = delta.action === "remove"
-        ? api.deleteSignup({ itemId: delta.itemId })
-        : api.postSignup({ itemId: delta.itemId, role: delta.role, link: delta.link, notes: delta.notes, reminders: delta.reminders });
-      request.then(function (res) {
-        if (res && res.revision) serverRevision = Number(res.revision);
-      }).catch(function (error) {
-        if (window.console && window.console.warn) {
-          window.console.warn("Signup sync failed; kept local copy.", error);
-        }
+    return deltas.reduce(function (promise, delta) {
+      return promise.then(function () {
+        var request = delta.action === "remove"
+          ? api.deleteSignup({ itemId: delta.itemId })
+          : api.postSignup({ itemId: delta.itemId, role: delta.role, link: delta.link, notes: delta.notes, reminders: delta.reminders });
+        return request.then(function (res) {
+          adoptServerResponse(res);
+          return res;
+        });
       });
-    });
+    }, Promise.resolve({ store: nextStore, revision: serverRevision }));
+  }
+
+  function isServerBackedProduction() {
+    return Boolean(!isLocalDevelopmentMode() && window.ECBS && window.ECBS.CalendarApi && window.ECBS.CalendarApi.enabled());
+  }
+
+  function cacheServerStore(store) {
+    if (!store || !window.localStorage) return;
+    window.localStorage.setItem(serverCacheKey(), JSON.stringify(normalizeStore(store)));
+  }
+
+  function serverCacheKey() {
+    var user = authUser();
+    var scope = user && user.email ? String(user.role || "member") + ":" + String(user.email).toLowerCase() : "public";
+    return SERVER_CACHE_KEY + ":" + scope;
+  }
+
+  function adoptServerResponse(response) {
+    if (!response || !response.store) return;
+    serverRevision = Number(response.revision || response.store.revision || serverRevision);
+    serverStore = normalizeStore(response.store);
+    serverStore.revision = serverRevision;
+    serverAvailable = true;
+    calendarServiceNotice = "";
+    cacheServerStore(serverStore);
+    rerenderCalendarRoot();
+  }
+
+  function handleServerWriteError(error) {
+    if (error && error.conflict) {
+      adoptServerResponse({ store: error.conflict.store, revision: error.conflict.revision });
+      calendarServiceNotice = "The calendar changed in another session. The latest shared version has been loaded.";
+    } else {
+      serverAvailable = false;
+      serverStore = null;
+      calendarServiceNotice = "The shared calendar is temporarily unavailable. The last saved version is read-only.";
+      rerenderCalendarRoot();
+    }
+    if (window.console && window.console.warn) window.console.warn("Calendar synchronization failed.", error);
+  }
+
+  function rerenderCalendarRoot() {
+    var root = typeof document !== "undefined" ? document.getElementById("calendar-app") : null;
+    if (root) renderForView(root, root.getAttribute("data-calendar-view"));
   }
 
   function normalizeStore(store) {
     store = store || {};
     var settings = normalizeCalendarSettings(store.settings);
     var recurrences = Array.isArray(store.recurrences) ? store.recurrences.map(normalizeRecurrence) : [];
-    if (!recurrences.length) recurrences.push(defaultTuesdayRecurrence());
+    if (!recurrences.length && !isServerBackedProduction()) recurrences.push(defaultTuesdayRecurrence());
     return applyDefaultLocationSettings({
       revision: Number(store.revision || 0),
       slots: Array.isArray(store.slots) ? store.slots.map(normalizeSlot) : [],
@@ -288,6 +361,7 @@
       speaker: slot.speaker && slot.speaker.name ? normalizeVolunteer(slot.speaker) : null,
       backups: Array.isArray(slot.backups) ? slot.backups.map(normalizeVolunteer) : [],
       attendees: Array.isArray(slot.attendees) ? slot.attendees.map(normalizeVolunteer) : [],
+      attendanceCount: hasOwnValue(slot, "attendanceCount") && slot.attendanceCount !== null && Number.isFinite(Number(slot.attendanceCount)) ? Number(slot.attendanceCount) : null,
       notifications: Array.isArray(slot.notifications) ? slot.notifications.map(normalizeNotification) : [],
       reminders: Array.isArray(slot.reminders) ? slot.reminders.map(normalizeReminder) : [],
       revision: Number(slot.revision || 0),
@@ -303,6 +377,7 @@
       link: volunteer.link || "",
       notes: volunteer.notes || "",
       reminders: uniqueStrings(volunteer.reminders),
+      fairnessRank: Number.isFinite(Number(volunteer.fairnessRank)) ? Number(volunteer.fairnessRank) : null,
       signedUpAt: volunteer.signedUpAt || new Date().toISOString()
     };
   }
@@ -314,7 +389,7 @@
       itemType: "talk",
       frequency: "weekly",
       interval: 1,
-      startDate: "2026-05-26",
+      startDate: "2026-07-21",
       startTime: DEFAULT_START_TIME,
       endTime: DEFAULT_END_TIME,
       title: DEFAULT_TITLE,
@@ -504,6 +579,7 @@
       return;
     }
     store = defaultCalendarStore();
+    store.slots = defaultSeedTalkSlots().map(normalizeSlot);
     store.slots.sort(byDateTime);
     saveStore(store);
     try {
@@ -572,7 +648,6 @@
       });
     }
     store.slots.sort(byDateTime);
-    saveStore(store);
     return store;
   }
 
@@ -604,7 +679,7 @@
 
   function slotFromRecurrence(rule, dateValue) {
     return normalizeSlot({
-      id: uid(),
+      id: deterministicOccurrenceId(rule.id, dateValue),
       date: dateValue,
       startTime: rule.startTime,
       endTime: rule.endTime,
@@ -624,6 +699,10 @@
       attendees: [],
       notifications: []
     });
+  }
+
+  function deterministicOccurrenceId(recurrenceId, dateValue) {
+    return "occ-" + String(recurrenceId || "").replace(/[^a-zA-Z0-9_-]/g, "-") + "-" + dateValue;
   }
 
   function updateOccurrenceOverrides(slot, recurrence) {
@@ -756,7 +835,7 @@
     try {
       var user = authUser();
       if (user) return user.name || "";
-      return (window.localStorage && window.localStorage.getItem("ecbs-calendar-current-user-name")) || "";
+      return isLocalDevelopmentMode() ? ((window.localStorage && window.localStorage.getItem("ecbs-calendar-current-user-name")) || "") : "";
     } catch (error) {
       return "";
     }
@@ -775,10 +854,11 @@
     try {
       var user = authUser();
       if (user && user.email) return user.email;
+      if (!isLocalDevelopmentMode()) return "";
       var userName = currentUserName();
       return (window.localStorage && window.localStorage.getItem("ecbs-calendar-current-user-email")) || (userName ? emailFromName(userName) : "");
     } catch (error) {
-      return currentUserName() ? emailFromName(currentUserName()) : "";
+      return isLocalDevelopmentMode() && currentUserName() ? emailFromName(currentUserName()) : "";
     }
   }
 
@@ -858,6 +938,9 @@
   function orderedBackups(slot, store) {
     var history = speakerHistory(store);
     return slot.backups.slice().sort(function (a, b) {
+      if (a.fairnessRank !== null && a.fairnessRank !== undefined && b.fairnessRank !== null && b.fairnessRank !== undefined) {
+        return Number(a.fairnessRank) - Number(b.fairnessRank);
+      }
       var aHistory = history[personKey(a.name)] || { count: 0, lastTalkDate: "" };
       var bHistory = history[personKey(b.name)] || { count: 0, lastTalkDate: "" };
       if (aHistory.lastTalkDate !== bHistory.lastTalkDate) return aHistory.lastTalkDate.localeCompare(bHistory.lastTalkDate);
@@ -955,7 +1038,8 @@
   }
 
   function attendanceCount(slot) {
-    return signedUpPeople(slot).length;
+    var projected = Number(slot && slot.attendanceCount);
+    return slot && slot.attendanceCount !== null && slot.attendanceCount !== undefined && Number.isFinite(projected) ? projected : signedUpPeople(slot).length;
   }
 
   function attendanceCountLabel(slot) {
@@ -1417,34 +1501,50 @@
   }
 
   function renderShell(root, inner) {
-    root.innerHTML = inner;
+    var notice = calendarServiceNotice
+      ? '<div role="status" class="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-sangha-navy">' + escapeHtml(calendarServiceNotice) + '</div>'
+      : '';
+    root.innerHTML = notice + inner;
+    if (isCalendarReadOnly()) {
+      root.querySelectorAll("form input, form textarea, form select, form button, [data-admin-slot-id], [data-calendar-day-add]").forEach(function (control) {
+        control.disabled = true;
+        control.setAttribute("aria-disabled", "true");
+      });
+    }
     syncModalScrollLock(root);
+  }
+
+  function isCalendarReadOnly() {
+    return isServerBackedProduction() && serverAvailable === false;
   }
 
   function hasCalendarAdminAccess() {
     if (isLocalDevelopmentMode()) return true;
     var user = authUser();
-    if (window.ECBS && window.ECBS.Auth) {
-      return Boolean(user && user.role === "admin");
-    }
-    if (typeof window === "undefined" || !window.sessionStorage) return false;
-    try {
-      var raw = window.sessionStorage.getItem(ADMIN_ACCESS_KEY);
-      var timestamp = Number(raw || 0);
-      return Boolean(timestamp && Date.now() - timestamp <= ADMIN_ACCESS_MAX_AGE_MS);
-    } catch (error) {
-      return false;
-    }
+    return Boolean(user && user.role === "admin");
   }
 
   function renderAdminAccessGate(root) {
+    var user = authUser();
+    var title = user ? "Administrator Access Required" : "Sign In Required";
+    var message = !user
+      ? "Sign in with Google to access Calendar Admin."
+      : user.role === "reader"
+        ? "Your account is signed in, but member access is still pending approval."
+        : "Your account can use member calendar features but does not have the administrator role.";
+    var button = !user
+      ? '<button type="button" data-calendar-sign-in class="mt-5 inline-flex rounded-full bg-sangha-navy px-5 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-blue-900">Sign In With Google</button>'
+      : '';
     renderShell(root,
       '<div class="rounded-2xl border border-sangha-gold/40 bg-white p-6 shadow-sm">' +
-        '<h2 class="font-serif text-2xl font-bold text-sangha-navy">Open Calendar Admin Through The CMS</h2>' +
-        '<p class="mt-3 text-sm leading-relaxed text-gray-600">Calendar Admin is linked from the Decap CMS menu. Open the CMS first, then choose Calendar Admin from that menu.</p>' +
-        '<p class="mt-3 text-xs leading-relaxed text-gray-500">This is a local/static preview gate. Final access control should be enforced with Cloudflare Access or a server-side authorization check.</p>' +
-        '<a href="' + appUrl("admin/") + '" class="mt-5 inline-flex rounded-full bg-sangha-navy px-5 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-blue-900">Open CMS</a>' +
+        '<h2 class="font-serif text-2xl font-bold text-sangha-navy">' + title + '</h2>' +
+        '<p class="mt-3 text-sm leading-relaxed text-gray-600">' + message + '</p>' +
+        button +
       '</div>');
+    var signIn = root.querySelector("[data-calendar-sign-in]");
+    if (signIn) signIn.addEventListener("click", function () {
+      if (window.ECBS && window.ECBS.Auth && window.ECBS.Auth.login) window.ECBS.Auth.login();
+    });
   }
 
   function renderMonthControls(year, month, viewTitle, description) {
@@ -1747,7 +1847,7 @@
     var selectedSlotId = state && state.selectedSlotId ? state.selectedSlotId : "";
     var store = ensureCalendarRenderSlots(loadStore(), year, month);
     var selectedSlot = selectedSlotId
-      ? findSlotById(store, selectedSlotId)
+      ? (findSlotById(store, selectedSlotId) || (pendingDraftSlot && pendingDraftSlot.id === selectedSlotId ? pendingDraftSlot : null))
       : (selectedDate && !itemTypePrompt ? getOrCreateSlotForDate(store, selectedDate) : null);
 
     renderShell(root,
@@ -1762,7 +1862,6 @@
       renderAdminEmailCopyBlock(store) +
       renderCalendarSettingsBlock(store) +
       renderRecurringMeetingsBlock(store, editRecurrenceId) +
-      renderAdminQueuedEmailBlock(store) +
       renderCalendarHistory(store) +
       '</div>' +
       (selectedSlot && !itemTypePrompt && !createBasicsPrompt ? renderAdminPanel(selectedSlot, Boolean(selectedSlot.isDraft), store.settings) : '') +
@@ -1796,6 +1895,10 @@
       button.addEventListener("click", function () {
         var nextType = button.getAttribute("data-select-item-type");
         var editableSlot = selectedSlot || createSlotForDate(store, selectedDate);
+        if (!selectedSlot) {
+          store.slots = store.slots.filter(function (slot) { return slot.id !== editableSlot.id; });
+          pendingDraftSlot = editableSlot;
+        }
         editableSlot.itemType = nextType === "meeting" ? "meeting" : "talk";
         if (isMeetingSlot(editableSlot) && editableSlot.title === DEFAULT_TITLE) {
           editableSlot.title = "Regular meeting";
@@ -1806,7 +1909,6 @@
           editableSlot.description = DEFAULT_DESCRIPTION;
         }
         touchSlot(editableSlot);
-        saveStore(store);
         renderAdmin(root, { year: year, month: month, selectedDate: editableSlot.date, selectedSlotId: editableSlot.id, createBasicsPrompt: true });
       });
     });
@@ -1816,7 +1918,8 @@
       basicsForm.addEventListener("submit", function (event) {
         event.preventDefault();
         var expectedRevision = Number(basicsForm.getAttribute("data-slot-revision") || 0);
-        var fresh = freshSlotForAction(selectedSlot.id, expectedRevision, year, month);
+        var isPendingDraft = Boolean(pendingDraftSlot && pendingDraftSlot.id === selectedSlot.id);
+        var fresh = isPendingDraft ? { store: loadStore(), slot: pendingDraftSlot, conflict: "" } : freshSlotForAction(selectedSlot.id, expectedRevision, year, month);
         if (fresh.conflict) {
           renderAdmin(root, { year: year, month: month, selectedDate: fresh.slot ? fresh.slot.date : selectedDate, selectedSlotId: fresh.slot ? fresh.slot.id : "", notice: fresh.conflict });
           return;
@@ -1835,9 +1938,12 @@
         slot.isDraft = false;
         touchSlot(slot);
         addCalendarHistory(fresh.store, "Created calendar item", slot, "Created " + calendarHistoryItemLabel(slot) + ".");
+        if (isPendingDraft) fresh.store.slots.push(slot);
         fresh.store.slots.sort(byDateTime);
-        saveStore(fresh.store);
-        renderAdmin(root, { year: parseDate(slot.date).getFullYear(), month: parseDate(slot.date).getMonth(), selectedDate: slot.date, selectedSlotId: slot.id });
+        pendingDraftSlot = null;
+        saveStoreAndThen(fresh.store, root, function () {
+          renderAdmin(root, { year: parseDate(slot.date).getFullYear(), month: parseDate(slot.date).getMonth(), selectedDate: slot.date, selectedSlotId: slot.id });
+        });
       });
     }
 
@@ -1869,7 +1975,7 @@
         if (newUsePhysicalLocation !== Boolean(editableSlot.usePhysicalLocation)) changes.push(newUsePhysicalLocation ? "physical location added" : "physical location removed");
         if (newUseZoom !== Boolean(editableSlot.useZoom)) changes.push(newUseZoom ? "Zoom added" : "Zoom removed");
         if (timeChanged && signedUpPeople(editableSlot).length) {
-          var confirmedTimeChange = window.confirm("Change this meeting time? Signed-up people will receive an email notice with the updated time.");
+          var confirmedTimeChange = window.confirm("Change this meeting time? Signed-up people are affected by this update.");
           if (!confirmedTimeChange) return;
         }
         editableSlot.date = newDate;
@@ -1888,12 +1994,13 @@
         touchSlot(editableSlot);
         addCalendarHistory(fresh.store, wasDraft ? "Created calendar item" : "Saved calendar item", editableSlot, wasDraft ? "Created " + calendarHistoryItemLabel(editableSlot) + "." : (changes.length ? "Updated " + calendarHistoryItemLabel(editableSlot) + ": " + changes.join("; ") + "." : "Updated " + calendarHistoryItemLabel(editableSlot) + "."));
         fresh.store.slots.sort(byDateTime);
-        saveStore(fresh.store);
         var nextYear = parseDate(editableSlot.date).getFullYear();
         var nextMonth = parseDate(editableSlot.date).getMonth();
-        renderAdmin(root, closeAfterSave
-          ? { year: nextYear, month: nextMonth, notice: "Calendar item saved." }
-          : { year: nextYear, month: nextMonth, selectedDate: editableSlot.date, selectedSlotId: editableSlot.id, notice: "Calendar item saved." });
+        saveStoreAndThen(fresh.store, root, function () {
+          renderAdmin(root, closeAfterSave
+            ? { year: nextYear, month: nextMonth, notice: "Calendar item saved." }
+            : { year: nextYear, month: nextMonth, selectedDate: editableSlot.date, selectedSlotId: editableSlot.id, notice: "Calendar item saved." });
+        });
       };
       form.addEventListener("submit", function (event) {
         event.preventDefault();
@@ -1912,9 +2019,15 @@
           }
         }
         if (selectedSlot && selectedSlot.isDraft) {
+          if (pendingDraftSlot && pendingDraftSlot.id === selectedSlot.id) {
+            pendingDraftSlot = null;
+            renderAdmin(root, { year: year, month: month });
+            return;
+          }
           var freshStore = loadStore();
           freshStore.slots = freshStore.slots.filter(function (slot) { return slot.id !== selectedSlot.id; });
-          saveStore(freshStore);
+          saveStoreAndThen(freshStore, root, function () { renderAdmin(root, { year: year, month: month }); });
+          return;
         }
         renderAdmin(root, { year: year, month: month });
       });
@@ -1984,10 +2097,9 @@
     var confirmAdminActionButton = root.querySelector("[data-confirm-admin-action]");
     if (confirmAdminActionButton && confirmAction) {
       confirmAdminActionButton.addEventListener("click", function () {
-        var emailCheckbox = root.querySelector("[data-send-email-notice]");
         var cancelModeInput = root.querySelector('[name="cancelMode"]:checked');
         performConfirmedAdminAction(root, confirmAction, year, month, selectedDate, {
-          sendEmail: !emailCheckbox || emailCheckbox.checked,
+          sendEmail: false,
           cancelMode: cancelModeInput ? cancelModeInput.value : "mark"
         });
       });
@@ -1999,7 +2111,6 @@
     if (slot) return slot;
     slot = createSlotForDate(store, selectedDate);
     touchSlot(slot);
-    saveStore(store);
     return slot;
   }
 
@@ -2067,8 +2178,9 @@
       }
       touchSlot(slot);
       addCalendarHistory(fresh.store, adminAssignmentHistoryAction(role), slot, adminAssignmentHistorySummary(role, person, slot));
-      saveStore(fresh.store);
-      renderAdmin(root, { year: parseDate(slot.date).getFullYear(), month: parseDate(slot.date).getMonth(), selectedDate: slot.date, selectedSlotId: slot.id, notice: publicName(person.name) + " was assigned." });
+      saveStoreAndThen(fresh.store, root, function () {
+        renderAdmin(root, { year: parseDate(slot.date).getFullYear(), month: parseDate(slot.date).getMonth(), selectedDate: slot.date, selectedSlotId: slot.id, notice: publicName(person.name) + " was assigned." });
+      });
     });
   }
 
@@ -2255,43 +2367,6 @@
     return '<div class="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-sangha-navy">' + escapeHtml(notice) + '</div>';
   }
 
-  function renderAdminQueuedEmailBlock(store) {
-    var notices = [];
-    (store.slots || []).forEach(function (slot) {
-      (slot.notifications || []).forEach(function (notice) {
-        notices.push({ slot: slot, notice: notice });
-      });
-    });
-    notices.sort(function (a, b) {
-      return String(b.notice.queuedAt || "").localeCompare(String(a.notice.queuedAt || ""));
-    });
-    var rows = notices.slice(0, 12).map(function (entry) {
-      var notice = entry.notice;
-      var slot = entry.slot;
-      return '<li class="border-b border-gray-100 py-3 last:border-b-0">' +
-        '<div class="flex flex-wrap items-center justify-between gap-2">' +
-          '<span class="text-sm font-bold text-sangha-navy">' + escapeHtml(publicName(notice.toName)) + '</span>' +
-          '<span class="text-xs text-gray-400">' + escapeHtml(notice.toEmail) + '</span>' +
-        '</div>' +
-        '<p class="mt-1 text-xs text-gray-500">' + escapeHtml(displayShortDate(slot.date) + ": " + (slot.title || "Calendar item")) + '</p>' +
-        '<p class="mt-1 text-xs text-gray-500">' + escapeHtml(notice.subject) + '</p>' +
-        '<a class="text-xs text-sangha-gold hover:text-yellow-600 break-all" href="' + escapeHtml(notice.link) + '">' + escapeHtml(notice.link) + '</a>' +
-      '</li>';
-    }).join("");
-    return '<details data-admin-section="email-notices" class="mt-6 rounded-2xl border border-gray-200 bg-white shadow-sm">' +
-      '<summary class="cursor-pointer list-none rounded-2xl p-5 hover:bg-sangha-light">' +
-        '<div class="flex flex-wrap items-center justify-between gap-3">' +
-          '<div>' +
-            '<h2 class="font-serif text-xl font-bold text-sangha-navy mb-2">Email Notices Queued</h2>' +
-            '<p class="text-sm text-gray-600 leading-relaxed">Preview records for cancellation, backup, and schedule-change notices.</p>' +
-          '</div>' +
-          '<span class="rounded-full bg-sangha-light px-3 py-1 text-[10px] uppercase tracking-widest font-bold text-sangha-navy">' + notices.length + ' queued</span>' +
-        '</div>' +
-      '</summary>' +
-      '<ul class="border-t border-gray-100 px-5 pb-5">' + (rows || '<li class="pt-4 text-sm text-gray-500">No email notices are queued.</li>') + '</ul>' +
-    '</details>';
-  }
-
   function emailTemplateItems() {
     return [
       {
@@ -2389,7 +2464,7 @@
       '<div class="mt-5 rounded-xl border border-red-100 bg-white p-4">' +
         '<p class="mb-2 text-[10px] uppercase tracking-widest font-bold text-red-700">Development</p>' +
         '<h3 class="font-serif text-lg font-bold text-sangha-navy mb-2">Local Prototype Data</h3>' +
-        '<p class="mb-4 text-sm leading-relaxed text-gray-600">Use this only while testing. It clears browser-local calendar items and history, then restores the weekly Sangha meeting recurrence with the current seeded talks.</p>' +
+        '<p class="mb-4 text-sm leading-relaxed text-gray-600">Use this only while testing. It clears browser-local calendar items and history, then restores the weekly Sangha meeting recurrence.</p>' +
         '<button type="button" data-reset-calendar-store class="rounded-lg border border-red-200 bg-white px-4 py-3 text-xs uppercase tracking-widest font-bold text-red-700 hover:bg-red-50">Reset Local Calendar Data</button>' +
       '</div>' +
     '</section>';
@@ -2409,8 +2484,9 @@
           zoomLink: store.settings.zoomLink
         });
         addCalendarHistory(store, "Updated calendar settings", null, "Updated calendar settings.");
-        saveStore(store);
-        renderAdmin(root, { year: year, month: month, notice: "Calendar settings updated. Future default-location items now use the current default location." });
+        saveStoreAndThen(store, root, function () {
+          renderAdmin(root, { year: year, month: month, notice: "Calendar settings updated. Future default-location items now use the current default location." });
+        });
       });
     }
 
@@ -2427,8 +2503,9 @@
           zoomLink: fieldValue(zoomForm, "zoomLink")
         });
         addCalendarHistory(store, "Updated Zoom settings", null, "Updated Zoom meeting settings.");
-        saveStore(store);
-        renderAdmin(root, { year: year, month: month, notice: "Zoom settings updated." });
+        saveStoreAndThen(store, root, function () {
+          renderAdmin(root, { year: year, month: month, notice: "Zoom settings updated." });
+        });
       });
     }
 
@@ -2442,7 +2519,7 @@
         try {
           if (window.localStorage) window.localStorage.removeItem(DEMO_SEEDED_KEY);
         } catch (error) {}
-        renderAdmin(root, { year: year, month: month, notice: "Local calendar data reset. Weekly Tuesday talks were restored with the seeded May 26, June 2, and June 9 entries." });
+        renderAdmin(root, { year: year, month: month, notice: "Local calendar data reset. The weekly Tuesday recurrence was restored without signup history." });
       });
     }
   }
@@ -2704,8 +2781,9 @@
           store.recurrences.push(recurrence);
           addCalendarHistory(store, "Created recurring meeting", null, "Created recurring meeting: " + recurrence.name + ".");
         }
-        saveStore(store);
-        renderAdmin(root, { year: year, month: month, notice: editId ? "Recurring meeting updated." : "Recurring meeting created." });
+        saveStoreAndThen(store, root, function () {
+          renderAdmin(root, { year: year, month: month, notice: editId ? "Recurring meeting updated." : "Recurring meeting created." });
+        });
       });
     }
 
@@ -2730,8 +2808,7 @@
         rule.active = !rule.active;
         rule.updatedAt = new Date().toISOString();
         addCalendarHistory(store, rule.active ? "Resumed recurring meeting" : "Paused recurring meeting", null, (rule.active ? "Resumed" : "Paused") + " recurring meeting: " + rule.name + ".");
-        saveStore(store);
-        renderAdmin(root, { year: year, month: month });
+        saveStoreAndThen(store, root, function () { renderAdmin(root, { year: year, month: month }); });
       });
     });
 
@@ -2747,8 +2824,9 @@
         });
         detachSlotsFromRecurrence(store, id);
         addCalendarHistory(store, "Deleted recurring meeting", null, "Deleted recurring meeting: " + rule.name + ".");
-        saveStore(store);
-        renderAdmin(root, { year: year, month: month, notice: "Recurring meeting deleted. Any non-empty existing items were kept as one-time calendar items." });
+        saveStoreAndThen(store, root, function () {
+          renderAdmin(root, { year: year, month: month, notice: "Recurring meeting deleted. Any non-empty existing items were kept as one-time calendar items." });
+        });
       });
     });
   }
@@ -3085,29 +3163,29 @@
     var body = "";
     if (action.type === "clear-speaker") {
       title = "Cancel Speaker";
-      body = (slot.speaker ? publicName(slot.speaker.name) : "The speaker") + " will be removed from " + displayDate(slot.date) + ". Backup volunteers can receive an email notice asking them to return to the calendar item link if they can bring the talk.";
+      body = (slot.speaker ? publicName(slot.speaker.name) : "The speaker") + " will be removed from " + displayDate(slot.date) + ".";
       recipients = signedUpPeople(slot);
     }
     if (action.type === "clear-backup") {
       var backup = slot.backups[action.backupIndex];
       title = "Cancel Backup";
-      body = (backup ? publicName(backup.name) : "This backup") + " will be removed from " + displayDate(slot.date) + ". Signed-up people can receive an email notice.";
+      body = (backup ? publicName(backup.name) : "This backup") + " will be removed from " + displayDate(slot.date) + ".";
       recipients = signedUpPeople(slot);
     }
     if (action.type === "clear-attendee") {
       var attendee = slot.attendees[action.attendeeIndex];
       title = "Cancel Attendee";
-      body = (attendee ? publicName(attendee.name) : "This attendee") + " will be removed from " + displayDate(slot.date) + ". Signed-up people can receive an email notice.";
+      body = (attendee ? publicName(attendee.name) : "This attendee") + " will be removed from " + displayDate(slot.date) + ".";
       recipients = signedUpPeople(slot);
     }
     if (action.type === "cancel-meeting") {
       title = "Cancel Meeting";
-      body = "Choose whether to leave this item visible as canceled or remove it from the calendar. Signed-up people can receive an email notice.";
+      body = "Choose whether to leave this item visible as canceled or remove it from the calendar.";
       recipients = signedUpPeople(slot);
     }
     if (action.type === "remove-meeting") {
       title = "Remove From Calendar";
-      body = "This canceled item will be removed from the calendar. Signed-up people can receive an email notice.";
+      body = "This canceled item will be removed from the calendar.";
       recipients = signedUpPeople(slot);
     }
     if (action.type === "push-week") {
@@ -3138,9 +3216,6 @@
     var recipientRows = preview.recipients.map(function (person) {
       return '<li class="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs"><span class="font-bold text-sangha-navy">' + escapeHtml(publicName(person.name)) + '</span><br><span class="text-gray-500">' + escapeHtml(person.email) + '</span></li>';
     }).join("");
-    var emailOption = preview.recipients.length
-      ? '<label class="mt-4 flex items-start gap-3 rounded-xl border border-blue-100 bg-white p-3 text-sm text-gray-600"><input type="checkbox" data-send-email-notice class="mt-0.5 accent-sangha-gold" checked /><span><span class="font-bold text-sangha-navy">Send email notice</span><span class="mt-1 block text-xs text-gray-500">Signed-up people listed here will receive an email notice when email sending is connected.</span></span></label>'
-      : '';
     var cancelModeOptions = action.type === "cancel-meeting"
       ? '<div class="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4">' +
           '<p class="mb-3 text-xs uppercase tracking-widest font-bold text-sangha-navy">Calendar Display</p>' +
@@ -3160,9 +3235,8 @@
         '<p class="mt-3 text-sm leading-relaxed text-gray-600">' + escapeHtml(preview.body) + '</p>' +
         cancelModeOptions +
         '<div class="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-4">' +
-          '<p class="text-xs uppercase tracking-widest font-bold text-sangha-navy mb-3">Email Notice Recipients</p>' +
-          '<ul class="grid gap-2">' + (recipientRows || '<li class="text-sm text-gray-500">No one is signed up or attending, so no email notice is needed.</li>') + '</ul>' +
-          emailOption +
+          '<p class="text-xs uppercase tracking-widest font-bold text-sangha-navy mb-3">People Affected</p>' +
+          '<ul class="grid gap-2">' + (recipientRows || '<li class="text-sm text-gray-500">No one is currently signed up or attending.</li>') + '</ul>' +
         '</div>' +
         '<div class="mt-6 grid gap-3 md:grid-cols-2">' +
           '<button type="button" data-cancel-admin-action class="rounded-lg border border-gray-200 px-4 py-3 text-xs uppercase tracking-widest font-bold text-sangha-navy hover:bg-sangha-light">Keep Editing</button>' +
@@ -3174,7 +3248,7 @@
 
   function performConfirmedAdminAction(root, action, year, month, selectedDate, options) {
     options = options || {};
-    var sendEmail = options.sendEmail !== false;
+    var sendEmail = false;
     var fresh = freshSlotForAction(action.slotId, action.expectedRevision, year, month);
     if (fresh.conflict) {
       renderAdmin(root, { year: year, month: month, selectedDate: fresh.slot ? fresh.slot.date : selectedDate, selectedSlotId: fresh.slot ? fresh.slot.id : "", notice: fresh.conflict });
@@ -3192,7 +3266,7 @@
       slot.speaker = null;
       touchSlot(slot);
       addCalendarHistory(fresh.store, "Canceled speaker", slot, calendarHistoryPersonName(speaker) + " canceled bringing this talk.");
-      notice = sendEmail ? "Speaker canceled and email notices were queued." : "Speaker canceled. No email notice was queued.";
+      notice = "Speaker canceled.";
     }
     if (action.type === "clear-backup") {
       var backup = slot.backups[action.backupIndex];
@@ -3201,7 +3275,7 @@
         slot.backups.splice(action.backupIndex, 1);
         touchSlot(slot);
         addCalendarHistory(fresh.store, "Canceled backup", slot, calendarHistoryPersonName(backup) + " canceled as a backup for this talk.");
-        notice = sendEmail ? "Backup canceled and email notices were queued." : "Backup canceled. No email notice was queued.";
+        notice = "Backup canceled.";
       }
     }
     if (action.type === "clear-attendee") {
@@ -3211,7 +3285,7 @@
         slot.attendees.splice(action.attendeeIndex, 1);
         touchSlot(slot);
         addCalendarHistory(fresh.store, "Canceled attendee", slot, calendarHistoryPersonName(attendee) + " canceled attending this " + (isTalkSlot(slot) ? "talk" : "meeting") + ".");
-        notice = sendEmail ? "Attendee canceled and email notices were queued." : "Attendee canceled. No email notice was queued.";
+        notice = "Attendee canceled.";
       }
     }
     if (action.type === "cancel-meeting") {
@@ -3221,7 +3295,7 @@
       }
       if (cancelCalendarItem(slot, sendEmail)) {
         addCalendarHistory(fresh.store, "Canceled meeting", slot, "Canceled " + calendarHistoryItemLabel(slot) + ".");
-        notice = sendEmail ? "Meeting canceled and email notices were queued." : "Meeting canceled. No email notice was queued.";
+        notice = "Meeting canceled.";
       } else {
         notice = "This meeting was already canceled.";
       }
@@ -3247,11 +3321,12 @@
       });
       addCalendarHistory(fresh.store, "Pushed schedule forward", slot, "Pushed this recurring group forward one week.");
       nextSelectedDate = shiftDateByDays(startDate, 7);
-      notice = sendEmail ? "Schedule moved forward one week and email notices were queued." : "Schedule moved forward one week. No email notice was queued.";
+      notice = "Schedule moved forward one week.";
     }
     fresh.store.slots.sort(byDateTime);
-    saveStore(fresh.store);
-    renderAdmin(root, { year: parseDate(nextSelectedDate).getFullYear(), month: parseDate(nextSelectedDate).getMonth(), selectedDate: nextSelectedDate, selectedSlotId: slot.id, notice: notice });
+    saveStoreAndThen(fresh.store, root, function () {
+      renderAdmin(root, { year: parseDate(nextSelectedDate).getFullYear(), month: parseDate(nextSelectedDate).getMonth(), selectedDate: nextSelectedDate, selectedSlotId: slot.id, notice: notice });
+    });
   }
 
   function removeCalendarItemFromAdmin(root, store, slot, year, month, sendEmail) {
@@ -3259,8 +3334,9 @@
     skipRecurringDateForSlot(store, slot);
     addCalendarHistory(store, "Removed calendar item", slot, "Removed " + calendarHistoryItemLabel(slot) + " from the calendar.");
     store.slots = store.slots.filter(function (item) { return item.id !== slot.id; });
-    saveStore(store);
-    renderAdmin(root, { year: year, month: month, notice: sendEmail ? "Calendar item removed and email notices were queued." : "Calendar item removed. No email notice was queued." });
+    saveStoreAndThen(store, root, function () {
+      renderAdmin(root, { year: year, month: month, notice: "Calendar item removed." });
+    });
   }
 
   function skipRecurringDateForSlot(store, slot) {
@@ -3459,8 +3535,7 @@
         freshSlot.speaker = null;
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Speaker canceled signup", freshSlot, calendarHistoryPersonName(speaker) + " canceled bringing this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3478,8 +3553,7 @@
         promoteBackupToSpeaker(freshSlot, backup);
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Backup promoted", freshSlot, calendarHistoryPersonName(backup) + " moved from backup to bringing this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3498,8 +3572,7 @@
         removeDirectAttendanceForPerson(freshSlot, freshSlot.speaker);
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Speaker signed up", freshSlot, calendarHistoryPersonName(freshSlot.speaker) + " signed up to bring this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3518,8 +3591,7 @@
         freshSlot.speaker.notes = fieldValue(event.currentTarget, "notes");
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Speaker updated details", freshSlot, calendarHistoryPersonName(freshSlot.speaker) + " updated their talk link or notes.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3543,8 +3615,7 @@
         }
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, existingAttendee ? "Attendee updated signup" : "Attendee signed up", freshSlot, existingAttendee ? calendarHistoryPersonName(attendee) + " updated their attendance for this talk." : calendarHistoryPersonName(attendee) + " signed up to attend this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3567,8 +3638,7 @@
         });
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Attendee canceled signup", freshSlot, calendarHistoryPersonName(attendee) + " canceled attending this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3596,8 +3666,7 @@
         removeDirectAttendanceForPerson(freshSlot, volunteer);
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, existingBackup ? "Backup updated signup" : "Backup signed up", freshSlot, existingBackup ? calendarHistoryPersonName(volunteer) + " updated their backup details for this talk." : calendarHistoryPersonName(volunteer) + " signed up as a backup for this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3621,8 +3690,7 @@
         backup.notes = fieldValue(event.currentTarget, "notes");
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Backup updated signup", freshSlot, calendarHistoryPersonName(backup) + " updated their backup details for this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3642,8 +3710,7 @@
         }
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Backup canceled signup", freshSlot, calendarHistoryPersonName(backup) + " canceled as a backup for this talk.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
   }
@@ -3701,6 +3768,10 @@
     var params = new URLSearchParams(window.location.search);
     if (params.get("attend") === "1" && isLoggedIn() && !isPastSlot(slot) && !slot.canceled && signupWindowOpen(slot, store.settings) && !currentUserAttendee(slot)) {
       addCurrentUserAttendance(store, slot);
+      if (isServerBackedProduction()) {
+        saveStoreAndThen(store, root, function () { renderSchedule(root); });
+        return;
+      }
       saveStore(store);
       store = loadStore();
       slot = findSlotById(store, slot.id) || slot;
@@ -3758,8 +3829,7 @@
         }
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, existingAttendee ? "Attendee updated signup" : "Attendee signed up", freshSlot, existingAttendee ? calendarHistoryPersonName(attendee) + " updated their attendance for this meeting." : calendarHistoryPersonName(attendee) + " signed up to attend this meeting.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
 
@@ -3782,8 +3852,7 @@
         });
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, "Attendee canceled signup", freshSlot, calendarHistoryPersonName(attendee) + " canceled attending this meeting.");
-        saveStore(freshStore);
-        renderSchedule(root);
+        saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
       });
     }
   }
@@ -3920,6 +3989,7 @@
   }
 
   function renderTopReminderControls(person) {
+    if (isServerBackedProduction()) return "";
     if (!person) return "";
     return '<form id="personal-reminder-form" class="min-w-64">' +
       confirmationHiddenUserFields() +
@@ -4045,7 +4115,6 @@
     return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
       '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Sign In Required</h3>' +
       '<p class="text-sm text-gray-600 leading-relaxed">Please sign in before you ' + escapeHtml(actionLabel) + '. You can still view the calendar and event details without signing in.</p>' +
-      '<p class="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-xs text-gray-600">Prototype note: the backend login is not connected yet. For preview, use <span class="font-bold text-sangha-navy">?as=Your%20Name&amp;email=you@example.com</span> on this page to simulate a signed-in member.</p>' +
     '</aside>';
   }
 
@@ -4073,6 +4142,7 @@
   }
 
   function renderPersonalReminderFields(volunteer, submitLabel) {
+    if (isServerBackedProduction()) return "";
     var selected = {};
     uniqueStrings(volunteer && volunteer.reminders).forEach(function (optionId) {
       selected[optionId] = true;
@@ -4115,13 +4185,21 @@
     try {
       appBaseUrl = root.getAttribute("data-calendar-base") || window.location.href;
       localDevelopmentPage = root.getAttribute("data-calendar-local-dev") === "true";
-      if (new URLSearchParams(window.location.search).get("demo") === "1") {
+      if (isLocalDevelopmentMode() && new URLSearchParams(window.location.search).get("demo") === "1") {
         seedDemoStore();
       }
-      applyUserFromQuery();
       var view = root.getAttribute("data-calendar-view");
-      renderForView(root, view);
-      hydrateFromServer(root, view);
+      if (isLocalDevelopmentMode()) {
+        applyUserFromQuery();
+        renderForView(root, view);
+      } else if (isServerBackedProduction()) {
+        root.innerHTML = '<div class="rounded-lg border border-gray-200 bg-white p-5 text-sm text-gray-600">Loading the shared calendar...</div>';
+        hydrateFromServer(root, view);
+      } else {
+        serverAvailable = false;
+        calendarServiceNotice = "The shared calendar is not configured. Calendar data is read-only.";
+        renderForView(root, view);
+      }
     } catch (error) {
       root.innerHTML = '<div class="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">' +
         '<p class="font-bold">Calendar could not load.</p>' +
@@ -4143,18 +4221,24 @@
   }
 
   function hydrateFromServer(root, view) {
-    if (!window.ECBS || !window.ECBS.CalendarApi || !window.ECBS.CalendarApi.enabled()) return;
-    window.ECBS.CalendarApi.fetchStore().then(function (data) {
-      if (!data || !data.store) return; // server not seeded yet; keep local cache
-      serverRevision = Number(data.revision || 0);
-      if (window.localStorage) {
-        var normalized = normalizeStore(data.store);
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    if (!window.ECBS || !window.ECBS.CalendarApi || !window.ECBS.CalendarApi.enabled() || typeof window.ECBS.CalendarApi.fetchStore !== "function") return;
+    return window.ECBS.CalendarApi.fetchStore().then(function (data) {
+      if (!data || !data.store) {
+        serverAvailable = false;
+        serverStore = null;
+        calendarServiceNotice = "The shared calendar is being initialized. Calendar data is temporarily read-only.";
+        renderForView(root, view);
+        return;
       }
+      adoptServerResponse(data);
       renderForView(root, view);
     }).catch(function (error) {
+      serverAvailable = false;
+      serverStore = null;
+      calendarServiceNotice = "The shared calendar is temporarily unavailable. The last saved version is read-only.";
+      renderForView(root, view);
       if (window.console && window.console.warn) {
-        window.console.warn("Calendar server hydrate failed; using local cache.", error);
+        window.console.warn("Calendar server hydrate failed; using the read-only cache.", error);
       }
     });
   }
@@ -4255,7 +4339,12 @@
       addCalendarHistory: addCalendarHistory,
       shiftDateByDays: shiftDateByDays,
       diffMemberSignups: diffMemberSignups,
-      memberRoleOnSlot: memberRoleOnSlot
+      memberRoleOnSlot: memberRoleOnSlot,
+      deterministicOccurrenceId: deterministicOccurrenceId,
+      isServerBackedProduction: isServerBackedProduction,
+      loadStore: loadStore,
+      saveStore: saveStore,
+      hydrateFromServer: hydrateFromServer
     };
   }
 
@@ -4272,11 +4361,14 @@
     // admin view (or member controls) reflects the resolved role.
     window.addEventListener("ecbs:session", function () {
       var root = typeof document !== "undefined" ? document.getElementById("calendar-app") : null;
-      if (root) renderForView(root, root.getAttribute("data-calendar-view"));
+      if (!root) return;
+      if (isServerBackedProduction()) hydrateFromServer(root, root.getAttribute("data-calendar-view"));
+      else renderForView(root, root.getAttribute("data-calendar-view"));
     });
   }
 
   function applyUserFromQuery() {
+    if (!isLocalDevelopmentMode()) return;
     var params = new URLSearchParams(window.location.search);
     var name = params.get("as");
     if (!name || !window.localStorage) return;
