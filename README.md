@@ -2,7 +2,7 @@
 
 A calm, "Zen"-inspired community portal for the Eau Claire Buddhist Sangha.
 
-This repo contains a **high-fidelity React prototype** being migrated to a low-maintenance production stack: **Hugo + Decap CMS + Cloudflare Pages** with **native comments stored in Cloudflare D1**.
+This repo contains a **high-fidelity React prototype** being migrated to a low-maintenance production stack: **Hugo + Cloudflare Pages** with **native content and comments stored in Cloudflare D1** (community updates and forum topics are served by the Worker, not a Git-based CMS).
 
 ---
 
@@ -31,11 +31,10 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - Will be moved to `/prototype/` during migration
 
 ### Target (Production)
-- **Hugo** for static site generation
-- **Decap CMS** for Git-based editing of Markdown content at `/admin`
+- **Hugo** for static site generation (page shells + design system)
 - **Cloudflare Pages** for build + deploy + CDN
-- **GitHub** as the content/source of truth
-- **Cloudflare Worker** (via Wrangler) for member auth, shared calendar, comments, and Decap GitHub OAuth
+- **Cloudflare Worker** (via Wrangler) for member auth, shared calendar, comments, and native content
+- **Native content** — community updates (announcements + events) and forum topics stored in Cloudflare D1, authored through the site (admins via an inline composer, members start topics), rendered client-side against `/api/posts` and `/api/topics`
 - **Native comments** stored in Cloudflare D1 via the Worker, gated by member roles (Topics + Pages only)
 
 ---
@@ -45,10 +44,9 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 | Component | Technology |
 |-----------|-----------|
 | Static Site Generator | Hugo |
-| CMS | Decap CMS (GitHub backend) |
+| Content (updates + topics) | Native (Cloudflare D1 via Worker) |
 | Hosting | Cloudflare Pages (free) |
 | Member Auth | Google SSO via Cloudflare Worker |
-| CMS Auth | GitHub OAuth via Cloudflare Worker |
 | Comments | Native (Cloudflare D1 via Worker) |
 | Calendar | Native Hugo UI + Cloudflare D1 |
 | Styling | Tailwind CSS (compiled at build time) |
@@ -90,14 +88,13 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - Port Sangha design system (colors, typography)
 - Create base templates (header, footer, home)
 
-### Phase 3: Decap CMS
-- Configure `/static/admin/config.yml`
-- Set up collections: events, announcements, pages, topics
-- Configure GitHub backend with OAuth proxy URL
+### Phase 3: Native content (supersedes Decap CMS)
+- `posts` (announcements + events) and `topics` (forum threads) tables in Cloudflare D1
+- Worker CRUD at `/api/posts` and `/api/topics`, role-gated (admins author updates; members start topics; authors/admins edit/delete)
+- Rendered client-side by `site/static/js/posts.js` and `topics.js`
 
-### Phase 4: OAuth proxy Worker
-- Create `/workers/oauth-proxy/` with Wrangler
-- Deploy to Cloudflare for Decap auth
+### Phase 4: ~~OAuth proxy Worker~~ (removed)
+- The Decap GitHub OAuth proxy is no longer needed — content authoring reuses the existing Google SSO + role system
 
 ### Phase 5: Native comments
 - `comments` table in Cloudflare D1 with CRUD in the Worker
@@ -114,8 +111,8 @@ This repo contains a **high-fidelity React prototype** being migrated to a low-m
 - Set custom domain
 
 ### Phase 8: Content migration
-- Convert prototype constants to Markdown
-- Test Decap CMS workflow
+- Seed existing Markdown into D1 (`migrations/0006_seed_content.sql`)
+- Author new updates/topics through the site UI
 
 ### Phase 9: Switchover
 - Update DNS to Cloudflare Pages
@@ -142,35 +139,27 @@ hugo server -D --renderToMemory --disableFastRender --bind 0.0.0.0 --baseURL "ht
 hugo  # production build
 ```
 
-### OAuth proxy Worker
-```bash
-cd workers/oauth-proxy
-npm install
-npx wrangler deploy
-```
-
-### Worker (auth, calendar, comments)
+### Worker (auth, calendar, comments, content)
 ```bash
 cd workers/sangha-worker
 npm install
 npm test          # vitest suite
 npx wrangler dev  # local worker
 npx wrangler deploy
-npx wrangler d1 migrations apply sangha-db --remote
+npx wrangler d1 migrations apply sangha-calendar --remote
 ```
 
 ---
 
-## Content collections
+## Content model
 
-| Collection | Purpose |
-|------------|---------|
-| `events/` | Weekly sits, retreats, special events |
-| `announcements/` | News, updates, library changes |
-| `pages/` | Static content (About, Contact, etc.) |
-| `topics/` | Forum discussion starters |
+| Store | Purpose | Authoring |
+|-------|---------|-----------|
+| `posts` (D1) | Community updates: announcements + events | Admins, via the inline composer on `/updates/` |
+| `topics` (D1) | Forum discussion threads | Members, via **New Topic** on `/topics/` |
+| `pages/` (Hugo Markdown) | Static content (About, Donate, etc.) | Edited in the repo |
 
-Native (Cloudflare D1) comments are enabled on **Topics and Pages only**.
+Native (Cloudflare D1) comments are enabled on **Topics and Pages only**. Post and topic bodies are stored as text and rendered as escaped plain text (no HTML is trusted).
 
 ---
 

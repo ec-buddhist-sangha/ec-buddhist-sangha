@@ -1,7 +1,8 @@
 # sangha-worker
 
 Single Cloudflare Worker for Eau Claire Buddhist Sangha: Google SSO, live roles,
-Decap OAuth, the shared D1 calendar, and native comments.
+the shared D1 calendar, native comments, and native content (community updates
+and forum topics).
 
 ## Calendar endpoints
 
@@ -16,6 +17,25 @@ Decap OAuth, the shared D1 calendar, and native comments.
 Calendar state is a versioned JSON document in D1. See
 `../../docs/CALENDAR_SYSTEM.md` for its privacy, recurrence, and initialization
 contract.
+
+## Content endpoints
+
+Replaces the former Decap CMS Markdown collections. Bodies are stored as text
+and rendered as escaped plain text client-side (no HTML is trusted).
+
+| Method + Path | Auth | Description |
+|---|---|---|
+| `GET /api/posts` | Public | Community feed (announcements + events); `?kind=` filters |
+| `GET /api/posts/:slug` | Public | A single published post |
+| `POST/PATCH/DELETE /api/posts` | Admin | Author/update/soft-delete updates |
+| `GET /api/topics` | Public | Forum threads, newest activity first, with `reply_count` |
+| `GET /api/topics/:slug` | Public | A single topic (omits `author_email`) |
+| `POST /api/topics` | Member | Start a thread |
+| `PATCH/DELETE /api/topics` | Member | Author or admin only |
+
+A topic's discussion lives in the `comments` table under
+`thread = 'topic:' || slug`; posting a comment there bumps the topic's
+`last_active_at`.
 
 ## Environment
 

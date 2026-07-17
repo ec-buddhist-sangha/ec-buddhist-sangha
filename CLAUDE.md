@@ -4,7 +4,7 @@ This file is the authoritative instructions for agentic coding in this repo.
 
 The repo has two "modes":
 1) **Prototype** (React/Vite) — current UI reference, located in `/prototype/`
-2) **Production** (Hugo/Decap/Pages) — migration target, located in `/site/`
+2) **Production** (Hugo + Cloudflare Pages/Worker/D1) — migration target, located in `/site/`
 
 Agents should keep both working during transition, but prioritize decisions that reduce future migration effort.
 
@@ -17,7 +17,7 @@ Agents should keep both working during transition, but prioritize decisions that
 
 This affects:
 - Google APIs requiring secrets
-- Decap GitHub OAuth exchange (must be server-side)
+- OAuth token exchange and JWT signing (must be server-side, in the Worker)
 
 ---
 
@@ -26,7 +26,7 @@ This affects:
 ```
 /prototype/        # React/Vite app (current UI reference)
 /site/             # Hugo site (production)
-/workers/          # Cloudflare Workers (OAuth proxy)
+/workers/          # Cloudflare Worker (auth, calendar, comments, content)
 /infra/            # docker-compose, deployment notes (Isso)
 /docs/             # architecture notes, content model docs
 ```
@@ -37,8 +37,8 @@ This affects:
 
 1. **Phase 1:** Create project structure, move prototype to `/prototype/`
 2. **Phase 2:** Hugo scaffold with Tailwind CSS compiled at build time, port Sangha design system
-3. **Phase 3:** Decap CMS configuration with GitHub backend and collections (events, announcements, pages, topics)
-4. **Phase 4:** OAuth proxy Worker with Wrangler CLI for Decap auth
+3. **Phase 3:** ~~Decap CMS configuration~~ Replaced with native D1 content — `posts` (announcements + events) and `topics` (forum threads) via Worker CRUD, role-gated, rendered client-side
+4. **Phase 4:** ~~OAuth proxy Worker for Decap auth~~ Removed — content authoring reuses the existing Google SSO + role system
 5. **Phase 5:** ~~Isso comments deployment~~ Replaced with native comments in Cloudflare D1 (Worker CRUD, role-gated), rendered on Topics and Pages only
 6. **Phase 6:** ~~Google Calendar embed on homepage~~ Replaced with Community Updates feed (events + announcements)
 7. **Phase 7:** Cloudflare Pages deployment with Hugo build
@@ -51,46 +51,42 @@ This affects:
 
 | Component | Technology | Notes |
 |-----------|-----------|-------|
-| Static Site Generator | Hugo | Build via Cloudflare Pages |
-| CMS | Decap CMS | GitHub backend, admin at /admin |
-| Auth | GitHub OAuth | Via Cloudflare Worker proxy (Wrangler) |
+| Static Site Generator | Hugo | Build via Cloudflare Pages; renders page shells only |
+| Content (updates + topics) | Native (Cloudflare D1) | Worker CRUD at `/api/posts` + `/api/topics`; admins author updates, members start topics; authors/admins edit/delete |
+| Auth | Google SSO | Via Cloudflare Worker (Wrangler); identity-only JWT, roles from `/api/me` |
 | Comments | Native (Cloudflare D1) | Worker CRUD, role-gated (members post; authors/admins edit/delete), Topics + Pages only |
-| Community Updates | Hugo-generated feed | Events + announcements on homepage, no external embeds |
+| Community Updates | Client-rendered feed | Events + announcements from `/api/posts`, no external embeds |
 | Hosting | Cloudflare Pages | Free tier, Hugo builds |
 | Styling | Tailwind CSS | Compiled at build time |
 | Comment moderation | Auto-publish | Can be changed later |
 
 ---
 
-## Content model (Decap collections)
+## Content model (native D1)
 
-### Required collections
+Content lives in D1 tables (migration `0005_init_content.sql`), served by the
+Worker and rendered client-side. Bodies are stored as text and rendered as
+escaped plain text (no HTML is trusted). Static informational pages (About,
+Donate, etc.) remain Hugo Markdown in `site/content/`.
 
-**events/** - Weekly sits, retreats, special events
+**`posts`** — admin-authored community feed (`kind` = `announcement` | `event`)
 ```
-title, date, end_date, location, body, tags
-```
-
-**announcements/** - News, updates, library changes
-```
-title, date, body, tags
-```
-
-**pages/** - Static content (singleton)
-```
-title, body (singleton: true, create: false)
+kind, slug, title, summary, body, tags, location, start_at, end_at,
+published_at, status, created_at, updated_at
 ```
 
-**topics/** - Forum discussion starters
+**`topics`** — member-authored forum threads
 ```
-title, author, body, tags, reply_count, last_active
+slug, title, body, tags, author_email, author_name, status,
+created_at, updated_at, last_active_at
 ```
+`reply_count` is computed from the `comments` table (thread = `topic:<slug>`);
+`author_email` is never returned by the public API (no PII leak).
 
-### Frontmatter conventions
-
-All content uses minimal frontmatter:
-- `title`, `date`, `summary`, `tags`, `draft`
-- Events additionally: `start`, `end`, `location`, `signup_url`
+### Authoring UI
+- Updates: admins use the inline composer on `/updates/` (`site/static/js/posts.js`)
+- Topics: members use **New Topic** on `/topics/` (`site/static/js/topics.js`)
+- Detail views are client-rendered at `/updates/view/?slug=` and `/topics/view/?slug=`
 
 ---
 
@@ -99,14 +95,14 @@ All content uses minimal frontmatter:
 ### Prototype (React + Vite)
 Vite exposes only `VITE_*` prefixed vars. No secrets needed for prototype.
 
-### Cloudflare Workers (production)
-Store in Worker environment:
-- `GITHUB_CLIENT_ID`
-- `GITHUB_CLIENT_SECRET`
-- `GITHUB_OAUTH_REDIRECT_URL`
+### Cloudflare Worker (production)
+Secrets (set via `wrangler secret put`, never committed):
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `JWT_SIGNING_SECRET`
 
-### Comments (native, Cloudflare D1)
-- No separate service or secrets — comments live in the `comments` D1 table via the Worker
+### Content + comments (native, Cloudflare D1)
+- No separate service or secrets — `posts`, `topics`, and `comments` live in D1 via the Worker
 - Moderation (hide/delete) is an admin action through the same role system
 
 ---
@@ -129,10 +125,12 @@ hugo server -D  # development with drafts
 hugo  # production build
 ```
 
-### OAuth proxy Worker
+### Worker (auth, calendar, comments, content)
 ```bash
-cd workers/oauth-proxy
+cd workers/sangha-worker
 npm install
+npm test          # vitest suite
+npx wrangler dev  # local worker
 npx wrangler deploy
 ```
 
@@ -159,7 +157,7 @@ hugo server -D --baseURL "http://127.0.0.1:1313/ec-buddhist-sangha/"
 ```
 
 ### What to verify
-1. All navigation links work (Home, About, Calendar, Forum, CMS)
+1. All navigation links work (Home, About, Updates, Forum, Calendar)
 2. Page URLs are correct (no path duplication)
 3. Assets (CSS, images) load correctly
 4. Console has no errors

@@ -20,8 +20,6 @@ NOTIFY_SENDER = "noreply@eauclairesangha.org"
 #   GOOGLE_CLIENT_ID
 #   GOOGLE_CLIENT_SECRET
 #   JWT_SIGNING_SECRET
-#   GITHUB_CLIENT_ID
-#   GITHUB_CLIENT_SECRET
 
 [[d1_databases]]
 binding = "DB"

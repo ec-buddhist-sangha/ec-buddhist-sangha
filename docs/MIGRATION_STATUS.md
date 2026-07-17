@@ -1,5 +1,13 @@
 # Migration Status Report
 
+> **Superseded (2026-07-16):** Phases 3–4 below describe the original **Decap CMS
+> + GitHub OAuth proxy** approach, which has since been **replaced by native
+> content in Cloudflare D1**. Community updates (`posts`) and forum topics
+> (`topics`) are now served by the sangha-worker at `/api/posts` and
+> `/api/topics` and rendered client-side; there is no `/admin` CMS and no
+> `oauth-proxy` worker. See the repo `README.md` and `CLAUDE.md` for the current
+> content model. The historical notes are retained below for reference only.
+
 ## Completed Phases
 
 ### Phase 1: Project Structure ✅
