@@ -77,3 +77,24 @@ test("forum list shows a graceful error when the worker is down", async () => {
   const html = win.document.getElementById("ecbs-topics").innerHTML;
   assert.ok(html.includes("unavailable"), "renders an error state, not a crash");
 });
+
+test("homepage next-gathering renders the soonest session from /api/calendar", async () => {
+  const store = { store: { slots: [], recurrences: [{
+    id: "r1", active: true, frequency: "weekly", interval: 1, startDate: "2026-07-21",
+    startTime: "19:00", endTime: "20:30", title: "Sangha Meeting", location: "Unity of Eau Claire\n1808 Folsom", skippedDates: []
+  }] } };
+  const win = boot('<section id="ecbs-next-gathering"></section>', [["/api/calendar", store]], "https://site.test/");
+  win.eval(read("next-gathering.js"));
+  await tick();
+  const el = win.document.getElementById("ecbs-next-gathering");
+  assert.ok(el, "section still present");
+  assert.ok(el.innerHTML.includes("Next Gathering") && el.innerHTML.includes("Sangha Meeting"));
+  assert.ok(el.innerHTML.includes("Unity of Eau Claire") && !el.innerHTML.includes("1808 Folsom"), "shows only first location line");
+});
+
+test("homepage next-gathering removes itself when the calendar is empty", async () => {
+  const win = boot('<section id="ecbs-next-gathering"></section>', [["/api/calendar", { store: { slots: [], recurrences: [] } }]], "https://site.test/");
+  win.eval(read("next-gathering.js"));
+  await tick();
+  assert.equal(win.document.getElementById("ecbs-next-gathering"), null, "empty calendar -> no empty box");
+});

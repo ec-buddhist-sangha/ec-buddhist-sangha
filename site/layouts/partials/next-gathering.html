@@ -1,0 +1,4 @@
+<!-- Next gathering: client-rendered from /api/calendar; self-removes if empty. -->
+<section id="ecbs-next-gathering" class="bg-sangha-paper pt-12"></section>
+{{ $v := readFile "static/js/next-gathering.js" | md5 }}
+<script src="{{ "js/next-gathering.js" | relURL }}?v={{ $v }}"></script>
