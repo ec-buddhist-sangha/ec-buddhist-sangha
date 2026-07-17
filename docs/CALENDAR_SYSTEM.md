@@ -6,8 +6,8 @@ The production calendar is a Hugo/JavaScript interface backed by the shared Clou
 
 - `/calendar/` shows a month grid on desktop. On mobile it shows today first, followed by up to five upcoming items per page.
 - `/calendar-item/?slot=<slot-id>` shows one calendar item. Public details are visible without signing in; volunteering requires a Google-authenticated member.
-- `/admin/calendar/` is linked from Decap for convenience, but Decap is not its security boundary. The direct URL requires the Google-authenticated `admin` role.
-- Calendar links remain absent from the main site navigation for now.
+- `/admin/calendar/` appears in the signed-in menu for administrators. The direct URL also requires the Google-authenticated `admin` role.
+- `/calendar/` appears in the main site navigation and in the signed-in user menu.
 
 Signed-out, pending-access, member, and administrator states are handled independently. Production ignores the local `?as=` mock identity and any obsolete Decap handoff marker.
 

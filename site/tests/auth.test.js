@@ -94,13 +94,17 @@ test("signed-in account menu labels the calendar without RSVP wording", async ()
 
   assert.match(container.innerHTML, />Calendar<\/a>/);
   assert.doesNotMatch(container.innerHTML, /RSVP/i);
+  assert.doesNotMatch(container.innerHTML, /Calendar Admin/);
 });
 
 test("isAdmin reflects the /api/me role", async () => {
   const fetch = apiFetch({ sub: "boss@x.org", name: "Boss", role: "admin", request_status: "none" });
-  const { Auth } = load({ hash: "#token=" + makeToken({ sub: "boss@x.org", name: "Boss", exp: future() }), fetch });
+  const { Auth, container } = load({ hash: "#token=" + makeToken({ sub: "boss@x.org", name: "Boss", exp: future() }), fetch });
   await Auth.ready();
   assert.equal(Auth.isAdmin(), true);
+  Auth.renderButtons();
+  assert.match(container.innerHTML, /href="\/admin\/calendar\/"[^>]*>Calendar Admin<\/a>/);
+  assert.doesNotMatch(container.innerHTML, />CMS<\/a>/);
 });
 
 test("getSession exposes role + request_status and getUser.role is null before refresh", async () => {

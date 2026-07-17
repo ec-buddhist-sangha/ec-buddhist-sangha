@@ -36,4 +36,4 @@ Dana can be offered at our Tuesday evening gatherings at Unity of Eau Claire, 18
 
 ### Questions?
 
-If you have questions about supporting the sangha, please reach out to us through our [Facebook Community](#).
+If you have questions about supporting the sangha, please reach out to us through our [Facebook Community](https://www.facebook.com/groups/189951952647).

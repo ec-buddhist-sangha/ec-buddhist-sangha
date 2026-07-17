@@ -175,6 +175,7 @@
     var items = '<a href="' + joinPath(siteBase(), "calendar/") + '" ' + link + '>Calendar</a>';
     var role = user.role;
     if (role === "admin") {
+      items += '<a href="' + joinPath(siteBase(), "admin/calendar/") + '" ' + link + '>Calendar Admin</a>';
       items += '<a href="' + joinPath(siteBase(), "account/members/") + '" ' + link + '>Members</a>';
     } else if (role === "reader" || role === null) {
       var sess = getSession();
