@@ -195,7 +195,7 @@ The Worker proxies comment actions so users only sign in once (not separately fo
 
 - `site/layouts/partials/auth-button.html` — Sign-in button partial
   - Renders "Sign in with Google" button when anonymous
-  - Renders user name with dropdown (My RSVPs, Sign Out) when signed in
+  - Renders user name with dropdown (Calendar, Sign Out) when signed in
   - Renders "Admin" link to `/admin/` for admin users
 
 ### Modified Files

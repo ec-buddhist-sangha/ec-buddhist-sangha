@@ -280,7 +280,7 @@ Expected: FAIL — `auth.js` not found.
           '<span class="hidden lg:inline">' + escapeHtml(user.name) + '</span>' +
         '</button>' +
         '<div data-ecbs-dropdown class="hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-1 z-50">' +
-          '<a href="' + joinPath(siteBase(), "calendar/") + '" class="block px-4 py-2 text-sm text-sangha-navy hover:bg-sangha-light">My RSVPs</a>' +
+          '<a href="' + joinPath(siteBase(), "calendar/") + '" class="block px-4 py-2 text-sm text-sangha-navy hover:bg-sangha-light">Calendar</a>' +
           adminLink +
           '<button type="button" data-ecbs-logout class="block w-full text-left px-4 py-2 text-sm text-sangha-navy hover:bg-sangha-light">Sign out</button>' +
         '</div>' +
@@ -859,7 +859,7 @@ git commit -m "feat(comments): signed-in compose box posting through the Worker"
 
 **1. Spec coverage (Site frontend + comments slice):**
 - `auth.js` `ECBS.Auth` with `init`/`login`/`logout`/`getUser`/`isAdmin`/`isSignedIn`/`fetch`; parses JWT from fragment, clears it, stores in `sessionStorage`, auto-clears expired (spec §Hugo Site Changes → New Files) — Task 1. ✓
-- `auth-button.html` partial: "Sign in" when anonymous, user menu (My RSVPs, Sign Out) when signed in, Admin link for admins (spec §New Files) — Tasks 1 (render) + 3 (partial). ✓
+- `auth-button.html` partial: "Sign in" when anonymous, user menu (Calendar, Sign Out) when signed in, Admin link for admins (spec §New Files) — Tasks 1 (render) + 3 (partial). ✓
 - `header.html` includes the auth button (spec §Modified Files) — Task 3. ✓
 - `calendar.js` replaces the `ecbs-calendar-current-user-name` mock with `ECBS.Auth.getUser()` (spec §Modified Files) — Task 4. ✓
 - `calendar-admin` gated by Worker JWT instead of the localStorage access key (spec §Modified Files: calendar-admin.html / `hasCalendarAdminAccess`) — Task 4. ✓

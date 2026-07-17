@@ -178,7 +178,7 @@ test("calendar admin rejects obsolete Decap session handoff outside local develo
   assert.equal(api.hasCalendarAdminAccess(), false);
 });
 
-test("public regular meeting attend link opens details and auto-attends", () => {
+test("hidden attendance setting removes public meeting attendance controls", () => {
   const api = loadDomApi();
   api.__window.localStorage.setItem("ecbs-calendar-current-user-name", "Current Member");
   api.__window.localStorage.setItem("ecbs-calendar-current-user-email", "current@example.com");
@@ -199,16 +199,34 @@ test("public regular meeting attend link opens details and auto-attends", () => 
   const detailLink = api.__root.querySelector('a[href="/ec-buddhist-sangha/calendar-item/?slot=meeting-open"]');
   const attendLink = api.__root.querySelector('a[href*="slot=meeting-open"][href*="attend=1"]');
   assert.ok(detailLink);
-  assert.ok(attendLink);
-  assert.equal(attendLink.textContent.trim(), "Attend");
+  assert.equal(attendLink, null);
+  assert.doesNotMatch(api.__root.textContent, /person attending|people attending/i);
 
   api.__window.history.replaceState({}, "", "/ec-buddhist-sangha/calendar-item/?slot=meeting-open&attend=1");
   api.renderSchedule(api.__root);
 
   const slot = api.__getStore().slots.find((item) => item.id === "meeting-open");
-  assert.equal(slot.attendees.length, 1);
-  assert.equal(slot.attendees[0].name, "Current Member");
-  assert.match(api.__root.textContent, /You Are Attending/);
+  assert.equal(slot.attendees.length, 0);
+  assert.doesNotMatch(api.__root.textContent, /You Are Attending|Click To Attend|Attending/i);
+});
+
+test("public talk cards omit attendance and backup totals", () => {
+  const api = loadDomApi();
+  api.__setStore({
+    slots: [{
+      id: "talk-counts-hidden",
+      date: "2026-06-02",
+      title: "Talk without public totals",
+      speaker: null,
+      backups: [api.makeVolunteer("Backup Member", "", "", "2026-01-01T00:00:00.000Z", "backup@example.com")],
+      attendees: [api.makeVolunteer("Attending Member", "", "", "2026-01-01T00:00:00.000Z", "attending@example.com")]
+    }]
+  });
+
+  api.renderCalendar(api.__root, { year: 2026, month: 5 });
+
+  assert.match(api.__root.textContent, /Sign up as backup/i);
+  assert.doesNotMatch(api.__root.textContent, /person attending|people attending|\d+ backups?/i);
 });
 
 test("calendar descriptions preserve newlines in tooltips and item pages", () => {
@@ -692,6 +710,17 @@ test("calendar settings store signup window months", () => {
   api.applyCalendarSettingsUpdate(store, { defaultLocation: "Old default", signupWindowMonths: 3 });
 
   assert.equal(store.settings.signupWindowMonths, 3);
+});
+
+test("calendar settings hide the attending block by default and can re-enable it", () => {
+  const api = loadApi();
+  const store = api.normalizeStore({ settings: {}, slots: [] });
+
+  assert.equal(store.settings.hideAttendingBlock, true);
+
+  api.applyCalendarSettingsUpdate(store, { hideAttendingBlock: false });
+
+  assert.equal(store.settings.hideAttendingBlock, false);
 });
 
 test("default local calendar starts clean with the weekly Sangha meeting recurrence", () => {
@@ -1550,6 +1579,7 @@ test("admin utility sections are collapsed by default", () => {
   assert.match(templatesSection.textContent, /Talk Signup Confirmation/);
   assert.match(templatesSection.textContent, /Meeting Moved/);
   assert.equal(api.__root.querySelector('#calendar-settings-form [name="signupWindowMonths"]').value, "1");
+  assert.equal(api.__root.querySelector('#calendar-settings-form [name="hideAttendingBlock"]').checked, true);
   assert.equal(api.__root.querySelector('details[data-admin-section="zoom-settings"]').open, false);
   assert.equal(api.__root.querySelector('details[data-admin-section="recurrence-form"]').open, false);
   assert.equal(historySection.open, false);
@@ -1924,6 +1954,32 @@ test("recurring occurrence IDs are deterministic and rendering does not persist 
   assert.ok(firstIds.includes("occ-weekly-main-2026-07-21"));
   assert.deepEqual(Array.from(store.slots.map((slot) => slot.id)), firstIds);
   assert.equal(api.__storage.size, 0);
+});
+
+test("a deterministic recurring link opens its derived item without persisting on view", () => {
+  const api = loadDomApi({
+    url: "http://127.0.0.1:1313/ec-buddhist-sangha/calendar-item/?slot=occ-weekly-main-2026-07-21"
+  });
+  api.__setStore({
+    slots: [],
+    recurrences: [{
+      id: "weekly-main",
+      frequency: "weekly",
+      interval: 1,
+      startDate: "2026-07-21",
+      title: "Linked recurring meeting",
+      itemType: "talk",
+      active: true
+    }],
+    history: [],
+    settings: { signupWindowMonths: 1, hideAttendingBlock: true }
+  });
+
+  api.renderSchedule(api.__root);
+
+  assert.match(api.__root.textContent, /Linked recurring meeting/);
+  assert.doesNotMatch(api.__root.textContent, /No calendar items yet/);
+  assert.equal(api.__getStore().slots.length, 0);
 });
 
 test("production ignores mock query and browser identity", () => {

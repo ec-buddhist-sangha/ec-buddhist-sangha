@@ -284,6 +284,7 @@ export function projectStore(store, viewer, revision) {
   clone.settings = {
     defaultLocation: String(clone.settings && clone.settings.defaultLocation || ""),
     signupWindowMonths: Math.max(1, Number(clone.settings && clone.settings.signupWindowMonths || 1)),
+    hideAttendingBlock: !clone.settings || clone.settings.hideAttendingBlock !== false,
     zoomName: "",
     zoomEmail: "",
     zoomLink: String(clone.settings && clone.settings.zoomLink || "")

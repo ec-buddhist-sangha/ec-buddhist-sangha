@@ -5,7 +5,7 @@ The production calendar is a Hugo/JavaScript interface backed by the shared Clou
 ## Pages and access
 
 - `/calendar/` shows a month grid on desktop. On mobile it shows today first, followed by up to five upcoming items per page.
-- `/calendar-item/?slot=<slot-id>` shows one calendar item. Public details are visible without signing in; volunteering and attendance require a Google-authenticated member.
+- `/calendar-item/?slot=<slot-id>` shows one calendar item. Public details are visible without signing in; volunteering requires a Google-authenticated member.
 - `/admin/calendar/` is linked from Decap for convenience, but Decap is not its security boundary. The direct URL requires the Google-authenticated `admin` role.
 - Calendar links remain absent from the main site navigation for now.
 
@@ -34,7 +34,7 @@ The authoritative D1 revision is also written into the JSON document. A stale wr
 
 ## Privacy projections
 
-The public projection contains first full name and last initial, public talk links and notes, backup order through `fairnessRank`, and the attendance total through `attendanceCount`. It does not contain attendee identities, email addresses, reminder records, notification queues, or administrator history.
+The public projection contains first full name and last initial, public talk links and notes, backup order through `fairnessRank`, and the internal attendance total through `attendanceCount`. The current interface does not display attendance or backup totals. The projection does not contain attendee identities, email addresses, reminder records, notification queues, or administrator history.
 
 A member receives the public projection plus that member's complete signup details. An administrator receives the complete unredacted store. Offline caches are scoped to the current identity so an administrator cache cannot become the signed-out fallback.
 
@@ -56,13 +56,13 @@ Individual occurrences can override title, description, time, and location while
 
 The Worker enforces valid talk/meeting types and roles, active future items, the configured signup window, one open speaker position, approved reminder identifiers, HTTP(S)-only optional links, and bounded link/notes lengths.
 
-Talk speakers and backups count as attending. Other members can click to attend. Public pages show only the count, and attendance is explicitly not an RSVP.
+Talk speakers and backups continue to count as attending in the stored data. The `Hide attending block` calendar setting is enabled by default, so public attendance controls and totals are currently hidden. This preserves the feature for a later return without treating attendance as an RSVP.
 
 Backup volunteers are never promoted automatically. Fairness ordering prefers the person who brought a talk less recently, then preserves signup time as the tie-breaker.
 
 ## Calendar settings
 
-The default signup window is one month. Calendar items can be physical, Zoom, or hybrid. The default physical location is:
+The default signup window is one month, and `Hide attending block` is enabled. Calendar items can be physical, Zoom, or hybrid. The default physical location is:
 
 ```text
 Unity of Eau Claire

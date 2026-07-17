@@ -116,6 +116,7 @@ describe("calendar state (D1)", () => {
     expect(publicStore.slots[0].speaker.link).toBe("https://talk.example");
     expect(publicStore.slots[0].attendees).toEqual([]);
     expect(publicStore.slots[0].attendanceCount).toBe(3);
+    expect(publicStore.settings.hideAttendingBlock).toBe(true);
     expect(publicStore.slots[0].notifications).toEqual([]);
     expect(publicStore.history).toEqual([]);
 

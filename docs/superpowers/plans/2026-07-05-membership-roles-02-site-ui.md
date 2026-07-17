@@ -374,7 +374,7 @@ Replace the file with:
   // Build the menu item HTML for a signed-in user based on the loaded session.
   function menuItemsFor(user) {
     var link = 'class="block px-4 py-2 text-sm text-sangha-navy hover:bg-sangha-light"';
-    var items = '<a href="' + joinPath(siteBase(), "calendar/") + '" ' + link + '>My RSVPs</a>';
+    var items = '<a href="' + joinPath(siteBase(), "calendar/") + '" ' + link + '>Calendar</a>';
     var role = user.role;
     if (role === "admin") {
       items += '<a href="' + joinPath(siteBase(), "account/members/") + '" ' + link + '>Members</a>';

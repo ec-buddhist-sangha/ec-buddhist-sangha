@@ -49,7 +49,7 @@ function load(options = {}) {
   vm.createContext(context);
   const scriptPath = path.join(__dirname, "..", "static", "js", "auth.js");
   vm.runInContext(fs.readFileSync(scriptPath, "utf8"), context, { filename: scriptPath });
-  return { Auth: context.window.ECBS.Auth, sessionData, location, events };
+  return { Auth: context.window.ECBS.Auth, sessionData, location, events, container };
 }
 
 // Fetch stub that answers /api/me with the given session, and records calls.
@@ -84,6 +84,16 @@ test("getUser role comes from /api/me, not the token", async () => {
   assert.equal(user.email, "mem@x.org");
   assert.equal(user.role, "member");
   assert.ok(fetch.calls.some((c) => c.url.endsWith("/api/me")));
+});
+
+test("signed-in account menu labels the calendar without RSVP wording", async () => {
+  const fetch = apiFetch({ sub: "mem@x.org", name: "Mem", role: "member", request_status: "none" });
+  const { Auth, container } = load({ hash: "#token=" + makeToken({ sub: "mem@x.org", name: "Mem", exp: future() }), fetch });
+  await Auth.ready();
+  Auth.renderButtons();
+
+  assert.match(container.innerHTML, />Calendar<\/a>/);
+  assert.doesNotMatch(container.innerHTML, /RSVP/i);
 });
 
 test("isAdmin reflects the /api/me role", async () => {

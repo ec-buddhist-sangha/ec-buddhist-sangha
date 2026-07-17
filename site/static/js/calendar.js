@@ -129,6 +129,7 @@
     return {
       defaultLocation: DEFAULT_LOCATION,
       signupWindowMonths: DEFAULT_SIGNUP_WINDOW_MONTHS,
+      hideAttendingBlock: true,
       zoomName: "",
       zoomEmail: "",
       zoomLink: ""
@@ -146,6 +147,7 @@
     return {
       defaultLocation: textValueOrDefault(settings, "defaultLocation", DEFAULT_LOCATION) || DEFAULT_LOCATION,
       signupWindowMonths: normalizeSignupWindowMonths(settings.signupWindowMonths),
+      hideAttendingBlock: settings.hideAttendingBlock !== false,
       zoomName: textValueOrDefault(settings, "zoomName", ""),
       zoomEmail: textValueOrDefault(settings, "zoomEmail", ""),
       zoomLink: textValueOrDefault(settings, "zoomLink", "")
@@ -778,7 +780,24 @@
   }
 
   function findSlotById(store, slotId) {
-    return store.slots.find(function (slot) { return slot.id === slotId; }) || null;
+    var existing = store.slots.find(function (slot) { return slot.id === slotId; });
+    if (existing) return existing;
+
+    var dateMatch = String(slotId || "").match(/-(\d{4}-\d{2}-\d{2})$/);
+    if (!dateMatch) return null;
+    var occurrenceDate = dateMatch[1];
+    var rule = store.recurrences.find(function (candidate) {
+      return candidate.active &&
+        deterministicOccurrenceId(candidate.id, occurrenceDate) === slotId &&
+        candidate.skippedDates.indexOf(occurrenceDate) === -1 &&
+        recurrenceMatchesDate(candidate, parseDate(occurrenceDate));
+    });
+    if (!rule) return null;
+
+    var derived = slotFromRecurrence(rule, occurrenceDate);
+    store.slots.push(derived);
+    store.slots.sort(byDateTime);
+    return derived;
   }
 
   function freshSlotForAction(slotId, expectedRevision, year, month) {
@@ -900,11 +919,6 @@
 
   function isMeetingSlot(slot) {
     return slot.itemType === "meeting";
-  }
-
-  function backupCountLabel(slot) {
-    var count = slot.backups.length;
-    return count + " " + (count === 1 ? "backup" : "backups");
   }
 
   function backupTooltip(slot) {
@@ -1777,7 +1791,6 @@
     var slotTitle = slot.title || "Calendar item";
     var slotDescription = slot.description || "";
     var backupTitle = backupTooltip(slot);
-    var attendanceLabel = attendanceCountLabel(slot);
     var cardClasses = moved
       ? "border-red-200 bg-red-50"
       : past
@@ -1801,7 +1814,6 @@
         '<div class="text-xs font-bold ' + titleClass + ' line-clamp-2"' + tooltipAttr(slotTitle) + '>' + escapeHtml(compactText(slotTitle, CALENDAR_TITLE_LIMIT)) + '</div>' +
         '<div class="text-xs ' + descriptionClass + ' mt-1 line-clamp-2"' + tooltipAttr(slotDescription) + '>' + escapeHtml(compactText(slotDescription, CALENDAR_DESCRIPTION_LIMIT)) + '</div>' +
         '<div class="text-[10px] uppercase tracking-widest font-bold text-gray-400 mt-2">' + displayTimeRange(slot) + '</div>' +
-        '<div class="mt-1 text-[10px] font-bold text-gray-400"' + tooltipAttr(attendanceLabel) + '>' + escapeHtml(attendanceLabel) + '</div>' +
       '</a>' +
       '<div class="mt-2 flex flex-col gap-2">' +
       (moved
@@ -1811,11 +1823,11 @@
         : canceled
           ? '<div class="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Canceled</div>'
         : meeting
-          ? (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>')
+          ? (settings.hideAttendingBlock ? '' : (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>'))
         : assigned
           ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-xs font-bold ' + primaryActionClass + '">' + escapeHtml(publicName(slot.speaker.name)) + '</a>'
           : (signupsOpen ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">Open for volunteer</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>')) +
-      (past || canceled || meeting || !signupsOpen ? '' : '<a href="' + backupUrl + '" class="inline-flex w-full min-w-0 flex-col items-center justify-center rounded-full border px-2 py-1.5 text-center ' + backupActionClass + '"' + tooltipAttr(backupTitle) + ' aria-label="' + escapeHtml(backupTitle) + '"><span class="text-[9px] font-bold leading-none text-gray-400">' + backupCountLabel(slot) + '</span><span class="mt-1 text-[10px] uppercase tracking-widest font-bold leading-tight">Sign up as backup</span></a>') +
+      (past || canceled || meeting || !signupsOpen ? '' : '<a href="' + backupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full border px-2 py-2 text-center ' + backupActionClass + '"' + tooltipAttr(backupTitle) + ' aria-label="' + escapeHtml(backupTitle) + '"><span class="text-[10px] uppercase tracking-widest font-bold leading-tight">Sign up as backup</span></a>') +
       '</div>' +
     '</div>';
   }
@@ -2436,7 +2448,8 @@
       '</div>' +
       '<form id="calendar-settings-form" class="mt-5 grid gap-4 rounded-xl border border-blue-100 bg-white p-4">' +
         textareaMarkup("Default Location", "defaultLocation", true, settings.defaultLocation) +
-        numberFieldMarkup("Signup Window (months)", "signupWindowMonths", settings.signupWindowMonths, 1, 24, "Members can volunteer, sign up as backup, or mark attendance once a calendar item is inside this window. The default is 1 month.") +
+        numberFieldMarkup("Signup Window (months)", "signupWindowMonths", settings.signupWindowMonths, 1, 24, "Members can volunteer or sign up as backup once a calendar item is inside this window. The default is 1 month.") +
+        checkboxMarkup("hideAttendingBlock", "Hide attending block", settings.hideAttendingBlock, "Hide public attendance controls and totals while retaining existing attendance data for possible future use.") +
         '<button type="submit" class="rounded-lg bg-sangha-navy px-4 py-3 text-xs uppercase tracking-widest font-bold text-white hover:bg-blue-900">Save Settings</button>' +
         '<p class="text-xs leading-relaxed text-gray-500">Changing the default location updates future items and recurring rules that are checked to use the default. Past items and custom locations are left alone.</p>' +
       '</form>' +
@@ -2479,6 +2492,7 @@
         applyCalendarSettingsUpdate(store, {
           defaultLocation: fieldValue(form, "defaultLocation") || DEFAULT_LOCATION,
           signupWindowMonths: fieldValue(form, "signupWindowMonths"),
+          hideAttendingBlock: checkboxValue(form, "hideAttendingBlock"),
           zoomName: store.settings.zoomName,
           zoomEmail: store.settings.zoomEmail,
           zoomLink: store.settings.zoomLink
@@ -2498,6 +2512,7 @@
         applyCalendarSettingsUpdate(store, {
           defaultLocation: store.settings.defaultLocation,
           signupWindowMonths: store.settings.signupWindowMonths,
+          hideAttendingBlock: store.settings.hideAttendingBlock,
           zoomName: fieldValue(zoomForm, "zoomName"),
           zoomEmail: fieldValue(zoomForm, "zoomEmail"),
           zoomLink: fieldValue(zoomForm, "zoomLink")
@@ -3464,7 +3479,7 @@
     var store = loadStore();
     var params = new URLSearchParams(window.location.search);
     var slotId = params.get("slot");
-    var slot = store.slots.find(function (item) { return item.id === slotId; });
+    var slot = findSlotById(store, slotId);
     if (!slot) {
       renderScheduleList(root, store);
       return;
@@ -3513,7 +3528,7 @@
         '<div class="' + (closed ? 'grid' : 'grid md:grid-cols-2') + ' gap-6">' +
           (past ? renderPastMeetingPanel(slot) : slot.canceled ? renderCanceledMeetingPanel(slot) : renderPrimaryPanel(slot, store.settings)) +
           (closed ? '' : '<div class="grid gap-2">' +
-            renderTalkAttendancePanel(slot, currentAttendee, store.settings) +
+            (store.settings.hideAttendingBlock ? '' : renderTalkAttendancePanel(slot, currentAttendee, store.settings)) +
             renderBackupPanel(slot, backupRows, store.settings) +
           '</div>') +
         '</div>' +
@@ -3766,7 +3781,8 @@
 
   function renderMeetingSchedule(root, store, slot) {
     var params = new URLSearchParams(window.location.search);
-    if (params.get("attend") === "1" && isLoggedIn() && !isPastSlot(slot) && !slot.canceled && signupWindowOpen(slot, store.settings) && !currentUserAttendee(slot)) {
+    var settings = normalizeCalendarSettings(store.settings);
+    if (!settings.hideAttendingBlock && params.get("attend") === "1" && isLoggedIn() && !isPastSlot(slot) && !slot.canceled && signupWindowOpen(slot, settings) && !currentUserAttendee(slot)) {
       addCurrentUserAttendance(store, slot);
       if (isServerBackedProduction()) {
         saveStoreAndThen(store, root, function () { renderSchedule(root); });
@@ -3801,10 +3817,10 @@
             topReminderControls +
           '</div>' +
         '</article>' +
-        '<div class="' + (closed ? 'grid' : 'grid md:grid-cols-2') + ' gap-6">' +
-          (closed ? renderMeetingClosedPanel(slot) : renderAttendancePanel(slot, currentAttendee, store.settings)) +
+        (settings.hideAttendingBlock ? '' : '<div class="' + (closed ? 'grid' : 'grid md:grid-cols-2') + ' gap-6">' +
+          (closed ? renderMeetingClosedPanel(slot) : renderAttendancePanel(slot, currentAttendee, settings)) +
           (closed ? '' : renderAttendeeListPanel(slot)) +
-        '</div>' +
+        '</div>') +
       '</div>');
 
     wirePersonalReminderForm(root, slot.id, renderSchedule);
