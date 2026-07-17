@@ -3,6 +3,7 @@ title: "Forum Topic"
 layout: "view"
 sitemap:
   disable: true
-build:
+_build:
   list: never
+  render: always
 ---
