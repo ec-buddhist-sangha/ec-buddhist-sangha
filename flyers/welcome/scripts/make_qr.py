@@ -6,16 +6,16 @@ from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.graphics.shapes import Drawing
 
 
-MAILING_LIST_URL = "https://groups.google.com/g/eauclairebuddhistsangha/about"
+WEBSITE_URL = "https://eauclairesangha.org/"
 
 
 def main() -> None:
     flyer_root = Path(__file__).resolve().parents[1]
-    svg_path = flyer_root / "assets" / "mailing-list-qr.svg"
-    png_path = flyer_root / "assets" / "mailing-list-qr.png"
+    svg_path = flyer_root / "assets" / "website-qr.svg"
+    png_path = flyer_root / "assets" / "website-qr.png"
     svg_path.parent.mkdir(parents=True, exist_ok=True)
 
-    qr = QrCodeWidget(MAILING_LIST_URL)
+    qr = QrCodeWidget(WEBSITE_URL)
     bounds = qr.getBounds()
     width = bounds[2] - bounds[0]
     height = bounds[3] - bounds[1]

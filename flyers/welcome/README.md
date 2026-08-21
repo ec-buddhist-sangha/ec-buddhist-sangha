@@ -8,8 +8,8 @@ This folder contains the editable source and generated print files for the weekl
 - `source/welcome-flyer.html` - browser preview markup matching the flyer copy
 - `source/welcome-flyer.css` - browser preview styling for letter-size output
 - `assets/logo.png` - copied from the site root `assets/logo.png`
-- `assets/mailing-list-qr.svg` - generated QR code for the Google Group mailing list
-- `assets/mailing-list-qr.png` - generated QR code used in the PDF/PNG render
+- `assets/website-qr.svg` - generated QR code for the Sangha website
+- `assets/website-qr.png` - generated QR code used in the PDF/PNG render
 - `scripts/render_flyer.py` - renders `source/flyer-content.json` to PDF and PNG
 - `dist/eau-claire-buddhist-sangha-welcome-flyer.pdf` - printable PDF
 - `dist/eau-claire-buddhist-sangha-welcome-flyer.png` - visual proof image
@@ -25,10 +25,10 @@ Edit `source/flyer-content.json`, then run:
 The QR code points to:
 
 ```text
-https://groups.google.com/g/eauclairebuddhistsangha/about
+https://eauclairesangha.org/
 ```
 
-If the mailing list URL changes, update `MAILING_LIST_URL` in `scripts/make_qr.py`, then rebuild.
+If the website URL changes, update `WEBSITE_URL` in `scripts/make_qr.py`, then rebuild.
 
 ## Source Notes
 

@@ -1,0 +1,29 @@
+{
+  "organization": "Eau Claire Buddhist Sangha",
+  "headline": "Welcome",
+  "intro": "You are welcome here, whether you are new to Buddhism,\nnew to meditation, returning after time away, or simply curious.",
+  "arrival_heading": "Arriving & Getting Settled",
+  "arrival_body": "If you arrive after 7:00, we will probably already be meditating, but you are still warmly encouraged to join us. Please enter quietly and take any open seat. Chairs are available. Large cushions are under the table inside the hall; small cushions and blankets are in the closet.",
+  "schedule": [
+    {
+      "time": "6:45 PM",
+      "text": "Optional orientation to sitting practice"
+    },
+    {
+      "time": "7:00 PM",
+      "text": "Silent sitting meditation"
+    },
+    {
+      "time": "7:30 PM",
+      "text": "Dharma talk, Buddhist teaching, or discussion"
+    },
+    {
+      "time": "8:00 PM",
+      "text": "Questions, reflections, and community conversation"
+    }
+  ],
+  "website_heading": "Visit Our Website",
+  "website_body": "Find meeting details, community updates, and sign up for our mailing list.",
+  "website_url": "https://eauclairesangha.org/",
+  "website_url_display": "eauclairesangha.org"
+}

@@ -1,0 +1,225 @@
+:root {
+  --sangha-navy: #1b3b5a;
+  --sangha-gold: #c59d45;
+  --brand-gold: #9b7428;
+  --sangha-light: #f5f5f0;
+  --sangha-paper: #fafaf8;
+  --ink: #233548;
+  --muted: #65717e;
+  --line: #dfd7c6;
+}
+
+@page {
+  size: Letter;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #ece7dc;
+}
+
+body {
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.page {
+  position: relative;
+  width: 8.5in;
+  height: 11in;
+  margin: 0 auto;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(197, 157, 69, 0.12), rgba(197, 157, 69, 0) 1.35in),
+    var(--sangha-paper);
+  border: 0.03in solid var(--sangha-navy);
+}
+
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0.22in;
+  border: 1px solid rgba(27, 59, 90, 0.16);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.header,
+.arrival,
+.schedule,
+.website-card {
+  position: absolute;
+  z-index: 1;
+}
+
+.brand-lockup {
+  position: absolute;
+  top: 0.42in;
+  left: 0.64in;
+  display: grid;
+  grid-template-columns: 1.42in auto;
+  align-items: center;
+  gap: 0.45in;
+}
+
+.logo {
+  display: block;
+  width: 1.42in;
+  height: 1.42in;
+  object-fit: contain;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--brand-gold);
+  font-size: 0.446in;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.eyebrow span {
+  display: block;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: var(--sangha-navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+h1 {
+  position: absolute;
+  top: 1.78in;
+  left: 0;
+  width: 8.5in;
+  text-align: center;
+  font-size: 0.816in;
+  line-height: 0.95;
+}
+
+.intro {
+  position: absolute;
+  top: 2.6in;
+  left: 0.64in;
+  width: 7.22in;
+  margin: 0;
+  text-align: center;
+  font-size: 0.22in;
+  line-height: 1.08;
+}
+
+.arrival {
+  top: 3.55in;
+  left: 0.99in;
+  width: 6.52in;
+  min-height: 1.95in;
+  padding: 0.28in 0.38in 0.2in;
+  background: var(--sangha-light);
+  border-left: 0.1in solid var(--sangha-gold);
+}
+
+.arrival h2 {
+  font-size: 0.4in;
+  line-height: 1.05;
+}
+
+.arrival p {
+  margin: 0.13in 0 0;
+  font-size: 0.21in;
+  line-height: 1.1;
+}
+
+.schedule {
+  top: 5.78in;
+  left: 0.99in;
+  width: 6.52in;
+}
+
+.schedule ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.schedule li {
+  display: grid;
+  grid-template-columns: 1.25in 1fr;
+  align-items: baseline;
+  gap: 0.22in;
+  padding: 0.12in 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.24in;
+  line-height: 1.05;
+}
+
+.schedule li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.schedule time {
+  color: var(--sangha-gold);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.website-card {
+  left: 0.64in;
+  bottom: 0.5in;
+  width: 7.22in;
+  min-height: 2.2in;
+  display: grid;
+  grid-template-columns: 1fr 1.45in;
+  align-items: center;
+  gap: 0.35in;
+  padding: 0.3in 0.38in;
+  border: 1px solid var(--line);
+  background: white;
+}
+
+.website-card h2 {
+  font-size: 0.41in;
+  line-height: 1.05;
+}
+
+.website-card p {
+  max-width: 4.9in;
+  margin: 0.13in 0 0;
+  font-size: 0.21in;
+  line-height: 1.1;
+}
+
+.website-card .url {
+  color: var(--brand-gold);
+  font-size: 0.395in;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.qr {
+  justify-self: end;
+  width: 1.45in;
+  height: 1.45in;
+}
+
+@media screen {
+  body {
+    padding: 24px;
+  }
+
+  .page {
+    box-shadow: 0 16px 54px rgba(27, 59, 90, 0.2);
+  }
+}

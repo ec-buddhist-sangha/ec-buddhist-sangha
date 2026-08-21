@@ -244,12 +244,12 @@ h1 {
 }
 
 .dana-column,
-.mailing-column {
+.website-column {
   min-width: 0;
   padding: 0.12in 0.2in;
 }
 
-.mailing-column {
+.website-column {
   display: grid;
   grid-template-columns: 1fr 0.86in;
   grid-template-rows: 1fr auto;
@@ -258,7 +258,7 @@ h1 {
   border-left: 1px solid var(--line);
 }
 
-.mailing-copy {
+.website-copy {
   min-width: 0;
 }
 
@@ -280,8 +280,9 @@ h1 {
 
 .url {
   grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 0.105in;
+  color: var(--sangha-navy);
+  font-size: 0.135in;
+  font-weight: 700;
 }
 
 @media screen {

@@ -90,7 +90,7 @@ def render_pdf(content: dict, root: Path, fonts: dict[str, str]) -> Path:
     dist.mkdir(parents=True, exist_ok=True)
     output = dist / "eau-claire-buddhist-sangha-welcome-flyer.pdf"
     logo = root / "assets" / "logo.png"
-    qr = root / "assets" / "mailing-list-qr.png"
+    qr = root / "assets" / "website-qr.png"
 
     c = canvas.Canvas(str(output), pagesize=letter)
     c.setFillColor(PAPER)
@@ -201,8 +201,8 @@ def render_pdf(content: dict, root: Path, fonts: dict[str, str]) -> Path:
     heading_bottom = draw_pdf_text(c, content["qr_heading"], qr_text_x, footer_y + 80, qr_text_w, fonts["serif_bold"], 17.4, 17.0, NAVY)
     body_y = min(footer_y + 47, heading_bottom - 2)
     draw_pdf_text(c, content["qr_body"], qr_text_x, body_y, qr_text_w, fonts["sans"], 9.7, 10.0, INK)
-    c.setFillColor(MUTED)
-    c.setFont(fonts["sans"], 7.5)
+    c.setFillColor(NAVY)
+    c.setFont(fonts["sans_bold"], 9.5)
     c.drawString(qr_text_x, footer_y + 18, content["qr_url_display"])
 
     c.save()
@@ -328,7 +328,7 @@ def render_png(content: dict, root: Path) -> Path:
     draw_pil_text(draw, content["dana_note"], dana_x, footer_top + p(50), footer_w / 2 - p(40), ImageFont.truetype("C:/Windows/Fonts/arial.ttf", p(11.7)), HEX["ink"], p(16))
 
     qr_size = p(60)
-    qr = Image.open(root / "assets" / "mailing-list-qr.png").convert("RGBA").resize((qr_size, qr_size))
+    qr = Image.open(root / "assets" / "website-qr.png").convert("RGBA").resize((qr_size, qr_size))
     qr_x = footer_x + footer_w - qr_size - p(18)
     qr_y = footer_top + p(27)
     img.paste(qr, (int(qr_x), qr_y), qr)
@@ -346,7 +346,7 @@ def render_png(content: dict, root: Path) -> Path:
     )
     body_start = max(footer_top + p(50), heading_end + p(2))
     draw_pil_text(draw, content["qr_body"], qr_text_x, body_start, qr_text_w, ImageFont.truetype("C:/Windows/Fonts/arial.ttf", p(9.7)), HEX["ink"], p(13))
-    draw.text((qr_text_x, footer_top + p(93)), content["qr_url_display"], font=ImageFont.truetype("C:/Windows/Fonts/arial.ttf", p(7.5)), fill=HEX["muted"])
+    draw.text((qr_text_x, footer_top + p(92)), content["qr_url_display"], font=ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", p(9.5)), fill=HEX["navy"])
 
     img.save(output)
     print(f"Wrote {output}")
