@@ -15,7 +15,7 @@
   var DEFAULT_TITLE = "Sangha Meeting";
   var DEFAULT_DESCRIPTION = "Each 90 minute gathering is divided into 30 minute segments:\n\u25cf Group meditation with instruction for newcomers\n\u25cf Recorded Dharma talk from a teacher presented by one of the members\n\u25cf Open discussion about the teachings and meditation practice";
   var DEFAULT_LOCATION = "Unity of Eau Claire\n1808 Folsom Street\nEau Claire, WI 54703";
-  var DEFAULT_SIGNUP_WINDOW_MONTHS = 1;
+  var DEFAULT_SIGNUP_WINDOW_WEEKS = 4;
   var DEFAULT_TUESDAY_RECURRENCE_ID = "default-weekly-tuesday-talks";
   var MONTHLY_MODE_WEEKDAY = "weekday";
   var MONTHLY_MODE_MONTH_DAY = "month-day";
@@ -128,7 +128,7 @@
   function defaultCalendarSettings() {
     return {
       defaultLocation: DEFAULT_LOCATION,
-      signupWindowMonths: DEFAULT_SIGNUP_WINDOW_MONTHS,
+      signupWindowWeeks: DEFAULT_SIGNUP_WINDOW_WEEKS,
       hideAttendingBlock: true,
       emailFooter: "",
       zoomName: "",
@@ -137,17 +137,18 @@
     };
   }
 
-  function normalizeSignupWindowMonths(value) {
-    var months = Number(value);
-    if (!Number.isFinite(months)) return DEFAULT_SIGNUP_WINDOW_MONTHS;
-    return Math.max(1, Math.min(24, Math.floor(months)));
+  function normalizeSignupWindowWeeks(value, legacyMonths) {
+    var weeks = Number(value);
+    if (!Number.isFinite(weeks) && Number.isFinite(Number(legacyMonths))) weeks = Number(legacyMonths) * 4;
+    if (!Number.isFinite(weeks)) return DEFAULT_SIGNUP_WINDOW_WEEKS;
+    return Math.max(0, Math.min(52, Math.floor(weeks)));
   }
 
   function normalizeCalendarSettings(settings) {
     settings = settings || {};
     return {
       defaultLocation: textValueOrDefault(settings, "defaultLocation", DEFAULT_LOCATION) || DEFAULT_LOCATION,
-      signupWindowMonths: normalizeSignupWindowMonths(settings.signupWindowMonths),
+      signupWindowWeeks: normalizeSignupWindowWeeks(settings.signupWindowWeeks, settings.signupWindowMonths),
       hideAttendingBlock: settings.hideAttendingBlock !== false,
       emailFooter: textValueOrDefault(settings, "emailFooter", ""),
       zoomName: textValueOrDefault(settings, "zoomName", ""),
@@ -610,19 +611,27 @@
   }
 
   function signupWindowLabel(settings) {
-    var months = normalizeCalendarSettings(settings).signupWindowMonths;
-    return months + " " + (months === 1 ? "month" : "months");
+    var weeks = normalizeCalendarSettings(settings).signupWindowWeeks;
+    return weeks + " " + (weeks === 1 ? "week" : "weeks");
+  }
+
+  function signupWindowDisabled(settings) {
+    return normalizeCalendarSettings(settings).signupWindowWeeks === 0;
   }
 
   function signupOpenDate(slot, settings) {
-    return dateKey(addMonthsClamped(parseDate(slot.date), -normalizeCalendarSettings(settings).signupWindowMonths));
+    return dateKey(addDays(parseDate(slot.date), -normalizeCalendarSettings(settings).signupWindowWeeks * 7));
   }
 
   function signupWindowOpen(slot, settings) {
+    if (signupWindowDisabled(settings)) return false;
     return dateKey(new Date()) >= signupOpenDate(slot, settings);
   }
 
   function signupWindowMessage(slot, settings, label) {
+    if (signupWindowDisabled(settings)) {
+      return "Online signups are currently closed. Calendar administrators can still assign people directly.";
+    }
     return label + " open " + signupWindowLabel(settings) + " before this calendar item, on " + displayDate(signupOpenDate(slot, settings)) + ".";
   }
 
@@ -1825,10 +1834,10 @@
         : canceled
           ? '<div class="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Canceled</div>'
         : meeting
-          ? (settings.hideAttendingBlock ? '' : (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>'))
+          ? (settings.hideAttendingBlock ? '' : (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml(signupWindowDisabled(settings) ? "Online signups closed" : "Opens " + signupWindowLabel(settings) + " before") + '</div>'))
         : assigned
           ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-xs font-bold ' + primaryActionClass + '">' + escapeHtml(publicName(slot.speaker.name)) + '</a>'
-          : (signupsOpen ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">Open for volunteer</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml("Opens " + signupWindowLabel(settings) + " before") + '</div>')) +
+          : (signupsOpen ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">Open for volunteer</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml(signupWindowDisabled(settings) ? "Online signups closed" : "Opens " + signupWindowLabel(settings) + " before") + '</div>')) +
       (past || canceled || meeting || !signupsOpen ? '' : '<a href="' + backupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full border px-2 py-2 text-center ' + backupActionClass + '"' + tooltipAttr(backupTitle) + ' aria-label="' + escapeHtml(backupTitle) + '"><span class="text-[10px] uppercase tracking-widest font-bold leading-tight">Sign up as backup</span></a>') +
       '</div>' +
     '</div>';
@@ -2494,7 +2503,7 @@
       '</div>' +
       '<form id="calendar-settings-form" class="mt-5 grid gap-4 rounded-xl border border-blue-100 bg-white p-4">' +
         textareaMarkup("Default Location", "defaultLocation", true, settings.defaultLocation) +
-        numberFieldMarkup("Signup Window (months)", "signupWindowMonths", settings.signupWindowMonths, 1, 24, "Members can volunteer or sign up as backup once a calendar item is inside this window. The default is 1 month.") +
+        numberFieldMarkup("Signup Window (weeks)", "signupWindowWeeks", settings.signupWindowWeeks, 0, 52, "Use 1 or more weeks to set when online signups open. Set this to 0 to disable online signups; calendar administrators can still assign people directly.") +
         checkboxMarkup("hideAttendingBlock", "Hide attending block", settings.hideAttendingBlock, "Hide public attendance controls and totals while retaining existing attendance data for possible future use.") +
         '<button type="submit" class="rounded-lg bg-sangha-navy px-4 py-3 text-xs uppercase tracking-widest font-bold text-white hover:bg-blue-900">Save Settings</button>' +
         '<p class="text-xs leading-relaxed text-gray-500">Changing the default location updates future items and recurring rules that are checked to use the default. Past items and custom locations are left alone.</p>' +
@@ -2537,7 +2546,7 @@
         var store = loadStore();
         applyCalendarSettingsUpdate(store, {
           defaultLocation: fieldValue(form, "defaultLocation") || DEFAULT_LOCATION,
-          signupWindowMonths: fieldValue(form, "signupWindowMonths"),
+          signupWindowWeeks: fieldValue(form, "signupWindowWeeks"),
           hideAttendingBlock: checkboxValue(form, "hideAttendingBlock"),
           emailFooter: store.settings.emailFooter,
           zoomName: store.settings.zoomName,
@@ -2558,7 +2567,7 @@
         var store = loadStore();
         applyCalendarSettingsUpdate(store, {
           defaultLocation: store.settings.defaultLocation,
-          signupWindowMonths: store.settings.signupWindowMonths,
+          signupWindowWeeks: store.settings.signupWindowWeeks,
           hideAttendingBlock: store.settings.hideAttendingBlock,
           emailFooter: store.settings.emailFooter,
           zoomName: fieldValue(zoomForm, "zoomName"),
@@ -2668,7 +2677,7 @@
         var store = loadStore();
         applyCalendarSettingsUpdate(store, {
           defaultLocation: store.settings.defaultLocation,
-          signupWindowMonths: store.settings.signupWindowMonths,
+          signupWindowWeeks: store.settings.signupWindowWeeks,
           hideAttendingBlock: store.settings.hideAttendingBlock,
           emailFooter: fieldValue(footerForm, "emailFooter"),
           zoomName: store.settings.zoomName,
@@ -3958,6 +3967,12 @@
   }
 
   function renderVolunteerWindowPanel(slot, settings) {
+    if (signupWindowDisabled(settings)) {
+      return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
+        '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Volunteer Signups Closed</h3>' +
+        '<p class="text-sm text-gray-600 leading-relaxed">Online volunteer signups are currently closed. A calendar administrator can still assign a volunteer directly.</p>' +
+      '</aside>';
+    }
     return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
       '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Will Open For Volunteers</h3>' +
       '<p class="text-sm text-gray-600 leading-relaxed">This will open for volunteers ' + escapeHtml(signupWindowLabel(settings)) + ' before the meeting, on ' + escapeHtml(displayDate(signupOpenDate(slot, settings))) + '.</p>' +

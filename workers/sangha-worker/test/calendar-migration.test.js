@@ -8,6 +8,7 @@ describe("calendar initialization migration", () => {
     expect(Number(row.revision)).toBe(1);
     expect(store.slots).toEqual([]);
     expect(store.history).toEqual([]);
+    expect(store.settings.signupWindowWeeks).toBe(4);
     expect(store.recurrences).toHaveLength(1);
     expect(store.recurrences[0]).toMatchObject({
       id: "default-weekly-tuesday-talks",

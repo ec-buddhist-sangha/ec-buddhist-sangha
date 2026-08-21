@@ -729,16 +729,39 @@ test("calendar settings update future default locations only", () => {
   assert.equal(store.slots.find((slot) => slot.id === "future-custom").location, "Custom place");
 });
 
-test("calendar settings store signup window months", () => {
+test("calendar settings store signup window weeks and migrate legacy months", () => {
   const api = loadApi();
   const store = api.normalizeStore({
     settings: { defaultLocation: "Old default", signupWindowMonths: 1 },
     slots: []
   });
 
-  api.applyCalendarSettingsUpdate(store, { defaultLocation: "Old default", signupWindowMonths: 3 });
+  assert.equal(store.settings.signupWindowWeeks, 4);
 
-  assert.equal(store.settings.signupWindowMonths, 3);
+  api.applyCalendarSettingsUpdate(store, { defaultLocation: "Old default", signupWindowWeeks: 3 });
+
+  assert.equal(store.settings.signupWindowWeeks, 3);
+});
+
+test("zero signup weeks disables online signup forms while retaining admin assignment", () => {
+  const api = loadApi();
+  api.__storage.set("ecbs-calendar-current-user-name", "Current Member");
+  api.__storage.set("ecbs-calendar-current-user-email", "current.member@example.com");
+  const slot = api.normalizeSlot({
+    id: "closed-online-signups",
+    date: "2099-08-04",
+    title: "Future talk",
+    speaker: null,
+    backups: []
+  });
+
+  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 0 });
+  assert.match(html, /Volunteer Signups Closed/);
+  assert.match(html, /calendar administrator can still assign a volunteer directly/i);
+  assert.doesNotMatch(html, /id="talk-primary-form"/);
+
+  api.assignPersonToSlot(slot, "speaker", "Direct Assignment", "");
+  assert.equal(slot.speaker.name, "Direct Assignment");
 });
 
 test("calendar settings hide the attending block by default and can re-enable it", () => {
@@ -764,7 +787,7 @@ test("default local calendar starts clean with the weekly Sangha meeting recurre
   assert.equal(store.recurrences[0].startDate, "2026-07-21");
   assert.equal(store.recurrences[0].startTime, "19:00");
   assert.equal(store.recurrences[0].endTime, "20:30");
-  assert.equal(store.settings.signupWindowMonths, 1);
+  assert.equal(store.settings.signupWindowWeeks, 4);
 });
 
 test("calendar supports physical only zoom only and hybrid items", () => {
@@ -831,10 +854,10 @@ test("future volunteer panels show when signups will open instead of the form", 
     backups: []
   });
 
-  const html = api.renderPrimaryPanel(slot, { signupWindowMonths: 1 });
+  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 });
 
   assert.match(html, /Will Open For Volunteers/);
-  assert.match(html, /This will open for volunteers 1 month before/);
+  assert.match(html, /This will open for volunteers 4 weeks before/);
   assert.doesNotMatch(html, /id="talk-primary-form"/);
   assert.doesNotMatch(html, /Sign Up To Bring Talk/);
 });
@@ -851,7 +874,7 @@ test("open volunteer panel uses current volunteer wording", () => {
     backups: []
   });
 
-  const html = api.renderPrimaryPanel(slot, { signupWindowMonths: 1 });
+  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 });
 
   assert.match(html, />Volunteer<\/h3>/);
   assert.match(html, /30 minute recorded Dharma talk on <span class="font-bold text-sangha-navy">Fourth Hindrance: Restlessness &amp; Worry<\/span>/);
@@ -870,7 +893,7 @@ test("assigned talk panel uses volunteer info wording", () => {
     backups: []
   });
 
-  const html = api.renderPrimaryPanel(slot, { signupWindowMonths: 1 });
+  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 });
 
   assert.match(html, /Volunteer Info/);
   assert.doesNotMatch(html, /Talk Already Claimed/);
@@ -895,10 +918,10 @@ test("open signup forms do not show reminder preferences before signup", () => {
     attendees: []
   });
 
-  assert.doesNotMatch(api.renderPrimaryPanel(talkSlot, { signupWindowMonths: 1 }), /Email Reminder Preferences/);
-  assert.doesNotMatch(api.renderBackupPanel(talkSlot, "", { signupWindowMonths: 1 }), /Email Reminder Preferences/);
-  assert.doesNotMatch(api.renderTalkAttendancePanel(talkSlot, null, { signupWindowMonths: 1 }), /Email Reminder Preferences/);
-  assert.doesNotMatch(api.renderAttendancePanel(meetingSlot, null, { signupWindowMonths: 1 }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderPrimaryPanel(talkSlot, { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderBackupPanel(talkSlot, "", { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderTalkAttendancePanel(talkSlot, null, { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderAttendancePanel(meetingSlot, null, { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
 });
 
 test("speaker panel lets the current speaker update talk details", () => {
@@ -1060,10 +1083,10 @@ test("future attendance panels show when signups will open instead of the form",
     attendees: []
   });
 
-  const html = api.renderAttendancePanel(slot, null, { signupWindowMonths: 2 });
+  const html = api.renderAttendancePanel(slot, null, { signupWindowWeeks: 8 });
 
   assert.match(html, /Attendance Not Open Yet/);
-  assert.match(html, /Attendance signups open 2 months before/);
+  assert.match(html, /Attendance signups open 8 weeks before/);
   assert.doesNotMatch(html, /id="meeting-attendance-form"/);
   assert.doesNotMatch(html, /I&rsquo;m Attending/);
 });
@@ -1607,7 +1630,8 @@ test("admin utility sections are collapsed by default", () => {
   assert.equal(templatesSection.open, false);
   assert.match(templatesSection.textContent, /Talk Signup Confirmation/);
   assert.match(templatesSection.textContent, /Meeting Moved/);
-  assert.equal(api.__root.querySelector('#calendar-settings-form [name="signupWindowMonths"]').value, "1");
+  assert.equal(api.__root.querySelector('#calendar-settings-form [name="signupWindowWeeks"]').value, "4");
+  assert.match(api.__root.querySelector('#calendar-settings-form').textContent, /Set this to 0 to disable online signups/);
   assert.equal(api.__root.querySelector('#calendar-settings-form [name="hideAttendingBlock"]').checked, true);
   assert.equal(api.__root.querySelector('details[data-admin-section="zoom-settings"]').open, false);
   assert.equal(api.__root.querySelector('details[data-admin-section="recurrence-form"]').open, false);
@@ -1758,7 +1782,7 @@ test("future month browsing does not move next-meeting highlight to the first vi
 test("public calendar hides open signup buttons outside the signup window", () => {
   const api = loadDomApi();
   api.__setStore({
-    settings: { signupWindowMonths: 1 },
+    settings: { signupWindowWeeks: 4 },
     recurrences: [
       { id: "inactive", name: "Inactive", frequency: "weekly", startDate: "2099-01-01", active: false }
     ],
@@ -1775,7 +1799,7 @@ test("public calendar hides open signup buttons outside the signup window", () =
 
   api.renderCalendar(api.__root, { year: 2099, month: 7 });
 
-  assert.match(api.__root.textContent, /Opens 1 month before/);
+  assert.match(api.__root.textContent, /Opens 4 weeks before/);
   assert.doesNotMatch(api.__root.textContent, /Open for volunteer/);
   assert.doesNotMatch(api.__root.textContent, /Sign up as backup/);
 });
@@ -1946,7 +1970,7 @@ test("admin saveStore pushes the full store via CalendarApi.putStore", async () 
     slots: [{ id: "s1", date: "2026-06-09", title: "T", speaker: null, backups: [], attendees: [] }],
     recurrences: [],
     history: [],
-    settings: { signupWindowMonths: 1 }
+    settings: { signupWindowWeeks: 4 }
   }));
   await new Promise((resolve) => setImmediate(resolve));
 
@@ -1964,7 +1988,7 @@ test("admin saveStore pushes the full store via CalendarApi.putStore", async () 
 
 test("choosing a new item type does not persist a draft before basics are saved", () => {
   const api = loadDomApi();
-  api.__setStore({ slots: [], recurrences: [], history: [], settings: { signupWindowMonths: 1 } });
+  api.__setStore({ slots: [], recurrences: [], history: [], settings: { signupWindowWeeks: 4 } });
 
   api.renderAdmin(api.__root, { year: 2026, month: 6, selectedDate: "2026-07-22", itemTypePrompt: true });
   api.__root.querySelector('[data-select-item-type="talk"]').click();
@@ -1994,7 +2018,7 @@ test("recurring occurrence IDs are deterministic and rendering does not persist 
     slots: [],
     recurrences: [{ id: "weekly-main", frequency: "weekly", interval: 1, startDate: "2026-07-21", itemType: "talk", active: true }],
     history: [],
-    settings: { signupWindowMonths: 1 }
+    settings: { signupWindowWeeks: 4 }
   });
 
   api.ensureRecurringSlots(store, 2026, 6);
@@ -2022,7 +2046,7 @@ test("a deterministic recurring link opens its derived item without persisting o
       active: true
     }],
     history: [],
-    settings: { signupWindowMonths: 1, hideAttendingBlock: true }
+    settings: { signupWindowWeeks: 4, hideAttendingBlock: true }
   });
 
   api.renderSchedule(api.__root);
@@ -2041,8 +2065,8 @@ test("production ignores mock query and browser identity", () => {
   api.__window.localStorage.setItem("ecbs-calendar-current-user-email", "imposter@example.com");
   const slot = api.normalizeSlot({ id: "future", itemType: "talk", date: "2026-06-02", speaker: null, backups: [] });
 
-  assert.match(api.renderPrimaryPanel(slot, { signupWindowMonths: 1 }), /Sign In Required/);
-  assert.doesNotMatch(api.renderPrimaryPanel(slot, { signupWindowMonths: 1 }), /id="talk-primary-form"/);
+  assert.match(api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 }), /Sign In Required/);
+  assert.doesNotMatch(api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 }), /id="talk-primary-form"/);
 });
 
 test("production fetch failure uses the identity-scoped cache read-only", async () => {
@@ -2051,7 +2075,7 @@ test("production fetch failure uses the identity-scoped cache read-only", async 
   api.__window.localStorage.setItem("ecbs-calendar-server-cache-v1:public", JSON.stringify({
     revision: 4,
     slots: [{ id: "cached", itemType: "meeting", date: "2026-06-02", title: "Cached gathering", attendees: [] }],
-    recurrences: [], history: [], settings: { signupWindowMonths: 1 }
+    recurrences: [], history: [], settings: { signupWindowWeeks: 4 }
   }));
   api.__window.ECBS = {
     Auth: { getUser: () => null },
@@ -2069,7 +2093,7 @@ test("revision conflict adopts the authoritative server state", async () => {
   const initial = {
     revision: 2,
     slots: [{ id: "s1", itemType: "talk", date: "2026-06-02", title: "Initial", speaker: null, backups: [], attendees: [] }],
-    recurrences: [], history: [], settings: { signupWindowMonths: 1 }
+    recurrences: [], history: [], settings: { signupWindowWeeks: 4 }
   };
   const authoritative = JSON.parse(JSON.stringify(initial));
   authoritative.revision = 3;

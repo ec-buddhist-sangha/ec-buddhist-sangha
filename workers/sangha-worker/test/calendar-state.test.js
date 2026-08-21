@@ -172,6 +172,47 @@ describe("calendar state (D1)", () => {
     expect(await (await handlePostSignup(badRole, env, { nowIso: NOW })).json()).toEqual({ error: "role_not_allowed" });
   });
 
+  it("zero signup weeks blocks new online signups but allows existing signup management and admin assignments", async () => {
+    const store = seedStore();
+    store.settings.signupWindowWeeks = 0;
+    await writeState(env, store, 0, NOW);
+
+    const newSignup = new Request("https://worker.test/api/signups", {
+      method: "POST",
+      body: JSON.stringify({ itemId: "s1", role: "backup" })
+    });
+    newSignup.user = { sub: "mem@example.com", name: "Mem", role: "member" };
+    expect(await (await handlePostSignup(newSignup, env, { nowIso: NOW })).json()).toEqual({ error: "signups_disabled" });
+
+    await env.DB.prepare("DELETE FROM calendar_state").run();
+    store.slots[0].backups = [{ name: "Mem", email: "mem@example.com", link: "", notes: "", reminders: [], signedUpAt: NOW }];
+    await writeState(env, store, 0, NOW);
+
+    const updateSignup = new Request("https://worker.test/api/signups", {
+      method: "POST",
+      body: JSON.stringify({ itemId: "s1", role: "backup", notes: "Updated details" })
+    });
+    updateSignup.user = { sub: "mem@example.com", name: "Mem", role: "member" };
+    expect((await handlePostSignup(updateSignup, env, { nowIso: NOW })).status).toBe(200);
+
+    const remove = new Request("https://worker.test/api/signups", {
+      method: "DELETE",
+      body: JSON.stringify({ itemId: "s1" })
+    });
+    remove.user = { sub: "mem@example.com", name: "Mem", role: "member" };
+    expect((await handleDeleteSignup(remove, env, { nowIso: NOW })).status).toBe(200);
+
+    const current = await readState(env);
+    current.store.slots[0].speaker = { name: "Assigned Person", email: "", link: "", notes: "", reminders: [], signedUpAt: NOW };
+    const adminPut = new Request("https://worker.test/api/calendar", {
+      method: "PUT",
+      body: JSON.stringify({ store: current.store, revision: current.revision })
+    });
+    adminPut.user = { sub: "admin@example.com", name: "Admin", role: "admin" };
+    const assigned = await (await handlePutCalendar(adminPut, env)).json();
+    expect(assigned.store.slots[0].speaker.name).toBe("Assigned Person");
+  });
+
   it("rejects unsafe signup details and invalid calendar item types", async () => {
     const store = seedStore();
     await writeState(env, store, 0, NOW);

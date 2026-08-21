@@ -144,13 +144,20 @@ function chicagoNow(nowIso) {
   return { date: values.year + "-" + values.month + "-" + values.day, time: values.hour + ":" + values.minute };
 }
 
-function subtractMonthsClamped(dateValue, months) {
+function subtractWeeks(dateValue, weeks) {
   const parts = parseDate(dateValue);
   if (!parts) return "";
-  const first = new Date(Date.UTC(parts.year, parts.month - 1 - months, 1));
-  const lastDay = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
-  first.setUTCDate(Math.min(parts.day, lastDay));
-  return dateKey(first);
+  const date = dateToUtc(parts);
+  date.setUTCDate(date.getUTCDate() - weeks * 7);
+  return dateKey(date);
+}
+
+function signupWindowWeeks(settings) {
+  settings = settings || {};
+  let weeks = Number(settings.signupWindowWeeks);
+  if (!Number.isFinite(weeks) && Number.isFinite(Number(settings.signupWindowMonths))) weeks = Number(settings.signupWindowMonths) * 4;
+  if (!Number.isFinite(weeks)) weeks = 4;
+  return Math.max(0, Math.min(52, Math.floor(weeks)));
 }
 
 function validateSignupDetails(body) {
@@ -168,7 +175,7 @@ function validateSignupDetails(body) {
   }
 }
 
-function validateSignupSlot(store, slot, role, nowIso) {
+function validateSignupSlot(store, slot, role, nowIso, options = {}) {
   if (slot.isDraft || slot.canceled || slot.movedToDate) throw { status: 409, error: "item_closed" };
   if (slot.itemType !== "meeting" && slot.itemType !== "talk") throw { status: 400, error: "invalid_item_type" };
   const itemType = slot.itemType;
@@ -177,13 +184,14 @@ function validateSignupSlot(store, slot, role, nowIso) {
   if (!parseDate(slot.date) || slot.date + "T" + (slot.endTime || "23:59") <= now.date + "T" + now.time) {
     throw { status: 409, error: "item_closed" };
   }
-  const windowMonths = Math.max(1, Number(store.settings && store.settings.signupWindowMonths || 1));
-  if (now.date < subtractMonthsClamped(slot.date, windowMonths)) throw { status: 409, error: "signup_not_open" };
+  const windowWeeks = signupWindowWeeks(store.settings);
+  if (!options.allowClosedWindow && windowWeeks === 0) throw { status: 409, error: "signups_disabled" };
+  if (!options.allowClosedWindow && now.date < subtractWeeks(slot.date, windowWeeks)) throw { status: 409, error: "signup_not_open" };
 }
 
 export function addSignup(store, itemId, role, person, options = {}) {
   const slot = findSlot(store, itemId, { materialize: options.materialize !== false });
-  if (options.validate === true) validateSignupSlot(store, slot, role, options.nowIso || new Date().toISOString());
+  if (options.validate === true) validateSignupSlot(store, slot, role, options.nowIso || new Date().toISOString(), { allowClosedWindow: options.allowClosedWindow === true });
   if (role === "speaker" && slot.speaker && String(slot.speaker.email || "").toLowerCase() !== person.email) {
     throw { status: 409, error: "speaker_taken" };
   }
@@ -204,7 +212,7 @@ export function addSignup(store, itemId, role, person, options = {}) {
 
 export function removeSignup(store, itemId, email, options = {}) {
   const slot = findSlot(store, itemId, { materialize: false });
-  if (options.validate === true) validateSignupSlot(store, slot, "attendee", options.nowIso || new Date().toISOString());
+  if (options.validate === true) validateSignupSlot(store, slot, "attendee", options.nowIso || new Date().toISOString(), { allowClosedWindow: true });
   removeEmailFromSlot(slot, email);
   return slot;
 }
@@ -283,7 +291,7 @@ export function projectStore(store, viewer, revision) {
   clone.history = [];
   clone.settings = {
     defaultLocation: String(clone.settings && clone.settings.defaultLocation || ""),
-    signupWindowMonths: Math.max(1, Number(clone.settings && clone.settings.signupWindowMonths || 1)),
+    signupWindowWeeks: signupWindowWeeks(clone.settings),
     hideAttendingBlock: !clone.settings || clone.settings.hideAttendingBlock !== false,
     zoomName: "",
     zoomEmail: "",
@@ -411,7 +419,14 @@ export async function handlePostSignup(request, env, options = {}) {
   try {
     validateSignupDetails(body);
     const person = makeServerVolunteer(request.user.name, request.user.sub, body, nowIso);
-    const { revision, store } = await mutateState(env, (current) => addSignup(current, body.itemId, body.role, person, { nowIso, validate: true }), { nowIso });
+    const { revision, store } = await mutateState(env, (current) => {
+      const existing = findSignup(current, body.itemId, request.user.sub);
+      return addSignup(current, body.itemId, body.role, person, {
+        nowIso,
+        validate: true,
+        allowClosedWindow: Boolean(existing && existing.role === body.role)
+      });
+    }, { nowIso });
     return jsonResponse(env, { revision, store: projectStore(store, request.user, revision) });
   } catch (error) {
     if (error && error.status) return jsonResponse(env, { error: error.error }, error.status);

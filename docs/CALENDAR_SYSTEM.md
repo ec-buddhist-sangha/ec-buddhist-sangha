@@ -62,7 +62,7 @@ Backup volunteers are never promoted automatically. Fairness ordering prefers th
 
 ## Calendar settings
 
-The default signup window is one month, and `Hide attending block` is enabled. Calendar items can be physical, Zoom, or hybrid. The default physical location is:
+The default online signup window is four weeks, and `Hide attending block` is enabled. Administrators can set the window to any whole number from 1 to 52 weeks, or set it to `0` to disable online signups while retaining direct admin assignments. Existing month-based settings are read compatibly as four weeks per month. Calendar items can be physical, Zoom, or hybrid. The default physical location is:
 
 ```text
 Unity of Eau Claire
@@ -84,7 +84,7 @@ Migration `workers/sangha-worker/migrations/0004_initialize_calendar.sql` insert
 - 7:00 PM to 8:30 PM;
 - title `Sangha Meeting` and the standard gathering description;
 - the default physical location;
-- one-month signup window;
+- four-week signup window;
 - no Zoom, historical items, volunteers, signups, notices, or history.
 
 Never reset or delete production D1 during initialization. Deployment order:
