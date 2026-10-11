@@ -1666,6 +1666,65 @@ test("admin can save a common upcoming-email footer", () => {
   assert.match(api.__root.textContent, /Calendar email footer updated/);
 });
 
+test("common header is editable above footer and retains the dynamic meeting line", () => {
+  const api = loadDomApi();
+  api.__setStore({ recurrences: [], slots: [{ id: "header-item", date: "2026-06-02", title: "Open talk", signupsOpen: true }] });
+  api.renderAdmin(api.__root, { year: 2026, month: 5 });
+  const headerForm = api.__root.querySelector("[data-upcoming-email-header-form]");
+  const footerForm = api.__root.querySelector("[data-upcoming-email-footer-form]");
+  assert.ok(headerForm.compareDocumentPosition(footerForm) & api.__window.Node.DOCUMENT_POSITION_FOLLOWING);
+  const field = headerForm.querySelector("textarea");
+  assert.match(field.value, /^We will meet at 7PM on Tuesday, June 2/);
+  field.value = "Welcome everyone!\n" + field.value;
+  field.dispatchEvent(new api.__window.Event("input", { bubbles: true }));
+  assert.match(api.__root.querySelector("[data-upcoming-talks-html]").textContent, /^Welcome everyone!/);
+  assert.equal(api.__getStore().settings.emailHeader, "{meeting_details}");
+  headerForm.dispatchEvent(new api.__window.Event("submit", { bubbles: true, cancelable: true }));
+  assert.equal(api.__getStore().settings.emailHeader, "Welcome everyone!\n{meeting_details}");
+  const saved = api.__getStore();
+  saved.slots[0].date = "2026-06-09";
+  assert.match(api.upcomingCalendarEmailText(saved), /^Welcome everyone!\nWe will meet at 7PM on Tuesday, June 9/);
+});
+
+test("draft item edits refresh the preview and both copy sources without saving", () => {
+  const api = loadDomApi();
+  api.__setStore({ slots: [{ id: "preview-item", date: "2026-06-02", title: "Original title", signupsOpen: true }] });
+  api.renderAdmin(api.__root, { year: 2026, month: 5, selectedSlotId: "preview-item" });
+  const form = api.__root.querySelector("#talk-slot-form");
+  form.querySelector('[name="title"]').value = "New title";
+  form.dispatchEvent(new api.__window.Event("input", { bubbles: true }));
+  const name = api.__root.querySelector('#admin-speaker-form [name="name"]');
+  name.value = "Bob";
+  name.dispatchEvent(new api.__window.Event("input", { bubbles: true }));
+  const time = form.querySelector('[name="startTime"]');
+  time.value = "18:30";
+  time.dispatchEvent(new api.__window.Event("change", { bubbles: true }));
+  assert.match(api.__root.querySelector("[data-upcoming-talks-html]").innerHTML, /New title/);
+  assert.match(api.__root.querySelector("[data-upcoming-talks-html-source]").value, /Bob/);
+  assert.match(api.__root.querySelector("[data-upcoming-talks-text]").value, /We will meet at 6:30PM/);
+  assert.equal(api.__getStore().slots[0].title, "Original title");
+  assert.equal(api.__getStore().slots[0].speaker, null);
+  api.__window.confirm = () => false;
+  api.__root.querySelector("[data-close-admin-modal]").click();
+  assert.doesNotMatch(api.__root.querySelector("[data-upcoming-talks-text]").value, /New title|Bob|6:30PM/);
+});
+
+test("header and footer typing immediately refreshes both clipboard formats", () => {
+  const api = loadDomApi();
+  api.__setStore({ slots: [{ id: "copy-item", date: "2026-06-02", title: "Talk", signupsOpen: true }] });
+  api.renderAdmin(api.__root, { year: 2026, month: 5 });
+  const header = api.__root.querySelector('[name="emailHeader"]');
+  header.value = "Custom welcome";
+  header.dispatchEvent(new api.__window.Event("input", { bubbles: true }));
+  const footer = api.__root.querySelector('[name="emailFooter"]');
+  footer.value = "PayPal Dana Donation\nThank you";
+  footer.dispatchEvent(new api.__window.Event("input", { bubbles: true }));
+  assert.match(api.__root.querySelector("[data-upcoming-talks-text]").value, /^Custom welcome/);
+  assert.match(api.__root.querySelector("[data-upcoming-talks-html-source]").value, /<strong>PayPal Dana Donation<\/strong>/);
+  assert.match(api.__root.querySelector("[data-upcoming-talks-text]").value, /Thank you$/);
+  assert.equal(api.__getStore().settings.emailFooter, "");
+});
+
 test("saving a calendar item closes without opening item-level reminder prompts", () => {
   const api = loadDomApi();
   api.__setStore({
