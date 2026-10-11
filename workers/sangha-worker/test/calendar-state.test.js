@@ -13,7 +13,7 @@ function seedStore() {
     revision: 0,
     settings: { defaultLocation: "Unity" },
     recurrences: [],
-    slots: [{ id: "s1", itemType: "talk", date: "2026-06-09", title: "Talk", speaker: null, backups: [], attendees: [] }],
+    slots: [{ id: "s1", itemType: "talk", date: "2026-06-09", title: "Talk", signupsOpen: true, speaker: null, backups: [], attendees: [] }],
     history: []
   };
 }
@@ -144,11 +144,12 @@ describe("calendar state (D1)", () => {
     const id = deterministicOccurrenceId("weekly", "2026-06-09");
     const slot = materializeOccurrence(store, id);
     expect(slot.id).toBe("occ-weekly-2026-06-09");
+    expect(slot.signupsOpen).toBe(false);
     expect(store.slots).toHaveLength(1);
     expect(materializeOccurrence(store, id)).toBe(slot);
   });
 
-  it("rejects closed, early, and invalid-role signups", async () => {
+  it("rejects past, closed, and invalid-role signups", async () => {
     const store = seedStore();
     store.slots[0].date = "2026-05-26";
     await writeState(env, store, 0, NOW);
@@ -158,10 +159,11 @@ describe("calendar state (D1)", () => {
 
     await env.DB.prepare("DELETE FROM calendar_state").run();
     store.slots[0].date = "2026-09-01";
+    store.slots[0].signupsOpen = false;
     await writeState(env, store, 0, NOW);
     const early = new Request("https://worker.test/api/signups", { method: "POST", body: JSON.stringify({ itemId: "s1", role: "attendee" }) });
     early.user = { sub: "mem@example.com", name: "Mem", role: "member" };
-    expect(await (await handlePostSignup(early, env, { nowIso: NOW })).json()).toEqual({ error: "signup_not_open" });
+    expect(await (await handlePostSignup(early, env, { nowIso: NOW })).json()).toEqual({ error: "signups_closed" });
 
     await env.DB.prepare("DELETE FROM calendar_state").run();
     store.slots[0].date = "2026-06-09";
@@ -172,9 +174,9 @@ describe("calendar state (D1)", () => {
     expect(await (await handlePostSignup(badRole, env, { nowIso: NOW })).json()).toEqual({ error: "role_not_allowed" });
   });
 
-  it("zero signup weeks blocks new online signups but allows existing signup management and admin assignments", async () => {
+  it("closed items block new online signups but allow existing signup management and admin assignments", async () => {
     const store = seedStore();
-    store.settings.signupWindowWeeks = 0;
+    store.slots[0].signupsOpen = false;
     await writeState(env, store, 0, NOW);
 
     const newSignup = new Request("https://worker.test/api/signups", {
@@ -182,7 +184,7 @@ describe("calendar state (D1)", () => {
       body: JSON.stringify({ itemId: "s1", role: "backup" })
     });
     newSignup.user = { sub: "mem@example.com", name: "Mem", role: "member" };
-    expect(await (await handlePostSignup(newSignup, env, { nowIso: NOW })).json()).toEqual({ error: "signups_disabled" });
+    expect(await (await handlePostSignup(newSignup, env, { nowIso: NOW })).json()).toEqual({ error: "signups_closed" });
 
     await env.DB.prepare("DELETE FROM calendar_state").run();
     store.slots[0].backups = [{ name: "Mem", email: "mem@example.com", link: "", notes: "", reminders: [], signedUpAt: NOW }];
@@ -229,5 +231,35 @@ describe("calendar state (D1)", () => {
     store.slots[0].itemType = "other";
     await writeState(env, store, 0, NOW);
     expect(await (await handlePostSignup(requestFor({}), env, { nowIso: NOW })).json()).toEqual({ error: "invalid_item_type" });
+  });
+
+  it("allows far-future signups only when the saved item was explicitly opened", async () => {
+    const store = seedStore();
+    store.slots[0].date = "2099-06-09";
+    store.slots[0].signupsOpen = false;
+    const makeRequest = () => {
+      const request = new Request("https://worker.test/api/signups", { method: "POST", body: JSON.stringify({ itemId: "s1", role: "speaker", signupsOpen: true }) });
+      request.user = { sub: "mem@example.com", name: "Mem", role: "member" };
+      return request;
+    };
+    await writeState(env, store, 0, NOW);
+    expect(await (await handlePostSignup(makeRequest(), env, { nowIso: NOW })).json()).toEqual({ error: "signups_closed" });
+    const current = await readState(env);
+    current.store.slots[0].signupsOpen = true;
+    await writeState(env, current.store, current.revision, NOW);
+    expect((await handlePostSignup(makeRequest(), env, { nowIso: NOW })).status).toBe(200);
+  });
+
+  it("keeps missing flags closed and removes retired signup settings in projections", () => {
+    const store = seedStore();
+    delete store.slots[0].signupsOpen;
+    store.settings.signupWindowWeeks = 4;
+    store.settings.signupWindowMonths = 1;
+    for (const viewer of [null, { role: "member", sub: "mem@example.com" }, { role: "admin" }]) {
+      const result = projectStore(store, viewer, 1);
+      expect(result.slots[0].signupsOpen).toBe(false);
+      expect(result.settings.signupWindowWeeks).toBeUndefined();
+      expect(result.settings.signupWindowMonths).toBeUndefined();
+    }
   });
 });

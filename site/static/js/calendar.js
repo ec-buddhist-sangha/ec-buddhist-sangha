@@ -15,7 +15,6 @@
   var DEFAULT_TITLE = "Sangha Meeting";
   var DEFAULT_DESCRIPTION = "Each 90 minute gathering is divided into 30 minute segments:\n\u25cf Group meditation with instruction for newcomers\n\u25cf Recorded Dharma talk from a teacher presented by one of the members\n\u25cf Open discussion about the teachings and meditation practice";
   var DEFAULT_LOCATION = "Unity of Eau Claire\n1808 Folsom Street\nEau Claire, WI 54703";
-  var DEFAULT_SIGNUP_WINDOW_WEEKS = 4;
   var DEFAULT_TUESDAY_RECURRENCE_ID = "default-weekly-tuesday-talks";
   var MONTHLY_MODE_WEEKDAY = "weekday";
   var MONTHLY_MODE_MONTH_DAY = "month-day";
@@ -128,7 +127,6 @@
   function defaultCalendarSettings() {
     return {
       defaultLocation: DEFAULT_LOCATION,
-      signupWindowWeeks: DEFAULT_SIGNUP_WINDOW_WEEKS,
       hideAttendingBlock: true,
       emailFooter: "",
       zoomName: "",
@@ -137,18 +135,10 @@
     };
   }
 
-  function normalizeSignupWindowWeeks(value, legacyMonths) {
-    var weeks = Number(value);
-    if (!Number.isFinite(weeks) && Number.isFinite(Number(legacyMonths))) weeks = Number(legacyMonths) * 4;
-    if (!Number.isFinite(weeks)) return DEFAULT_SIGNUP_WINDOW_WEEKS;
-    return Math.max(0, Math.min(52, Math.floor(weeks)));
-  }
-
   function normalizeCalendarSettings(settings) {
     settings = settings || {};
     return {
       defaultLocation: textValueOrDefault(settings, "defaultLocation", DEFAULT_LOCATION) || DEFAULT_LOCATION,
-      signupWindowWeeks: normalizeSignupWindowWeeks(settings.signupWindowWeeks, settings.signupWindowMonths),
       hideAttendingBlock: settings.hideAttendingBlock !== false,
       emailFooter: textValueOrDefault(settings, "emailFooter", ""),
       zoomName: textValueOrDefault(settings, "zoomName", ""),
@@ -354,6 +344,7 @@
       generatedFromRecurrence: Boolean(slot.generatedFromRecurrence),
       occurrenceOverrides: uniqueStrings(slot.occurrenceOverrides),
       isDraft: Boolean(slot.isDraft),
+      signupsOpen: slot.signupsOpen === true,
       title: slot.title || DEFAULT_TITLE,
       description: textValueOrDefault(slot, "description", itemType === "meeting" ? "" : DEFAULT_DESCRIPTION),
       usePhysicalLocation: usePhysicalLocation,
@@ -602,37 +593,8 @@
     return new Date(year, month + 1, 0).getDate();
   }
 
-  function addMonthsClamped(date, count) {
-    var targetMonth = date.getMonth() + count;
-    var targetYear = date.getFullYear() + Math.floor(targetMonth / 12);
-    targetMonth = ((targetMonth % 12) + 12) % 12;
-    var targetDay = Math.min(date.getDate(), lastDayOfMonth(targetYear, targetMonth));
-    return new Date(targetYear, targetMonth, targetDay);
-  }
-
-  function signupWindowLabel(settings) {
-    var weeks = normalizeCalendarSettings(settings).signupWindowWeeks;
-    return weeks + " " + (weeks === 1 ? "week" : "weeks");
-  }
-
-  function signupWindowDisabled(settings) {
-    return normalizeCalendarSettings(settings).signupWindowWeeks === 0;
-  }
-
-  function signupOpenDate(slot, settings) {
-    return dateKey(addDays(parseDate(slot.date), -normalizeCalendarSettings(settings).signupWindowWeeks * 7));
-  }
-
-  function signupWindowOpen(slot, settings) {
-    if (signupWindowDisabled(settings)) return false;
-    return dateKey(new Date()) >= signupOpenDate(slot, settings);
-  }
-
-  function signupWindowMessage(slot, settings, label) {
-    if (signupWindowDisabled(settings)) {
-      return "Online signups are currently closed. Calendar administrators can still assign people directly.";
-    }
-    return label + " open " + signupWindowLabel(settings) + " before this calendar item, on " + displayDate(signupOpenDate(slot, settings)) + ".";
+  function itemSignupsOpen(slot) {
+    return slot.signupsOpen === true && !slot.isDraft && !slot.canceled && !slot.movedToDate && !isPastSlot(slot);
   }
 
   function monthWindow(year, month) {
@@ -921,7 +883,7 @@
     }
     if (slot.canceled) return "Canceled";
     if (isPastSlot(slot)) return "Past meeting";
-    return slot.speaker && slot.speaker.name ? "Assigned" : "Open";
+    return slot.speaker && slot.speaker.name ? "Assigned" : (itemSignupsOpen(slot) ? "Open" : "Closed");
   }
 
   function isTalkSlot(slot) {
@@ -1531,7 +1493,7 @@
       : '';
     root.innerHTML = notice + inner;
     if (isCalendarReadOnly()) {
-      root.querySelectorAll("form input, form textarea, form select, form button, [data-admin-slot-id], [data-calendar-day-add]").forEach(function (control) {
+      root.querySelectorAll("form input, form textarea, form select, form button, [data-toggle-signups], [data-admin-slot-id] button, [data-calendar-day-add]").forEach(function (control) {
         control.disabled = true;
         control.setAttribute("aria-disabled", "true");
       });
@@ -1794,7 +1756,7 @@
     var canceled = slot.canceled;
     var moved = Boolean(slot.movedToDate);
     var isNext = slotInstanceKey(slot) === nextUpcomingSlotKey;
-    var signupsOpen = signupWindowOpen(slot, settings);
+    var signupsOpen = itemSignupsOpen(slot);
     var isNextOpenTalk = isNext && !meeting && !assigned && signupsOpen;
     var signupUrl = appUrl("calendar-item/", { slot: slot.id });
     var attendUrl = appUrl("calendar-item/", { slot: slot.id, attend: "1" });
@@ -1834,10 +1796,10 @@
         : canceled
           ? '<div class="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Canceled</div>'
         : meeting
-          ? (settings.hideAttendingBlock ? '' : (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml(signupWindowDisabled(settings) ? "Online signups closed" : "Opens " + signupWindowLabel(settings) + " before") + '</div>'))
+          ? (settings.hideAttendingBlock ? '' : (signupsOpen ? '<a href="' + attendUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">' + (currentUserAttendee(slot) ? 'Attending' : 'Attend') + '</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">Online signups closed</div>'))
         : assigned
           ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-xs font-bold ' + primaryActionClass + '">' + escapeHtml(publicName(slot.speaker.name)) + '</a>'
-          : (signupsOpen ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">Open for volunteer</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">' + escapeHtml(signupWindowDisabled(settings) ? "Online signups closed" : "Opens " + signupWindowLabel(settings) + " before") + '</div>')) +
+          : (signupsOpen ? '<a href="' + signupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight ' + primaryActionClass + '">Open for volunteer</a>' : '<div class="rounded-full bg-gray-50 px-2 py-2 text-center text-[10px] uppercase tracking-widest font-bold leading-tight text-gray-400">Online signups closed</div>')) +
       (past || canceled || meeting || !signupsOpen ? '' : '<a href="' + backupUrl + '" class="inline-flex w-full min-w-0 items-center justify-center rounded-full border px-2 py-2 text-center ' + backupActionClass + '"' + tooltipAttr(backupTitle) + ' aria-label="' + escapeHtml(backupTitle) + '"><span class="text-[10px] uppercase tracking-widest font-bold leading-tight">Sign up as backup</span></a>') +
       '</div>' +
     '</div>';
@@ -1908,6 +1870,23 @@
       });
     });
 
+    root.querySelectorAll("[data-toggle-signups]").forEach(function (button) {
+      button.addEventListener("click", function (event) {
+        event.stopPropagation();
+        var fresh = freshSlotForAction(button.getAttribute("data-toggle-signups"), Number(button.getAttribute("data-slot-revision") || 0), year, month);
+        if (fresh.conflict) {
+          renderAdmin(root, { year: year, month: month, notice: fresh.conflict });
+          return;
+        }
+        var slot = fresh.slot;
+        if (!slot || isPastSlot(slot) || slot.canceled || slot.movedToDate) return;
+        slot.signupsOpen = !slot.signupsOpen;
+        touchSlot(slot);
+        addCalendarHistory(fresh.store, slot.signupsOpen ? "Opened signups" : "Closed signups", slot, "Online signups were " + (slot.signupsOpen ? "opened" : "closed") + " for this item.");
+        saveStoreAndThen(fresh.store, root, function () { renderAdmin(root, { year: year, month: month }); });
+      });
+    });
+
     root.querySelectorAll("[data-admin-date]").forEach(function (cell) {
       cell.addEventListener("click", function () {
         renderAdmin(root, { year: year, month: month, selectedDate: cell.getAttribute("data-admin-date"), itemTypePrompt: true });
@@ -1975,6 +1954,8 @@
     if (form && selectedSlot) {
       form.setAttribute("data-initial-signature", adminSlotFormSignature(form));
       saveSelectedSlotForm = function (closeAfterSave) {
+        var assignments = pendingAdminAssignments(root);
+        if (assignments.some(function (assignment) { return !assignment.form.reportValidity(); })) return;
         var expectedRevision = Number(form.getAttribute("data-slot-revision") || 0);
         var fresh = freshSlotForAction(selectedSlot.id, expectedRevision, year, month);
         if (fresh.conflict) {
@@ -2010,6 +1991,10 @@
         editableSlot.useDefaultLocation = newUseDefaultLocation;
         editableSlot.location = newLocation;
         editableSlot.useZoom = newUseZoom;
+        assignments.forEach(function (assignment) {
+          var person = assignPersonToSlot(editableSlot, assignment.role, assignment.name, assignment.email);
+          addCalendarHistory(fresh.store, adminAssignmentHistoryAction(assignment.role), editableSlot, adminAssignmentHistorySummary(assignment.role, person, editableSlot));
+        });
         updateOccurrenceOverrides(editableSlot, fresh.store.recurrences.find(function (rule) { return rule.id === editableSlot.recurrenceId; }));
         var wasDraft = Boolean(editableSlot.isDraft);
         editableSlot.isDraft = false;
@@ -2174,12 +2159,23 @@
       usePhysicalLocation: checkboxValue(form, "usePhysicalLocation"),
       useDefaultLocation: checkboxValue(form, "useDefaultLocation"),
       location: fieldValue(form, "location"),
-      useZoom: checkboxValue(form, "useZoom")
+      useZoom: checkboxValue(form, "useZoom"),
+      assignments: pendingAdminAssignments(form.closest("[data-calendar-modal]")).map(function (assignment) {
+        return { role: assignment.role, name: assignment.name, email: assignment.email };
+      })
     });
   }
 
   function adminSlotFormHasChanges(form) {
     return form && form.getAttribute("data-initial-signature") !== adminSlotFormSignature(form);
+  }
+
+  function pendingAdminAssignments(root) {
+    if (!root) return [];
+    return ["speaker", "backup", "attendee"].map(function (role) {
+      var form = root.querySelector("#admin-" + role + "-form");
+      return form ? { form: form, role: role, name: fieldValue(form, "name"), email: fieldValue(form, "email") } : null;
+    }).filter(function (assignment) { return assignment && (assignment.name || assignment.email); });
   }
 
   function wireAdminAssignmentForm(root, selectedSlot, formId, role, year, month) {
@@ -2236,7 +2232,6 @@
       var canceled = slot.canceled;
       var moved = Boolean(slot.movedToDate);
       var isNext = slotInstanceKey(slot) === nextUpcomingSlotKey;
-      var isNextOpenTalk = isNext && !meeting && !assigned;
       var slotTitle = slot.title || "Talk offering";
       var slotDescription = slot.description || "";
       var cardClasses = moved
@@ -2250,12 +2245,14 @@
             : assigned
               ? 'border-gray-200 bg-white'
               : 'border-gray-200 bg-white';
-      var openBadgeClass = isNextOpenTalk ? 'bg-green-600 text-white shadow-sm' : 'bg-white text-gray-500 ring-1 ring-gray-200';
-      return '<button type="button" data-admin-slot-id="' + escapeHtml(slot.id) + '" class="mt-2 block w-full rounded-lg border ' + cardClasses + ' p-2 text-left hover:border-sangha-gold focus:outline-none focus:ring-2 focus:ring-sangha-gold" aria-label="Edit ' + escapeHtml(slotTitle) + '">' +
+      var openBadgeClass = slot.signupsOpen ? (isNext ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-blue-50 text-sangha-navy hover:bg-blue-100') : 'bg-white text-gray-500 ring-1 ring-gray-200 hover:bg-gray-100';
+      return '<div data-admin-slot-id="' + escapeHtml(slot.id) + '" class="mt-2 block w-full rounded-lg border ' + cardClasses + ' p-2 text-left hover:border-sangha-gold">' +
+        '<button type="button" class="block w-full text-left focus:outline-none focus:ring-2 focus:ring-sangha-gold" aria-label="Edit ' + escapeHtml(slotTitle) + '">' +
         '<div class="text-xs font-bold ' + (moved ? 'text-red-700' : past ? 'text-gray-500' : canceled ? 'text-red-700' : 'text-sangha-navy') + ' line-clamp-2"' + tooltipAttr(slotTitle) + '>' + escapeHtml(compactText(slotTitle, CALENDAR_TITLE_LIMIT)) + '</div>' +
         '<div class="text-xs ' + (moved ? 'text-red-700' : past ? 'text-gray-500' : canceled ? 'text-red-700' : 'text-gray-600') + ' mt-1 line-clamp-2"' + tooltipAttr(slotDescription) + '>' + escapeHtml(compactText(slotDescription, CALENDAR_DESCRIPTION_LIMIT)) + '</div>' +
         '<div class="text-[10px] uppercase tracking-widest font-bold text-gray-400 mt-2">' + displayTimeRange(slot) + '</div>' +
         '<div class="mt-1 text-[10px] font-bold text-gray-400">' + escapeHtml(attendanceCountLabel(slot)) + '</div>' +
+        '</button>' +
         (moved
           ? '<div class="mt-2 inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] uppercase tracking-widest font-bold text-red-700">Moved to ' + escapeHtml(displayNumericShortDate(slot.movedToDate)) + '</div>'
         : past
@@ -2266,8 +2263,9 @@
             ? '<div class="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-[10px] uppercase tracking-widest font-bold text-sangha-navy">' + attendanceCount(slot) + ' attending</div>'
           : assigned
             ? '<div class="mt-2 text-xs font-bold text-sangha-navy">' + escapeHtml(publicName(slot.speaker.name)) + '</div>'
-            : '<div class="mt-2 inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-widest font-bold ' + openBadgeClass + '">Open</div>') +
-      '</button>';
+            : '') +
+        (!past && !canceled && !moved ? '<button type="button" data-toggle-signups="' + escapeHtml(slot.id) + '" data-slot-revision="' + Number(slot.revision || 0) + '" aria-pressed="' + Boolean(slot.signupsOpen) + '" aria-label="' + (slot.signupsOpen ? 'Close' : 'Open') + ' online signups for ' + escapeHtml(slotTitle) + '" title="' + (slot.signupsOpen ? 'Close' : 'Open') + ' online signups" class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border px-2 py-2 text-[10px] uppercase tracking-widest font-bold ' + openBadgeClass + '"><span aria-hidden="true">' + (slot.signupsOpen ? '&#10003;' : '&#8722;') + '</span>' + (slot.signupsOpen ? 'Open' : 'Closed') + '<span class="normal-case font-normal">signups</span></button>' : '') +
+      '</div>';
     }).join("");
 
     var bottomPadding = slots.length ? " pb-5 md:pb-6" : " pb-3 md:pb-4";
@@ -2281,7 +2279,9 @@
   function upcomingCalendarEmailRows(store) {
     var today = dateKey(new Date());
     var upcoming = store.slots.filter(function (slot) {
-      return slot.date >= today && (!isDefaultEmptySlot(slot) || slot.date <= shiftDateByDays(today, 42));
+      return !isPastSlot(slot) && !slot.isDraft && !slot.canceled && !slot.movedToDate &&
+        (isMeetingSlot(slot) || Boolean(slot.speaker && slot.speaker.name) || itemSignupsOpen(slot)) &&
+        (!isDefaultEmptySlot(slot) || slot.date <= shiftDateByDays(today, 42));
     }).sort(byDateTime);
     if (!upcoming.length) return [];
     return upcoming.map(function (slot) {
@@ -2295,7 +2295,7 @@
           title: title,
           titleHref: scheduleUrl,
           actions: [
-            { text: slot.canceled ? "canceled" : "attend", href: attendUrl }
+            { text: itemSignupsOpen(slot) ? "attend" : "meeting details", href: itemSignupsOpen(slot) ? attendUrl : scheduleUrl }
           ].concat(zoomLink ? [{ text: "Zoom", href: zoomLink }] : [])
         };
       }
@@ -2304,9 +2304,7 @@
         title: title,
         titleHref: scheduleUrl,
         actions: [
-          slot.canceled
-            ? { text: "canceled", href: scheduleUrl }
-            : slot.speaker && slot.speaker.name
+          slot.speaker && slot.speaker.name
               ? { text: publicName(slot.speaker.name), href: "", kind: "name" }
               : { text: "volunteer to bring talk", href: scheduleUrl }
         ].concat(zoomLink ? [{ text: "Zoom", href: zoomLink }] : [])
@@ -2349,7 +2347,7 @@
         return action.href ? action.text + " (" + action.href + ")" : action.text;
       }).join(", ");
     }).join("\n") : "No upcoming calendar items are currently scheduled.";
-    return [body, upcomingMeetingEmailSentence(store), normalizeCalendarSettings(store.settings).emailFooter]
+    return [upcomingMeetingEmailSentence(store), body, normalizeCalendarSettings(store.settings).emailFooter]
       .filter(Boolean)
       .join("\n\n");
   }
@@ -2368,15 +2366,14 @@
     }).join("") : '<p>No upcoming calendar items are currently scheduled.</p>';
     var meetingSentence = upcomingMeetingEmailSentence(store);
     var footer = normalizeCalendarSettings(store.settings).emailFooter;
-    return body +
-      (meetingSentence ? '<p style="margin-top:16px;">' + escapeHtml(meetingSentence) + '</p>' : '') +
-      (footer ? '<p style="margin-top:16px;">' + escapeHtml(footer).replace(/\r?\n/g, "<br>") + '</p>' : '');
+    return (meetingSentence ? '<p style="margin-bottom:16px;"><strong>' + escapeHtml(meetingSentence) + '</strong></p>' : '') + body +
+      (footer ? '<p style="margin-top:16px;">' + escapeHtml(footer).replace(/PayPal Dana Donation/gi, '<strong>$&</strong>').replace(/\r?\n/g, "<br>") + '</p>' : '');
   }
 
   function nextTuesdayCalendarItem(store) {
     var today = dateKey(new Date());
     return store.slots.filter(function (slot) {
-      return slot.date >= today && !slot.canceled && parseDate(slot.date).getDay() === 2;
+      return !isPastSlot(slot) && !slot.isDraft && !slot.canceled && !slot.movedToDate && parseDate(slot.date).getDay() === 2;
     }).sort(byDateTime)[0] || null;
   }
 
@@ -2420,7 +2417,7 @@
       '<div data-upcoming-talks-html class="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700">' + html + '</div>' +
       '<form data-upcoming-email-footer-form class="mt-4 grid gap-3 rounded-lg border border-gray-200 bg-white p-4">' +
         textareaMarkup("Common Footer", "emailFooter", false, normalizeCalendarSettings(store.settings).emailFooter) +
-        '<p class="text-xs leading-relaxed text-gray-500">This text is appended after the automatically generated next-Tuesday meeting information.</p>' +
+        '<p class="text-xs leading-relaxed text-gray-500">This text is appended after the calendar list.</p>' +
         '<button type="submit" class="rounded-lg border border-sangha-navy px-4 py-3 text-xs uppercase tracking-widest font-bold text-sangha-navy hover:bg-sangha-light">Save Footer</button>' +
       '</form>' +
       '<textarea readonly data-upcoming-talks-text aria-hidden="true" tabindex="-1" class="absolute h-px w-px overflow-hidden opacity-0 pointer-events-none">' + escapeHtml(text) + '</textarea>' +
@@ -2503,7 +2500,7 @@
       '</div>' +
       '<form id="calendar-settings-form" class="mt-5 grid gap-4 rounded-xl border border-blue-100 bg-white p-4">' +
         textareaMarkup("Default Location", "defaultLocation", true, settings.defaultLocation) +
-        numberFieldMarkup("Signup Window (weeks)", "signupWindowWeeks", settings.signupWindowWeeks, 0, 52, "Use 1 or more weeks to set when online signups open. Set this to 0 to disable online signups; calendar administrators can still assign people directly.") +
+        '<p class="text-sm leading-relaxed text-gray-600">Use each calendar item\'s Open / Closed button to allow or stop online signups. New items start closed. Direct admin assignments remain available.</p>' +
         checkboxMarkup("hideAttendingBlock", "Hide attending block", settings.hideAttendingBlock, "Hide public attendance controls and totals while retaining existing attendance data for possible future use.") +
         '<button type="submit" class="rounded-lg bg-sangha-navy px-4 py-3 text-xs uppercase tracking-widest font-bold text-white hover:bg-blue-900">Save Settings</button>' +
         '<p class="text-xs leading-relaxed text-gray-500">Changing the default location updates future items and recurring rules that are checked to use the default. Past items and custom locations are left alone.</p>' +
@@ -2546,7 +2543,6 @@
         var store = loadStore();
         applyCalendarSettingsUpdate(store, {
           defaultLocation: fieldValue(form, "defaultLocation") || DEFAULT_LOCATION,
-          signupWindowWeeks: fieldValue(form, "signupWindowWeeks"),
           hideAttendingBlock: checkboxValue(form, "hideAttendingBlock"),
           emailFooter: store.settings.emailFooter,
           zoomName: store.settings.zoomName,
@@ -2567,7 +2563,6 @@
         var store = loadStore();
         applyCalendarSettingsUpdate(store, {
           defaultLocation: store.settings.defaultLocation,
-          signupWindowWeeks: store.settings.signupWindowWeeks,
           hideAttendingBlock: store.settings.hideAttendingBlock,
           emailFooter: store.settings.emailFooter,
           zoomName: fieldValue(zoomForm, "zoomName"),
@@ -2677,7 +2672,6 @@
         var store = loadStore();
         applyCalendarSettingsUpdate(store, {
           defaultLocation: store.settings.defaultLocation,
-          signupWindowWeeks: store.settings.signupWindowWeeks,
           hideAttendingBlock: store.settings.hideAttendingBlock,
           emailFooter: fieldValue(footerForm, "emailFooter"),
           zoomName: store.settings.zoomName,
@@ -2925,7 +2919,7 @@
   }
 
   function isEmptyGeneratedSlot(slot) {
-    return slot.generatedFromRecurrence && !slot.canceled && !slot.occurrenceOverrides.length && !slot.speaker && !slot.backups.length && !slot.attendees.length && !slot.notifications.length && !slot.reminders.length;
+    return slot.generatedFromRecurrence && !slot.signupsOpen && !slot.canceled && !slot.occurrenceOverrides.length && !slot.speaker && !slot.backups.length && !slot.attendees.length && !slot.notifications.length && !slot.reminders.length;
   }
 
   function isFutureEmptyGeneratedSlot(slot) {
@@ -3447,14 +3441,6 @@
     '</label>';
   }
 
-  function numberFieldMarkup(label, name, value, min, max, description) {
-    return '<label class="block mb-4">' +
-      '<span class="block text-xs uppercase tracking-widest font-bold text-sangha-navy mb-2">' + escapeHtml(label) + '</span>' +
-      '<input class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sangha-gold" type="number" name="' + escapeHtml(name) + '" min="' + escapeHtml(min) + '" max="' + escapeHtml(max) + '" step="1" value="' + escapeHtml(value) + '" required />' +
-      (description ? '<span class="mt-2 block text-xs leading-relaxed text-gray-500">' + escapeHtml(description) + '</span>' : '') +
-    '</label>';
-  }
-
   function textareaMarkup(label, name, required, value) {
     return '<label class="block mb-4">' +
       '<span class="block text-xs uppercase tracking-widest font-bold text-sangha-navy mb-2">' + label + (required ? '' : ' <span class="text-gray-400 font-bold">(optional)</span>') + '</span>' +
@@ -3860,7 +3846,7 @@
   function renderMeetingSchedule(root, store, slot) {
     var params = new URLSearchParams(window.location.search);
     var settings = normalizeCalendarSettings(store.settings);
-    if (!settings.hideAttendingBlock && params.get("attend") === "1" && isLoggedIn() && !isPastSlot(slot) && !slot.canceled && signupWindowOpen(slot, settings) && !currentUserAttendee(slot)) {
+    if (!settings.hideAttendingBlock && params.get("attend") === "1" && isLoggedIn() && !isPastSlot(slot) && !slot.canceled && itemSignupsOpen(slot) && !currentUserAttendee(slot)) {
       addCurrentUserAttendance(store, slot);
       if (isServerBackedProduction()) {
         saveStoreAndThen(store, root, function () { renderSchedule(root); });
@@ -3959,23 +3945,17 @@
     '</aside>';
   }
 
-  function renderSignupWindowNotice(slot, settings, label) {
+  function renderSignupClosedNotice(slot, settings, label) {
     return '<div class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm leading-relaxed text-gray-600">' +
       '<p class="font-bold text-sangha-navy">' + escapeHtml(label) + '</p>' +
-      '<p class="mt-1">' + escapeHtml(signupWindowMessage(slot, settings, label)) + '</p>' +
+      '<p class="mt-1">Online signups are closed for this item. A calendar administrator can still assign people directly.</p>' +
     '</div>';
   }
 
-  function renderVolunteerWindowPanel(slot, settings) {
-    if (signupWindowDisabled(settings)) {
-      return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
-        '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Volunteer Signups Closed</h3>' +
-        '<p class="text-sm text-gray-600 leading-relaxed">Online volunteer signups are currently closed. A calendar administrator can still assign a volunteer directly.</p>' +
-      '</aside>';
-    }
+  function renderVolunteerClosedPanel(slot, settings) {
     return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
-      '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Will Open For Volunteers</h3>' +
-      '<p class="text-sm text-gray-600 leading-relaxed">This will open for volunteers ' + escapeHtml(signupWindowLabel(settings)) + ' before the meeting, on ' + escapeHtml(displayDate(signupOpenDate(slot, settings))) + '.</p>' +
+      '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Volunteer Signups Closed</h3>' +
+      '<p class="text-sm text-gray-600 leading-relaxed">Online volunteer signups are currently closed. A calendar administrator can still assign a volunteer directly.</p>' +
     '</aside>';
   }
 
@@ -3993,10 +3973,10 @@
         '<button type="button" data-cancel-attendance class="w-full mt-5 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-red-50">Cancel Attendance</button>' +
       '</aside>';
     }
-    if (!signupWindowOpen(slot, settings)) {
+    if (!itemSignupsOpen(slot)) {
       return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
-        '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Attendance Not Open Yet</h3>' +
-        renderSignupWindowNotice(slot, settings, "Attendance signups") +
+        '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Attendance Signups Closed</h3>' +
+        renderSignupClosedNotice(slot, settings, "Attendance signups") +
       '</aside>';
     }
     if (!isLoggedIn()) {
@@ -4028,12 +4008,12 @@
         (currentAttendee ? '<button type="button" data-cancel-talk-attendance class="w-full mt-5 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-red-50">Cancel Attendance</button>' : '') +
       '</aside>';
     }
-    if (!signupWindowOpen(slot, settings)) {
+    if (!itemSignupsOpen(slot)) {
       return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
         '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Attending</h3>' +
         '<p class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm font-bold text-sangha-navy">' + escapeHtml(countText) + '</p>' +
         renderAttendanceIntentNote("my-5") +
-        renderSignupWindowNotice(slot, settings, "Attendance signups") +
+        renderSignupClosedNotice(slot, settings, "Attendance signups") +
       '</aside>';
     }
     if (!isLoggedIn()) {
@@ -4144,7 +4124,7 @@
       return '<aside class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-fit">' +
         '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">Volunteer Info</h3>' +
         renderSpeakerClaimBlock(slot.speaker, false) +
-        '<p class="mt-4 text-sm text-gray-600 leading-relaxed">' + (signupWindowOpen(slot, settings) ? 'Backup volunteers are still welcome in case plans change.' : 'Backup volunteer signups are not open yet.') + '</p>' +
+        '<p class="mt-4 text-sm text-gray-600 leading-relaxed">' + (itemSignupsOpen(slot) ? 'Backup volunteers are still welcome in case plans change.' : 'Backup volunteer signups are closed.') + '</p>' +
       '</aside>';
     }
 
@@ -4153,12 +4133,12 @@
         '<h3 class="font-serif text-xl font-bold text-sangha-navy mb-3">You Are A Backup</h3>' +
         '<p class="text-sm text-gray-600 leading-relaxed">If the person bringing the talk has stepped back and you are able to offer it, you can move from backup to bringing the talk.</p>' +
         renderVolunteerMeta(userBackup, false) +
-        '<button type="button" data-promote-backup class="w-full mt-5 bg-green-600 text-white rounded-lg px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-green-700">Volunteer</button>' +
+        (itemSignupsOpen(slot) ? '<button type="button" data-promote-backup class="w-full mt-5 bg-green-600 text-white rounded-lg px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-green-700">Volunteer</button>' : renderSignupClosedNotice(slot, settings, "Volunteer signups")) +
       '</aside>';
     }
 
-    if (!signupWindowOpen(slot, settings)) {
-      return renderVolunteerWindowPanel(slot, settings);
+    if (!itemSignupsOpen(slot)) {
+      return renderVolunteerClosedPanel(slot, settings);
     }
 
     if (!isLoggedIn()) {
@@ -4200,7 +4180,7 @@
           '<button type="submit" class="w-full mt-2 bg-sangha-navy text-white rounded-lg px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-blue-900">Update Backup Details</button>' +
           '<button type="button" data-cancel-current-backup class="w-full mt-3 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-red-50">Cancel As Backup</button>' +
         '</form>' :
-        !signupWindowOpen(slot, settings) ? '<div class="mb-5">' + renderSignupWindowNotice(slot, settings, "Backup volunteer signups") + '</div>' :
+        !itemSignupsOpen(slot) ? '<div class="mb-5">' + renderSignupClosedNotice(slot, settings, "Backup volunteer signups") + '</div>' :
         !isLoggedIn() ? renderLoginRequiredInline("volunteer as a backup") :
         '<form id="talk-backup-form" class="mb-5">' +
           renderUserNameField(userName) +

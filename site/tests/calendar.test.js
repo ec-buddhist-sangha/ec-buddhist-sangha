@@ -217,7 +217,7 @@ test("public talk cards omit attendance and backup totals", () => {
       id: "talk-counts-hidden",
       date: "2026-06-02",
       title: "Talk without public totals",
-      speaker: null,
+      speaker: null, signupsOpen: true,
       backups: [api.makeVolunteer("Backup Member", "", "", "2026-01-01T00:00:00.000Z", "backup@example.com")],
       attendees: [api.makeVolunteer("Attending Member", "", "", "2026-01-01T00:00:00.000Z", "attending@example.com")]
     }]
@@ -234,7 +234,7 @@ test("calendar descriptions preserve newlines in tooltips and item pages", () =>
   const description = "First line\n\n\u25cf Second line\n\u25cf Third line";
   api.__setStore({
     slots: [
-      { id: "slot-lines", date: "2026-06-02", title: "Line test", description, speaker: null, backups: [] }
+      { id: "slot-lines", date: "2026-06-02", title: "Line test", description, speaker: null, signupsOpen: true, backups: [] }
     ]
   });
 
@@ -273,7 +273,7 @@ test("admin calendar renders moved markers without blanking the page", () => {
         title: "Moved talk",
         description: "This meeting moved.",
         movedToDate: "2026-06-02",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -294,7 +294,7 @@ test("admin cancel meeting buttons open confirmation and mark the item canceled"
         date: "2026-06-02",
         title: "Cancel test talk",
         description: "Cancel this item.",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: [],
         attendees: []
       }
@@ -332,7 +332,7 @@ test("admin cancel meeting can remove the item from the calendar", () => {
         date: "2026-06-02",
         title: "Remove test talk",
         description: "Remove this item.",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: [],
         attendees: []
       }
@@ -366,7 +366,7 @@ test("admin editor for a canceled item shows remove from calendar", () => {
         title: "Canceled talk",
         description: "Already canceled.",
         canceled: true,
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: [],
         attendees: []
       }
@@ -393,8 +393,8 @@ test("admin push-forward button moves a recurring group with no confirmation whe
       { id: "weekly-talks", name: "Weekly Talks", frequency: "weekly", startDate: "2026-06-02", itemType: "talk", active: true }
     ],
     slots: [
-      { id: "slot-a", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Talk A", speaker: null, backups: [] },
-      { id: "slot-b", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-09", title: "Talk B", speaker: null, backups: [] }
+      { id: "slot-a", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Talk A", speaker: null, signupsOpen: true, backups: [] },
+      { id: "slot-b", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-09", title: "Talk B", speaker: null, signupsOpen: true, backups: [] }
     ]
   });
 
@@ -425,7 +425,7 @@ test("admin push-forward confirmation moves a recurring group when people are si
         speaker: api.makeVolunteer("Mary Speaker", "", "", "2026-01-01T00:00:00.000Z", "mary@example.com"),
         backups: []
       },
-      { id: "slot-b", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-09", title: "Talk B", speaker: null, backups: [] }
+      { id: "slot-b", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-09", title: "Talk B", speaker: null, signupsOpen: true, backups: [] }
     ]
   });
 
@@ -448,6 +448,7 @@ test("regular meetings preserve blank descriptions", () => {
   const meetingSlot = api.normalizeSlot({
     id: "meeting-a",
     itemType: "meeting",
+    signupsOpen: true,
     date: "2026-06-02",
     title: "Regular meeting",
     description: ""
@@ -471,7 +472,7 @@ test("promoteBackupToSpeaker moves one backup into the speaker slot", () => {
   const slot = api.normalizeSlot({
     id: "slot-a",
     date: "2026-06-02",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: [backup, api.makeVolunteer("Maya Chen", "", "", "2026-01-04T00:00:00.000Z", "maya@example.com")],
     attendees: [api.makeVolunteer("Jordan Lee", "", "", "2026-01-02T00:00:00.000Z", "jordan@example.com")]
   });
@@ -507,7 +508,7 @@ test("recurring push forward removes default duplicate slot and queues one conso
         date: "2026-06-09",
         title: "Sangha Meeting",
         description: "Each 90 minute gathering is divided into 30 minute segments:\n\u25cf Group meditation with instruction for newcomers\n\u25cf Recorded Dharma talk from a teacher presented by one of the members\n\u25cf Open discussion about the teachings and meditation practice",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: [],
         notifications: []
       }
@@ -620,7 +621,7 @@ test("upcomingCalendarEmailText omits time and backup count", () => {
         date: "2026-06-02",
         title: "Third Hindrance: Sloth & Torpor",
         description: "Talk slot",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       },
       {
@@ -652,7 +653,7 @@ test("upcomingCalendarEmailHtml styles names orange and links blue", () => {
         date: "2026-06-02",
         title: "Third Hindrance: Sloth & Torpor",
         description: "Talk slot",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       },
       {
@@ -690,7 +691,7 @@ test("upcoming calendar email includes next Tuesday details and the editable foo
       title: "Sangha Meeting",
       location: "Unity of Eau Claire\n1808 Folsom Street\nEau Claire, WI 54703",
       usePhysicalLocation: true,
-      speaker: null,
+      speaker: null, signupsOpen: true,
       backups: []
     }]
   });
@@ -713,9 +714,9 @@ test("calendar settings update future default locations only", () => {
       { id: "custom-rule", name: "Custom Rule", startDate: "2026-06-03", useDefaultLocation: false, location: "Custom place" }
     ],
     slots: [
-      { id: "past-default", date: "2026-01-06", useDefaultLocation: true, location: "Old default", speaker: null, backups: [] },
-      { id: "future-default", date: "2026-06-02", useDefaultLocation: true, location: "Old default", speaker: null, backups: [] },
-      { id: "future-custom", date: "2026-06-09", useDefaultLocation: false, location: "Custom place", speaker: null, backups: [] }
+      { id: "past-default", date: "2026-01-06", useDefaultLocation: true, location: "Old default", speaker: null, signupsOpen: true, backups: [] },
+      { id: "future-default", date: "2026-06-02", useDefaultLocation: true, location: "Old default", speaker: null, signupsOpen: true, backups: [] },
+      { id: "future-custom", date: "2026-06-09", useDefaultLocation: false, location: "Custom place", speaker: null, signupsOpen: true, backups: [] }
     ]
   });
 
@@ -729,21 +730,19 @@ test("calendar settings update future default locations only", () => {
   assert.equal(store.slots.find((slot) => slot.id === "future-custom").location, "Custom place");
 });
 
-test("calendar settings store signup window weeks and migrate legacy months", () => {
+test("calendar settings drop retired signup windows and items default to closed", () => {
   const api = loadApi();
   const store = api.normalizeStore({
     settings: { defaultLocation: "Old default", signupWindowMonths: 1 },
     slots: []
   });
 
-  assert.equal(store.settings.signupWindowWeeks, 4);
-
-  api.applyCalendarSettingsUpdate(store, { defaultLocation: "Old default", signupWindowWeeks: 3 });
-
-  assert.equal(store.settings.signupWindowWeeks, 3);
+  assert.equal(store.settings.signupWindowWeeks, undefined);
+  assert.equal(store.settings.signupWindowMonths, undefined);
+  assert.equal(api.normalizeSlot({ date: "2026-06-02" }).signupsOpen, false);
 });
 
-test("zero signup weeks disables online signup forms while retaining admin assignment", () => {
+test("closed item disables online signup forms while retaining admin assignment", () => {
   const api = loadApi();
   api.__storage.set("ecbs-calendar-current-user-name", "Current Member");
   api.__storage.set("ecbs-calendar-current-user-email", "current.member@example.com");
@@ -751,11 +750,11 @@ test("zero signup weeks disables online signup forms while retaining admin assig
     id: "closed-online-signups",
     date: "2099-08-04",
     title: "Future talk",
-    speaker: null,
+    speaker: null, signupsOpen: false,
     backups: []
   });
 
-  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 0 });
+  const html = api.renderPrimaryPanel(slot);
   assert.match(html, /Volunteer Signups Closed/);
   assert.match(html, /calendar administrator can still assign a volunteer directly/i);
   assert.doesNotMatch(html, /id="talk-primary-form"/);
@@ -787,15 +786,15 @@ test("default local calendar starts clean with the weekly Sangha meeting recurre
   assert.equal(store.recurrences[0].startDate, "2026-07-21");
   assert.equal(store.recurrences[0].startTime, "19:00");
   assert.equal(store.recurrences[0].endTime, "20:30");
-  assert.equal(store.settings.signupWindowWeeks, 4);
+  assert.equal(store.settings.signupWindowWeeks, undefined);
 });
 
 test("calendar supports physical only zoom only and hybrid items", () => {
   const api = loadApi();
   const settings = { zoomLink: "https://zoom.example/j/123" };
-  const physicalOnly = api.normalizeSlot({ id: "physical", date: "2026-06-02", usePhysicalLocation: true, useZoom: false, location: "Unity", speaker: null, backups: [] });
-  const zoomOnly = api.normalizeSlot({ id: "zoom", date: "2026-06-03", usePhysicalLocation: false, useZoom: true, location: "", speaker: null, backups: [] });
-  const hybrid = api.normalizeSlot({ id: "hybrid", date: "2026-06-04", usePhysicalLocation: true, useZoom: true, location: "Unity", speaker: null, backups: [] });
+  const physicalOnly = api.normalizeSlot({ id: "physical", date: "2026-06-02", usePhysicalLocation: true, useZoom: false, location: "Unity", speaker: null, signupsOpen: true, backups: [] });
+  const zoomOnly = api.normalizeSlot({ id: "zoom", date: "2026-06-03", usePhysicalLocation: false, useZoom: true, location: "", speaker: null, signupsOpen: true, backups: [] });
+  const hybrid = api.normalizeSlot({ id: "hybrid", date: "2026-06-04", usePhysicalLocation: true, useZoom: true, location: "Unity", speaker: null, signupsOpen: true, backups: [] });
 
   assert.equal(api.zoomLinkForSlot(physicalOnly, settings), "");
   assert.equal(api.zoomLinkForSlot(zoomOnly, settings), "https://zoom.example/j/123");
@@ -814,7 +813,7 @@ test("upcomingCalendarEmailText adds Zoom link when enabled", () => {
         date: "2026-06-02",
         title: "Hybrid talk",
         useZoom: true,
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -831,7 +830,7 @@ test("open volunteer panels require a logged in user", () => {
     id: "slot-open",
     date: "2026-06-02",
     title: "Open talk offering",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: []
   });
 
@@ -842,7 +841,7 @@ test("open volunteer panels require a logged in user", () => {
   assert.doesNotMatch(html, /Talk Already Claimed/);
 });
 
-test("future volunteer panels show when signups will open instead of the form", () => {
+test("closed volunteer panels do not promise an automatic opening date", () => {
   const api = loadApi();
   api.__storage.set("ecbs-calendar-current-user-name", "Current Member");
   api.__storage.set("ecbs-calendar-current-user-email", "current.member@example.com");
@@ -850,14 +849,14 @@ test("future volunteer panels show when signups will open instead of the form", 
     id: "slot-future",
     date: "2099-08-04",
     title: "Future talk",
-    speaker: null,
+    speaker: null, signupsOpen: false,
     backups: []
   });
 
-  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 });
+  const html = api.renderPrimaryPanel(slot, {  });
 
-  assert.match(html, /Will Open For Volunteers/);
-  assert.match(html, /This will open for volunteers 4 weeks before/);
+  assert.match(html, /Volunteer Signups Closed/);
+  assert.doesNotMatch(html, /weeks before|Will Open For Volunteers/);
   assert.doesNotMatch(html, /id="talk-primary-form"/);
   assert.doesNotMatch(html, /Sign Up To Bring Talk/);
 });
@@ -870,11 +869,11 @@ test("open volunteer panel uses current volunteer wording", () => {
     id: "slot-open",
     date: "2026-06-02",
     title: "Fourth Hindrance: Restlessness & Worry",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: []
   });
 
-  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 });
+  const html = api.renderPrimaryPanel(slot, {  });
 
   assert.match(html, />Volunteer<\/h3>/);
   assert.match(html, /30 minute recorded Dharma talk on <span class="font-bold text-sangha-navy">Fourth Hindrance: Restlessness &amp; Worry<\/span>/);
@@ -893,7 +892,7 @@ test("assigned talk panel uses volunteer info wording", () => {
     backups: []
   });
 
-  const html = api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 });
+  const html = api.renderPrimaryPanel(slot, {  });
 
   assert.match(html, /Volunteer Info/);
   assert.doesNotMatch(html, /Talk Already Claimed/);
@@ -907,21 +906,22 @@ test("open signup forms do not show reminder preferences before signup", () => {
     id: "slot-open",
     date: "2026-06-02",
     title: "Open talk offering",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: []
   });
   const meetingSlot = api.normalizeSlot({
     id: "meeting-open",
     itemType: "meeting",
+    signupsOpen: true,
     date: "2026-06-02",
     title: "Regular meeting",
     attendees: []
   });
 
-  assert.doesNotMatch(api.renderPrimaryPanel(talkSlot, { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
-  assert.doesNotMatch(api.renderBackupPanel(talkSlot, "", { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
-  assert.doesNotMatch(api.renderTalkAttendancePanel(talkSlot, null, { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
-  assert.doesNotMatch(api.renderAttendancePanel(meetingSlot, null, { signupWindowWeeks: 4 }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderPrimaryPanel(talkSlot, {  }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderBackupPanel(talkSlot, "", {  }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderTalkAttendancePanel(talkSlot, null, {  }), /Email Reminder Preferences/);
+  assert.doesNotMatch(api.renderAttendancePanel(meetingSlot, null, {  }), /Email Reminder Preferences/);
 });
 
 test("speaker panel lets the current speaker update talk details", () => {
@@ -977,7 +977,7 @@ test("backup panel lets the current backup update backup details", () => {
   const slot = api.normalizeSlot({
     id: "slot-backup",
     date: "2026-06-02",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: [
       api.makeVolunteer("Current Member", "https://example.com/backup", "Backup notes", "2026-01-01T00:00:00.000Z", "current.member@example.com")
     ]
@@ -1002,7 +1002,7 @@ test("backup panel shows a confirmation with update and cancel controls", () => 
   const slot = api.normalizeSlot({
     id: "slot-backup-confirmed",
     date: "2026-06-02",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: [backup]
   });
 
@@ -1023,7 +1023,7 @@ test("cancelCurrentBackupSignup removes only the logged-in backup", () => {
   const slot = api.normalizeSlot({
     id: "slot-backup",
     date: "2026-06-02",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: [
       api.makeVolunteer("Current Member", "", "", "2026-01-01T00:00:00.000Z", "current.member@example.com"),
       api.makeVolunteer("Other Member", "", "", "2026-01-02T00:00:00.000Z", "other@example.com")
@@ -1062,6 +1062,7 @@ test("regular meeting attendance requires a logged in user", () => {
     itemType: "meeting",
     date: "2026-06-02",
     title: "Regular meeting",
+    signupsOpen: true,
     attendees: []
   });
 
@@ -1071,7 +1072,7 @@ test("regular meeting attendance requires a logged in user", () => {
   assert.doesNotMatch(html, /I&rsquo;m Attending/);
 });
 
-test("future attendance panels show when signups will open instead of the form", () => {
+test("closed meeting attendance does not offer a signup form", () => {
   const api = loadApi();
   api.__storage.set("ecbs-calendar-current-user-name", "Current Member");
   api.__storage.set("ecbs-calendar-current-user-email", "current.member@example.com");
@@ -1083,10 +1084,11 @@ test("future attendance panels show when signups will open instead of the form",
     attendees: []
   });
 
-  const html = api.renderAttendancePanel(slot, null, { signupWindowWeeks: 8 });
+  slot.signupsOpen = false;
+  const html = api.renderAttendancePanel(slot, null, {});
 
-  assert.match(html, /Attendance Not Open Yet/);
-  assert.match(html, /Attendance signups open 8 weeks before/);
+  assert.match(html, /Attendance Signups Closed/);
+  assert.match(html, /Online signups are closed for this item/);
   assert.doesNotMatch(html, /id="meeting-attendance-form"/);
   assert.doesNotMatch(html, /I&rsquo;m Attending/);
 });
@@ -1100,6 +1102,7 @@ test("regular meeting attendance form uses click to attend label", () => {
     itemType: "meeting",
     date: "2026-06-03",
     title: "Regular meeting",
+    signupsOpen: true,
     attendees: []
   });
 
@@ -1164,7 +1167,7 @@ test("admin can assign people by name with optional email", () => {
   const talkSlot = api.normalizeSlot({
     id: "talk-a",
     date: "2026-06-02",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: [api.makeVolunteer("Jordan Lee", "", "", "2026-01-01T00:00:00.000Z", "jordan@example.com")]
   });
   const meetingSlot = api.normalizeSlot({
@@ -1193,7 +1196,7 @@ test("speaker and backup signup remove duplicate direct attendance", () => {
   const slot = api.normalizeSlot({
     id: "slot-role",
     date: "2026-06-02",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: [],
     attendees: [
       api.makeVolunteer("Current Member", "", "", "2026-01-01T00:00:00.000Z", "current.member@example.com"),
@@ -1364,7 +1367,7 @@ test("individual recurring occurrence edits are tracked as overrides", () => {
     title: "Custom title",
     description: "Custom description",
     location: "Series location",
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: []
   });
 
@@ -1380,8 +1383,8 @@ test("recurrence edits preserve past generated meetings", () => {
       { id: "weekly-talks", name: "Weekly Talks", frequency: "weekly", startDate: "2026-01-06", itemType: "talk", active: true }
     ],
     slots: [
-      { id: "past-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-01-06", title: "Past generated", speaker: null, backups: [] },
-      { id: "future-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Future generated", speaker: null, backups: [] },
+      { id: "past-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-01-06", title: "Past generated", speaker: null, signupsOpen: true, backups: [] },
+      { id: "future-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Future generated", speaker: null, signupsOpen: false, backups: [] },
       {
         id: "future-signed",
         recurrenceId: "weekly-talks",
@@ -1399,7 +1402,7 @@ test("recurrence edits preserve past generated meetings", () => {
         date: "2026-06-16",
         title: "Custom occurrence title",
         description: "Custom occurrence description.",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -1446,7 +1449,7 @@ test("recurrence date edits move future generated occurrences without duplicatin
   const store = api.normalizeStore({
     recurrences: [previousRecurrence],
     slots: [
-      { id: "future-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Open talk offering", description: "Old description", speaker: null, backups: [] },
+      { id: "future-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Open talk offering", description: "Old description", speaker: null, signupsOpen: false, backups: [] },
       {
         id: "future-signed",
         recurrenceId: "weekly-talks",
@@ -1465,7 +1468,7 @@ test("recurrence date edits move future generated occurrences without duplicatin
         date: "2026-06-16",
         title: "Custom talk title",
         description: "Old description",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -1489,7 +1492,7 @@ test("deleted recurrences keep historical items as one-time records", () => {
       { id: "weekly-talks", name: "Weekly Talks", frequency: "weekly", startDate: "2026-01-06", itemType: "talk", active: true }
     ],
     slots: [
-      { id: "past-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-01-06", title: "Past generated", speaker: null, backups: [] },
+      { id: "past-empty", recurrenceId: "weekly-talks", generatedFromRecurrence: true, date: "2026-01-06", title: "Past generated", speaker: null, signupsOpen: true, backups: [] },
       {
         id: "future-signed",
         recurrenceId: "weekly-talks",
@@ -1522,8 +1525,8 @@ test("push forward only affects the selected recurring group", () => {
       { id: "saturday-event", name: "Saturday Event", frequency: "weekly", startDate: "2026-06-06", itemType: "meeting", title: "Saturday sit", active: true }
     ],
     slots: [
-      { id: "tue-1", recurrenceId: "tuesday-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Tuesday talk", description: "Talk", speaker: null, backups: [] },
-      { id: "tue-2", recurrenceId: "tuesday-talks", generatedFromRecurrence: true, date: "2026-06-09", title: "Tuesday talk", description: "Talk", speaker: null, backups: [] },
+      { id: "tue-1", recurrenceId: "tuesday-talks", generatedFromRecurrence: true, date: "2026-06-02", title: "Tuesday talk", description: "Talk", speaker: null, signupsOpen: true, backups: [] },
+      { id: "tue-2", recurrenceId: "tuesday-talks", generatedFromRecurrence: true, date: "2026-06-09", title: "Tuesday talk", description: "Talk", speaker: null, signupsOpen: true, backups: [] },
       { id: "sat-1", recurrenceId: "saturday-event", generatedFromRecurrence: true, itemType: "meeting", date: "2026-06-06", title: "Saturday sit", description: "", attendees: [] }
     ]
   });
@@ -1571,7 +1574,7 @@ test("admin item editor collapses location and saves from the bottom", () => {
   const api = loadDomApi();
   api.__setStore({
     slots: [
-      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, backups: [] }
+      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, signupsOpen: true, backups: [] }
     ]
   });
 
@@ -1609,7 +1612,7 @@ test("admin utility sections are collapsed by default", () => {
         id: "slot-notice",
         date: "2026-06-02",
         title: "Notice talk",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: [],
         notifications: [
           { id: "notice-a", toName: "Backup Member", toEmail: "backup@example.com", subject: "Talk backup notice", link: "http://example.com/talk" }
@@ -1630,8 +1633,8 @@ test("admin utility sections are collapsed by default", () => {
   assert.equal(templatesSection.open, false);
   assert.match(templatesSection.textContent, /Talk Signup Confirmation/);
   assert.match(templatesSection.textContent, /Meeting Moved/);
-  assert.equal(api.__root.querySelector('#calendar-settings-form [name="signupWindowWeeks"]').value, "4");
-  assert.match(api.__root.querySelector('#calendar-settings-form').textContent, /Set this to 0 to disable online signups/);
+  assert.equal(api.__root.querySelector('#calendar-settings-form [name="signupWindowWeeks"]'), null);
+  assert.match(api.__root.querySelector('#calendar-settings-form').textContent, /Open \/ Closed button/);
   assert.equal(api.__root.querySelector('#calendar-settings-form [name="hideAttendingBlock"]').checked, true);
   assert.equal(api.__root.querySelector('details[data-admin-section="zoom-settings"]').open, false);
   assert.equal(api.__root.querySelector('details[data-admin-section="recurrence-form"]').open, false);
@@ -1667,7 +1670,7 @@ test("saving a calendar item closes without opening item-level reminder prompts"
   const api = loadDomApi();
   api.__setStore({
     slots: [
-      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, backups: [] }
+      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, signupsOpen: true, backups: [] }
     ]
   });
 
@@ -1681,11 +1684,81 @@ test("saving a calendar item closes without opening item-level reminder prompts"
   assert.equal(api.__root.querySelector("[data-calendar-modal]"), null);
 });
 
+test("Save And Close applies pending speaker and backup assignments together with item edits", () => {
+  const api = loadDomApi();
+  api.__setStore({ slots: [{ id: "assignment-save", date: "2026-06-02", title: "Original", signupsOpen: false }] });
+  api.renderAdmin(api.__root, { year: 2026, month: 5, selectedSlotId: "assignment-save" });
+  const form = api.__root.querySelector("#talk-slot-form");
+  form.querySelector('[name="title"]').value = "Updated title";
+  api.__root.querySelector('#admin-speaker-form [name="name"]').value = "Bob";
+  api.__root.querySelector('#admin-backup-form [name="name"]').value = "Mary";
+  form.dispatchEvent(new api.__window.Event("submit", { bubbles: true, cancelable: true }));
+  const saved = api.__getStore().slots.find((slot) => slot.id === "assignment-save");
+  assert.equal(saved.title, "Updated title");
+  assert.equal(saved.speaker.name, "Bob");
+  assert.equal(saved.speaker.email, "");
+  assert.equal(saved.backups[0].name, "Mary");
+  assert.equal(saved.signupsOpen, false);
+  assert.equal(api.__root.querySelector("[data-calendar-modal]"), null);
+  assert.ok(api.__getStore().history.some((entry) => entry.action === "Assigned speaker"));
+});
+
+test("closing with only a pending speaker assignment offers to save", () => {
+  const api = loadDomApi();
+  api.__setStore({ slots: [{ id: "assignment-close", date: "2026-06-02", title: "Talk" }] });
+  api.renderAdmin(api.__root, { year: 2026, month: 5, selectedSlotId: "assignment-close" });
+  let prompted = false;
+  api.__window.confirm = () => { prompted = true; return true; };
+  api.__root.querySelector('#admin-speaker-form [name="name"]').value = "Mary";
+  api.__root.querySelector("[data-close-admin-modal]").click();
+  assert.equal(prompted, true);
+  assert.equal(api.__getStore().slots.find((slot) => slot.id === "assignment-close").speaker.name, "Mary");
+});
+
+test("admin grid toggles one recurring occurrence without opening its neighbors or an editor", () => {
+  const api = loadDomApi();
+  api.__setStore({ slots: [], recurrences: [{ id: "toggle-series", name: "Weekly", frequency: "weekly", startDate: "2026-06-02" }] });
+  api.renderAdmin(api.__root, { year: 2026, month: 5 });
+  const selector = '[data-toggle-signups="occ-toggle-series-2026-06-02"]';
+  assert.equal(api.__root.querySelector(selector).getAttribute("aria-pressed"), "false");
+  api.__root.querySelector(selector).click();
+  assert.equal(api.__root.querySelector(selector).getAttribute("aria-pressed"), "true");
+  assert.equal(api.__root.querySelector("[data-calendar-modal]"), null);
+  assert.equal(api.__getStore().slots.find((slot) => slot.id === "occ-toggle-series-2026-06-09").signupsOpen, false);
+  api.__root.querySelector(selector).click();
+  assert.equal(api.__getStore().slots.find((slot) => slot.id === "occ-toggle-series-2026-06-02").signupsOpen, false);
+});
+
+test("email copy starts with a bold meeting sentence and lists only scheduled or open items", () => {
+  const api = loadApi();
+  const store = api.normalizeStore({
+    settings: { emailFooter: "PayPal Dana Donation\nThank you <friends>" },
+    slots: [
+      { id: "closed", date: "2026-06-02", title: "Closed unassigned talk", signupsOpen: false },
+      { id: "open", date: "2026-06-09", title: "Open offering", signupsOpen: true },
+      { id: "assigned", date: "2026-06-16", title: "Assigned offering", speaker: { name: "Mary" } },
+      { id: "canceled", date: "2026-06-23", title: "Canceled offering", canceled: true, signupsOpen: true },
+      { id: "draft", date: "2026-06-30", title: "Draft offering", isDraft: true, signupsOpen: true },
+      { id: "regular", date: "2026-07-07", title: "Regular gathering", itemType: "meeting" }
+    ]
+  });
+  const html = api.upcomingCalendarEmailHtml(store);
+  const text = api.upcomingCalendarEmailText(store);
+  assert.match(html, /^<p[^>]*><strong>We will meet/);
+  assert.match(text, /^We will meet/);
+  assert.match(html, /<strong>PayPal Dana Donation<\/strong>/);
+  assert.match(html, /Thank you &lt;friends&gt;/);
+  assert.match(text, /Open offering/);
+  assert.match(text, /Assigned offering/);
+  assert.match(text, /Regular gathering/);
+  assert.doesNotMatch(text, /Closed unassigned talk|Canceled offering|Draft offering/);
+});
+
 test("closing a dirty admin modal can save before closing", () => {
   const api = loadDomApi();
   api.__setStore({
     slots: [
-      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, backups: [] }
+      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, signupsOpen: true, backups: [] }
     ]
   });
   api.__window.confirm = () => true;
@@ -1702,7 +1775,7 @@ test("closing a dirty admin modal can discard changes", () => {
   const api = loadDomApi();
   api.__setStore({
     slots: [
-      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, backups: [] }
+      { id: "slot-admin", date: "2026-06-02", title: "Open talk", description: "Description", speaker: null, signupsOpen: true, backups: [] }
     ]
   });
   api.__window.confirm = () => false;
@@ -1733,7 +1806,7 @@ test("later open talks are not highlighted when the next meeting already has a s
         id: "slot-later-open",
         date: "2026-06-09",
         title: "Later open gathering",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -1765,7 +1838,7 @@ test("future month browsing does not move next-meeting highlight to the first vi
         id: "slot-future-open",
         date: "2026-08-04",
         title: "Future visible open gathering",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -1779,10 +1852,10 @@ test("future month browsing does not move next-meeting highlight to the first vi
   assert.doesNotMatch(futureOpen.outerHTML, /bg-green-600/);
 });
 
-test("public calendar hides open signup buttons outside the signup window", () => {
+test("public calendar hides signup buttons for closed items even in future months", () => {
   const api = loadDomApi();
   api.__setStore({
-    settings: { signupWindowWeeks: 4 },
+    settings: {  },
     recurrences: [
       { id: "inactive", name: "Inactive", frequency: "weekly", startDate: "2099-01-01", active: false }
     ],
@@ -1791,7 +1864,7 @@ test("public calendar hides open signup buttons outside the signup window", () =
         id: "slot-far-future-open",
         date: "2099-08-04",
         title: "Far future open gathering",
-        speaker: null,
+        speaker: null, signupsOpen: false,
         backups: []
       }
     ]
@@ -1799,7 +1872,7 @@ test("public calendar hides open signup buttons outside the signup window", () =
 
   api.renderCalendar(api.__root, { year: 2099, month: 7 });
 
-  assert.match(api.__root.textContent, /Opens 4 weeks before/);
+  assert.match(api.__root.textContent, /Online signups closed/);
   assert.doesNotMatch(api.__root.textContent, /Open for volunteer/);
   assert.doesNotMatch(api.__root.textContent, /Sign up as backup/);
 });
@@ -1843,7 +1916,7 @@ test("mobile public calendar starts with today even when empty", () => {
         id: "slot-tomorrow",
         date: api.shiftDateByDays(today, 1),
         title: "Tomorrow gathering",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -1867,7 +1940,7 @@ test("mobile public calendar paginates upcoming items by five with controls on t
     id: "mobile-slot-" + index,
     date: api.shiftDateByDays(today, index + 1),
     title: "Mobile item " + index,
-    speaker: null,
+    speaker: null, signupsOpen: true,
     backups: []
   }));
   api.__setStore({
@@ -1901,7 +1974,7 @@ test("the next open talk gets a green action without green card framing", () => 
         id: "slot-next-open",
         date: "2026-06-02",
         title: "Open next gathering",
-        speaker: null,
+        speaker: null, signupsOpen: true,
         backups: []
       }
     ]
@@ -1920,17 +1993,17 @@ test("diffMemberSignups detects add, remove, role change, and detail edits", () 
   const email = "mem@example.com";
   const prev = api.normalizeStore({
     slots: [
-      { id: "add", date: "2026-06-09", speaker: null, backups: [], attendees: [] },
-      { id: "remove", date: "2026-06-09", speaker: null, backups: [api.makeVolunteer("Mem", "", "", "t", email)], attendees: [] },
-      { id: "change", date: "2026-06-09", speaker: null, backups: [api.makeVolunteer("Mem", "", "", "t", email)], attendees: [] },
+      { id: "add", date: "2026-06-09", speaker: null, signupsOpen: true, backups: [], attendees: [] },
+      { id: "remove", date: "2026-06-09", speaker: null, signupsOpen: true, backups: [api.makeVolunteer("Mem", "", "", "t", email)], attendees: [] },
+      { id: "change", date: "2026-06-09", speaker: null, signupsOpen: true, backups: [api.makeVolunteer("Mem", "", "", "t", email)], attendees: [] },
       { id: "detail", date: "2026-06-09", speaker: api.makeVolunteer("Mem", "old-link", "", "t", email), backups: [], attendees: [] },
       { id: "other", date: "2026-06-09", speaker: api.makeVolunteer("Someone", "", "", "t", "other@example.com"), backups: [], attendees: [] }
     ]
   });
   const next = api.normalizeStore({
     slots: [
-      { id: "add", date: "2026-06-09", speaker: null, backups: [], attendees: [api.makeVolunteer("Mem", "", "", "t", email)] },
-      { id: "remove", date: "2026-06-09", speaker: null, backups: [], attendees: [] },
+      { id: "add", date: "2026-06-09", speaker: null, signupsOpen: true, backups: [], attendees: [api.makeVolunteer("Mem", "", "", "t", email)] },
+      { id: "remove", date: "2026-06-09", speaker: null, signupsOpen: true, backups: [], attendees: [] },
       { id: "change", date: "2026-06-09", speaker: api.makeVolunteer("Mem", "", "", "t", email), backups: [], attendees: [] },
       { id: "detail", date: "2026-06-09", speaker: api.makeVolunteer("Mem", "new-link", "", "t", email), backups: [], attendees: [] },
       { id: "other", date: "2026-06-09", speaker: api.makeVolunteer("Someone", "", "", "t", "other@example.com"), backups: [], attendees: [] }
@@ -1967,10 +2040,10 @@ test("admin saveStore pushes the full store via CalendarApi.putStore", async () 
   };
   api.__window.localStorage.setItem("ecbs-calendar-server-cache-v1:admin:a@example.com", JSON.stringify({
     revision: 1,
-    slots: [{ id: "s1", date: "2026-06-09", title: "T", speaker: null, backups: [], attendees: [] }],
+    slots: [{ id: "s1", date: "2026-06-09", title: "T", speaker: null, signupsOpen: true, backups: [], attendees: [] }],
     recurrences: [],
     history: [],
-    settings: { signupWindowWeeks: 4 }
+    settings: {  }
   }));
   await new Promise((resolve) => setImmediate(resolve));
 
@@ -1988,7 +2061,7 @@ test("admin saveStore pushes the full store via CalendarApi.putStore", async () 
 
 test("choosing a new item type does not persist a draft before basics are saved", () => {
   const api = loadDomApi();
-  api.__setStore({ slots: [], recurrences: [], history: [], settings: { signupWindowWeeks: 4 } });
+  api.__setStore({ slots: [], recurrences: [], history: [], settings: {  } });
 
   api.renderAdmin(api.__root, { year: 2026, month: 6, selectedDate: "2026-07-22", itemTypePrompt: true });
   api.__root.querySelector('[data-select-item-type="talk"]').click();
@@ -2018,7 +2091,7 @@ test("recurring occurrence IDs are deterministic and rendering does not persist 
     slots: [],
     recurrences: [{ id: "weekly-main", frequency: "weekly", interval: 1, startDate: "2026-07-21", itemType: "talk", active: true }],
     history: [],
-    settings: { signupWindowWeeks: 4 }
+    settings: {  }
   });
 
   api.ensureRecurringSlots(store, 2026, 6);
@@ -2046,7 +2119,7 @@ test("a deterministic recurring link opens its derived item without persisting o
       active: true
     }],
     history: [],
-    settings: { signupWindowWeeks: 4, hideAttendingBlock: true }
+    settings: { hideAttendingBlock: true }
   });
 
   api.renderSchedule(api.__root);
@@ -2063,10 +2136,10 @@ test("production ignores mock query and browser identity", () => {
   });
   api.__window.localStorage.setItem("ecbs-calendar-current-user-name", "Imposter");
   api.__window.localStorage.setItem("ecbs-calendar-current-user-email", "imposter@example.com");
-  const slot = api.normalizeSlot({ id: "future", itemType: "talk", date: "2026-06-02", speaker: null, backups: [] });
+  const slot = api.normalizeSlot({ id: "future", itemType: "talk", date: "2026-06-02", speaker: null, signupsOpen: true, backups: [] });
 
-  assert.match(api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 }), /Sign In Required/);
-  assert.doesNotMatch(api.renderPrimaryPanel(slot, { signupWindowWeeks: 4 }), /id="talk-primary-form"/);
+  assert.match(api.renderPrimaryPanel(slot, {  }), /Sign In Required/);
+  assert.doesNotMatch(api.renderPrimaryPanel(slot, {  }), /id="talk-primary-form"/);
 });
 
 test("production fetch failure uses the identity-scoped cache read-only", async () => {
@@ -2075,7 +2148,7 @@ test("production fetch failure uses the identity-scoped cache read-only", async 
   api.__window.localStorage.setItem("ecbs-calendar-server-cache-v1:public", JSON.stringify({
     revision: 4,
     slots: [{ id: "cached", itemType: "meeting", date: "2026-06-02", title: "Cached gathering", attendees: [] }],
-    recurrences: [], history: [], settings: { signupWindowWeeks: 4 }
+    recurrences: [], history: [], settings: {  }
   }));
   api.__window.ECBS = {
     Auth: { getUser: () => null },
@@ -2092,8 +2165,8 @@ test("revision conflict adopts the authoritative server state", async () => {
   const api = loadDomApi({ localDev: false, url: "https://eauclairesangha.org/admin/calendar/" });
   const initial = {
     revision: 2,
-    slots: [{ id: "s1", itemType: "talk", date: "2026-06-02", title: "Initial", speaker: null, backups: [], attendees: [] }],
-    recurrences: [], history: [], settings: { signupWindowWeeks: 4 }
+    slots: [{ id: "s1", itemType: "talk", date: "2026-06-02", title: "Initial", speaker: null, signupsOpen: true, backups: [], attendees: [] }],
+    recurrences: [], history: [], settings: {  }
   };
   const authoritative = JSON.parse(JSON.stringify(initial));
   authoritative.revision = 3;

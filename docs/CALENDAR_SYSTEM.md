@@ -54,7 +54,9 @@ Individual occurrences can override title, description, time, and location while
 
 ## Signup behavior
 
-The Worker enforces valid talk/meeting types and roles, active future items, the configured signup window, one open speaker position, approved reminder identifiers, HTTP(S)-only optional links, and bounded link/notes lengths.
+Each calendar item has its own `signupsOpen` flag. Administrators click the Open / Closed signups button on the item in the admin grid to save its availability immediately. New and derived recurring items start closed, and existing items without a flag are treated as closed. Opening one recurring occurrence does not open the rest of its series. Past, canceled, and moved items cannot be opened.
+
+The Worker enforces valid talk/meeting types and roles, active future items, the individual item's signup flag, one open speaker position, approved reminder identifiers, HTTP(S)-only optional links, and bounded link/notes lengths. Existing participants may update or cancel their signup while an item is closed; moving to a different role requires it to be open. Direct admin assignments work regardless of the signup flag. Save And Close applies any name/email entered into the speaker, backup, or attendee assignment fields, even if the individual assignment button was not clicked. Closing a modal with pending assignment changes offers to save them.
 
 Talk speakers and backups continue to count as attending in the stored data. The `Hide attending block` calendar setting is enabled by default, so public attendance controls and totals are currently hidden. This preserves the feature for a later return without treating attendance as an RSVP.
 
@@ -62,7 +64,7 @@ Backup volunteers are never promoted automatically. Fairness ordering prefers th
 
 ## Calendar settings
 
-The default online signup window is four weeks, and `Hide attending block` is enabled. Administrators can set the window to any whole number from 1 to 52 weeks, or set it to `0` to disable online signups while retaining direct admin assignments. Existing month-based settings are read compatibly as four weeks per month. Calendar items can be physical, Zoom, or hybrid. The default physical location is:
+There is no global signup window. Retired week/month settings are ignored and removed when the store is saved. `Hide attending block` is enabled. Calendar items can be physical, Zoom, or hybrid. The default physical location is:
 
 ```text
 Unity of Eau Claire
@@ -72,9 +74,11 @@ Eau Claire, WI 54703
 
 Changing the default location updates future items and recurrence rules still marked to use it. Manual Zoom links are supported. Automatic Zoom meeting creation is deferred.
 
-The Upcoming Calendar Email Block automatically adds the next active Tuesday meeting's time, full date, concise physical location, and an all-are-welcome note. Administrators can save a common footer beneath that generated sentence; both are included in the copied plain-text and HTML versions.
+The Upcoming Calendar Email Block starts with the next active Tuesday meeting's time, full date, physical location, and an all-are-welcome note. The list contains future active regular meetings and talks that have an assigned speaker or are open for volunteers; canceled, moved, draft, and closed unassigned talks are excluded. An editable common footer follows the list. Both plain-text and HTML copies use this order. The HTML copy bolds the opening meeting sentence and the phrase `PayPal Dana Donation` in the footer.
 
 The admin page retains email templates and reminder fields for a later implementation, but production does not display send-email controls or promise reminder delivery. Calendar email delivery is deferred.
+
+The individual signup controls require both the updated site and Worker to be deployed. Existing D1 data needs no reset or additional migration; after rollout, administrators must explicitly open the dates they want to make available for new signups.
 
 ## Initialization
 
@@ -84,7 +88,7 @@ Migration `workers/sangha-worker/migrations/0004_initialize_calendar.sql` insert
 - 7:00 PM to 8:30 PM;
 - title `Sangha Meeting` and the standard gathering description;
 - the default physical location;
-- four-week signup window;
+- individual occurrences closed until opened by an administrator (the original seed's retired signup-window setting is ignored);
 - no Zoom, historical items, volunteers, signups, notices, or history.
 
 Never reset or delete production D1 during initialization. Deployment order:

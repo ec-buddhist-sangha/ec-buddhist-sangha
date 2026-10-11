@@ -88,6 +88,7 @@ function slotFromRecurrence(rule, date) {
     generatedFromRecurrence: true,
     occurrenceOverrides: [],
     isDraft: false,
+    signupsOpen: false,
     title: rule.title || "Sangha Meeting",
     description: typeof rule.description === "string" ? rule.description : "",
     usePhysicalLocation: rule.usePhysicalLocation !== false,
@@ -144,22 +145,6 @@ function chicagoNow(nowIso) {
   return { date: values.year + "-" + values.month + "-" + values.day, time: values.hour + ":" + values.minute };
 }
 
-function subtractWeeks(dateValue, weeks) {
-  const parts = parseDate(dateValue);
-  if (!parts) return "";
-  const date = dateToUtc(parts);
-  date.setUTCDate(date.getUTCDate() - weeks * 7);
-  return dateKey(date);
-}
-
-function signupWindowWeeks(settings) {
-  settings = settings || {};
-  let weeks = Number(settings.signupWindowWeeks);
-  if (!Number.isFinite(weeks) && Number.isFinite(Number(settings.signupWindowMonths))) weeks = Number(settings.signupWindowMonths) * 4;
-  if (!Number.isFinite(weeks)) weeks = 4;
-  return Math.max(0, Math.min(52, Math.floor(weeks)));
-}
-
 function validateSignupDetails(body) {
   const link = typeof body.link === "string" ? body.link.trim() : "";
   const notes = typeof body.notes === "string" ? body.notes.trim() : "";
@@ -184,14 +169,12 @@ function validateSignupSlot(store, slot, role, nowIso, options = {}) {
   if (!parseDate(slot.date) || slot.date + "T" + (slot.endTime || "23:59") <= now.date + "T" + now.time) {
     throw { status: 409, error: "item_closed" };
   }
-  const windowWeeks = signupWindowWeeks(store.settings);
-  if (!options.allowClosedWindow && windowWeeks === 0) throw { status: 409, error: "signups_disabled" };
-  if (!options.allowClosedWindow && now.date < subtractWeeks(slot.date, windowWeeks)) throw { status: 409, error: "signup_not_open" };
+  if (!options.allowClosedSignups && slot.signupsOpen !== true) throw { status: 409, error: "signups_closed" };
 }
 
 export function addSignup(store, itemId, role, person, options = {}) {
   const slot = findSlot(store, itemId, { materialize: options.materialize !== false });
-  if (options.validate === true) validateSignupSlot(store, slot, role, options.nowIso || new Date().toISOString(), { allowClosedWindow: options.allowClosedWindow === true });
+  if (options.validate === true) validateSignupSlot(store, slot, role, options.nowIso || new Date().toISOString(), { allowClosedSignups: options.allowClosedSignups === true });
   if (role === "speaker" && slot.speaker && String(slot.speaker.email || "").toLowerCase() !== person.email) {
     throw { status: 409, error: "speaker_taken" };
   }
@@ -212,7 +195,7 @@ export function addSignup(store, itemId, role, person, options = {}) {
 
 export function removeSignup(store, itemId, email, options = {}) {
   const slot = findSlot(store, itemId, { materialize: false });
-  if (options.validate === true) validateSignupSlot(store, slot, "attendee", options.nowIso || new Date().toISOString(), { allowClosedWindow: true });
+  if (options.validate === true) validateSignupSlot(store, slot, "attendee", options.nowIso || new Date().toISOString(), { allowClosedSignups: true });
   removeEmailFromSlot(slot, email);
   return slot;
 }
@@ -276,12 +259,17 @@ function projectPerson(person, viewer, fairnessRank) {
 export function projectStore(store, viewer, revision) {
   if (!store) return null;
   const clone = JSON.parse(JSON.stringify(store));
+  if (clone.settings) {
+    delete clone.settings.signupWindowWeeks;
+    delete clone.settings.signupWindowMonths;
+  }
   clone.revision = Number(revision || clone.revision || 0);
   if (viewer && viewer.role === "admin") {
     clone.slots = (clone.slots || []).map((slot) => {
       const ranks = new Map(orderedBackups(slot, store).map((person, index) => [personKey(person), index + 1]));
       return {
         ...slot,
+        signupsOpen: slot.signupsOpen === true,
         backups: (slot.backups || []).map((person) => ({ ...person, fairnessRank: ranks.get(personKey(person)) })),
         attendanceCount: attendanceCount(slot)
       };
@@ -291,7 +279,6 @@ export function projectStore(store, viewer, revision) {
   clone.history = [];
   clone.settings = {
     defaultLocation: String(clone.settings && clone.settings.defaultLocation || ""),
-    signupWindowWeeks: signupWindowWeeks(clone.settings),
     hideAttendingBlock: !clone.settings || clone.settings.hideAttendingBlock !== false,
     zoomName: "",
     zoomEmail: "",
@@ -302,6 +289,7 @@ export function projectStore(store, viewer, revision) {
     const ownAttendees = (slot.attendees || []).filter((person) => viewer && viewer.role === "member" && String(person.email || "").toLowerCase() === String(viewer.sub || "").toLowerCase());
     return {
       ...JSON.parse(JSON.stringify(slot)),
+      signupsOpen: slot.signupsOpen === true,
       speaker: projectPerson(slot.speaker, viewer),
       backups,
       attendees: ownAttendees.map((person) => projectPerson(person, viewer)),
@@ -323,6 +311,10 @@ export async function readState(env) {
 
 function canonicalStore(store, revision) {
   const clone = JSON.parse(JSON.stringify(store));
+  if (clone.settings) {
+    delete clone.settings.signupWindowWeeks;
+    delete clone.settings.signupWindowMonths;
+  }
   clone.revision = Number(revision);
   return clone;
 }
@@ -424,7 +416,7 @@ export async function handlePostSignup(request, env, options = {}) {
       return addSignup(current, body.itemId, body.role, person, {
         nowIso,
         validate: true,
-        allowClosedWindow: Boolean(existing && existing.role === body.role)
+        allowClosedSignups: Boolean(existing && existing.role === body.role)
       });
     }, { nowIso });
     return jsonResponse(env, { revision, store: projectStore(store, request.user, revision) });

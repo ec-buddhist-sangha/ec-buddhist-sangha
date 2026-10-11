@@ -69,7 +69,7 @@ describe("router", () => {
     await seedRole("m@eauclairesangha.org", "member");
     const adminToken = await signJwt({ sub: "a@eauclairesangha.org", name: "A", role: "admin" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });
     const date = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
-    const seed = { revision: 0, settings: { signupWindowWeeks: 4 }, recurrences: [], history: [], slots: [{ id: "s1", itemType: "talk", date, endTime: "23:59", title: "T", speaker: null, backups: [], attendees: [] }] };
+    const seed = { revision: 0, settings: {}, recurrences: [], history: [], slots: [{ id: "s1", itemType: "talk", date, endTime: "23:59", title: "T", signupsOpen: true, speaker: null, backups: [], attendees: [] }] };
     await call("/api/calendar", { method: "PUT", headers: { Authorization: "Bearer " + adminToken }, body: JSON.stringify({ store: seed, revision: 0 }) });
 
     const memberToken = await signJwt({ sub: "m@eauclairesangha.org", name: "M", role: "member" }, env.JWT_SIGNING_SECRET, { expiresInSeconds: 600 });

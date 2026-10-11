@@ -10,13 +10,15 @@ and forum topics).
 |---|---|---|
 | `GET /api/calendar` | Public | Role-aware calendar projection |
 | `PUT /api/calendar` | Admin | Optimistically locked full-store write |
-| `POST /api/signups` | Member | Add or update the caller's signup |
+| `POST /api/signups` | Member | Sign up on an explicitly opened item, or update an existing signup |
 | `DELETE /api/signups` | Member | Remove the caller's signup |
 | `GET /api/signups` | Member | Read the caller's signup |
 
 Calendar state is a versioned JSON document in D1. See
 `../../docs/CALENDAR_SYSTEM.md` for its privacy, recurrence, and initialization
 contract.
+
+New online signups require the item's saved `signupsOpen: true` flag. Missing flags are closed. Existing participants can update or cancel while signups are closed, and admin assignments use the admin-only calendar save. Deploy the matching site and Worker together; existing D1 data needs no reset or additional migration.
 
 ## Content endpoints
 
