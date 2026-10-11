@@ -1674,16 +1674,42 @@ test("common header is editable above footer and retains the dynamic meeting lin
   const footerForm = api.__root.querySelector("[data-upcoming-email-footer-form]");
   assert.ok(headerForm.compareDocumentPosition(footerForm) & api.__window.Node.DOCUMENT_POSITION_FOLLOWING);
   const field = headerForm.querySelector("textarea");
-  assert.match(field.value, /^We will meet at 7PM on Tuesday, June 2/);
+  assert.equal(field.value, "We will meet at [next time] on [next date], at [next location]. All are welcome.");
   field.value = "Welcome everyone!\n" + field.value;
   field.dispatchEvent(new api.__window.Event("input", { bubbles: true }));
   assert.match(api.__root.querySelector("[data-upcoming-talks-html]").textContent, /^Welcome everyone!/);
-  assert.equal(api.__getStore().settings.emailHeader, "{meeting_details}");
+  assert.equal(api.__getStore().settings.emailHeader, "We will meet at [next time] on [next date], at [next location]. All are welcome.");
   headerForm.dispatchEvent(new api.__window.Event("submit", { bubbles: true, cancelable: true }));
-  assert.equal(api.__getStore().settings.emailHeader, "Welcome everyone!\n{meeting_details}");
+  assert.equal(api.__getStore().settings.emailHeader, "Welcome everyone!\nWe will meet at [next time] on [next date], at [next location]. All are welcome.");
   const saved = api.__getStore();
   saved.slots[0].date = "2026-06-09";
   assert.match(api.upcomingCalendarEmailText(saved), /^Welcome everyone!\nWe will meet at 7PM on Tuesday, June 9/);
+});
+
+test("custom header wording survives saves while shortcode date time and location follow the next meeting", () => {
+  const api = loadDomApi();
+  api.__setStore({ slots: [{ id: "shortcodes", date: "2026-06-02", startTime: "19:00", location: "Original Hall", useDefaultLocation: false, signupsOpen: true }] });
+  api.renderAdmin(api.__root, { year: 2026, month: 5 });
+  const form = api.__root.querySelector("[data-upcoming-email-header-form]");
+  const template = "Please join us on [next date] at [next time]. We gather at [next location]. Everyone is welcome!";
+  form.querySelector("textarea").value = template;
+  form.dispatchEvent(new api.__window.Event("submit", { bubbles: true, cancelable: true }));
+  assert.equal(api.__getStore().settings.emailHeader, template);
+  assert.equal(api.__root.querySelector('[name="emailHeader"]').value, template);
+  const store = api.__getStore();
+  store.slots[0].date = "2026-06-09";
+  store.slots[0].startTime = "18:30";
+  store.slots[0].location = "New Hall\n42 Main Street";
+  assert.match(api.upcomingCalendarEmailText(store), /^Please join us on Tuesday, June 9 at 6:30PM\. We gather at New Hall, 42 Main Street\. Everyone is welcome!/);
+  assert.doesNotMatch(api.upcomingCalendarEmailHtml(store), /\[next (date|time|location)\]/);
+});
+
+test("legacy automatic headers convert to visible shortcodes and empty calendars keep static greetings", () => {
+  const api = loadApi();
+  const store = api.normalizeStore({ settings: { emailHeader: "Welcome!\n{meeting_details}" }, slots: [], recurrences: [] });
+  assert.match(store.settings.emailHeader, /\[next date\]/);
+  assert.match(api.upcomingCalendarEmailText(store), /^Welcome!\n\nNo upcoming/);
+  assert.doesNotMatch(api.upcomingCalendarEmailText(store), /We will meet at|\[next date\]/);
 });
 
 test("draft item edits refresh the preview and both copy sources without saving", () => {

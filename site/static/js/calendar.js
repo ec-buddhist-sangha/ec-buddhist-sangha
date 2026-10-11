@@ -15,6 +15,7 @@
   var DEFAULT_TITLE = "Sangha Meeting";
   var DEFAULT_DESCRIPTION = "Each 90 minute gathering is divided into 30 minute segments:\n\u25cf Group meditation with instruction for newcomers\n\u25cf Recorded Dharma talk from a teacher presented by one of the members\n\u25cf Open discussion about the teachings and meditation practice";
   var DEFAULT_LOCATION = "Unity of Eau Claire\n1808 Folsom Street\nEau Claire, WI 54703";
+  var DEFAULT_EMAIL_HEADER = "We will meet at [next time] on [next date], at [next location]. All are welcome.";
   var DEFAULT_TUESDAY_RECURRENCE_ID = "default-weekly-tuesday-talks";
   var MONTHLY_MODE_WEEKDAY = "weekday";
   var MONTHLY_MODE_MONTH_DAY = "month-day";
@@ -128,7 +129,7 @@
     return {
       defaultLocation: DEFAULT_LOCATION,
       hideAttendingBlock: true,
-      emailHeader: "{meeting_details}",
+      emailHeader: DEFAULT_EMAIL_HEADER,
       emailFooter: "",
       zoomName: "",
       zoomEmail: "",
@@ -141,7 +142,7 @@
     return {
       defaultLocation: textValueOrDefault(settings, "defaultLocation", DEFAULT_LOCATION) || DEFAULT_LOCATION,
       hideAttendingBlock: settings.hideAttendingBlock !== false,
-      emailHeader: textValueOrDefault(settings, "emailHeader", "{meeting_details}"),
+      emailHeader: textValueOrDefault(settings, "emailHeader", DEFAULT_EMAIL_HEADER).split("{meeting_details}").join(DEFAULT_EMAIL_HEADER),
       emailFooter: textValueOrDefault(settings, "emailFooter", ""),
       zoomName: textValueOrDefault(settings, "zoomName", ""),
       zoomEmail: textValueOrDefault(settings, "zoomEmail", ""),
@@ -2423,21 +2424,21 @@
     return location.split(/\r?\n/).map(function (line) { return line.trim(); }).filter(Boolean).join(", ");
   }
 
-  function upcomingMeetingEmailSentence(store) {
-    var slot = nextTuesdayCalendarItem(store);
-    if (!slot) return "";
-    var location = emailMeetingLocation(slot, normalizeCalendarSettings(store.settings));
-    return "We will meet at " + emailStartTime(slot) + " on " + emailMeetingDate(slot.date) +
-      (location ? ", at " + location.replace(/\.+$/, "") : "") + ". All are welcome.";
-  }
-
   function calendarEmailHeaderText(store) {
-    return normalizeCalendarSettings(store.settings).emailHeader.split("{meeting_details}").join(upcomingMeetingEmailSentence(store));
-  }
-
-  function emailHeaderTemplate(value, store, displayedMeetingSentence) {
-    var meetingSentence = displayedMeetingSentence || upcomingMeetingEmailSentence(store);
-    return meetingSentence ? value.replace(meetingSentence, "{meeting_details}") : value;
+    var settings = normalizeCalendarSettings(store.settings);
+    var slot = nextTuesdayCalendarItem(store);
+    var shortcodes = /\[(next date|next time|next location)\]/gi;
+    if (!slot) {
+      return settings.emailHeader.split(/\r?\n/).filter(function (line) {
+        return !/\[(next date|next time|next location)\]/i.test(line);
+      }).join("\n").trim();
+    }
+    var values = {
+      "next date": emailMeetingDate(slot.date),
+      "next time": emailStartTime(slot),
+      "next location": emailMeetingLocation(slot, settings).replace(/\.+$/, "") || (slot.useZoom ? "the Zoom meeting" : "a location to be announced")
+    };
+    return settings.emailHeader.replace(shortcodes, function (match, name) { return values[name.toLowerCase()]; });
   }
 
   function refreshAdminEmailCopyBlock(root, store) {
@@ -2447,15 +2448,14 @@
     store = ensureCalendarRenderSlots(normalizeStore(store), Number(section.getAttribute("data-year")), Number(section.getAttribute("data-month")));
     var headerField = root.querySelector('[data-upcoming-email-header-form] [name="emailHeader"]');
     var footerField = root.querySelector('[data-upcoming-email-footer-form] [name="emailFooter"]');
-    if (headerField && headerField.getAttribute("data-dirty") === "true") store.settings.emailHeader = emailHeaderTemplate(headerField.value, store, headerField.getAttribute("data-meeting-sentence"));
+    if (headerField && headerField.getAttribute("data-dirty") === "true") store.settings.emailHeader = headerField.value;
     if (footerField && footerField.getAttribute("data-dirty") === "true") store.settings.emailFooter = footerField.value;
     var html = upcomingCalendarEmailHtml(store);
     block.innerHTML = html;
     root.querySelector("[data-upcoming-talks-text]").value = upcomingCalendarEmailText(store);
     root.querySelector("[data-upcoming-talks-html-source]").value = html;
     if (headerField && headerField.getAttribute("data-dirty") !== "true") {
-      headerField.value = calendarEmailHeaderText(store);
-      headerField.setAttribute("data-meeting-sentence", upcomingMeetingEmailSentence(store));
+      headerField.value = store.settings.emailHeader;
     }
     var status = root.querySelector("[data-copy-upcoming-talks-status]");
     if (status) status.textContent = "";
@@ -2474,8 +2474,8 @@
       '</div>' +
       '<div data-upcoming-talks-html class="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700">' + html + '</div>' +
       '<form data-upcoming-email-header-form class="mt-4 grid gap-3 rounded-lg border border-gray-200 bg-white p-4">' +
-        textareaMarkup("Common Header", "emailHeader", false, calendarEmailHeaderText(store)) +
-        '<p class="text-xs leading-relaxed text-gray-500">The meeting line follows the next Tuesday\'s date, time, and location unless you replace it.</p>' +
+        textareaMarkup("Common Header", "emailHeader", false, normalizeCalendarSettings(store.settings).emailHeader) +
+        '<p class="text-xs leading-relaxed text-gray-500">Use <code>[next date]</code>, <code>[next time]</code>, and <code>[next location]</code> for the next active Tuesday meeting. Edit the wording around these shortcodes; the preview fills in the current details.</p>' +
         '<button type="submit" class="rounded-lg border border-sangha-navy px-4 py-3 text-xs uppercase tracking-widest font-bold text-sangha-navy hover:bg-sangha-light">Save Header</button>' +
       '</form>' +
       '<form data-upcoming-email-footer-form class="mt-4 grid gap-3 rounded-lg border border-gray-200 bg-white p-4">' +
@@ -2732,7 +2732,6 @@
 
     var footerForm = root.querySelector("[data-upcoming-email-footer-form]");
     var headerForm = root.querySelector("[data-upcoming-email-header-form]");
-    if (headerForm) headerForm.querySelector("textarea").setAttribute("data-meeting-sentence", upcomingMeetingEmailSentence(ensureCalendarRenderSlots(loadStore(), year, month)));
     [headerForm, footerForm].forEach(function (copyForm) {
       if (!copyForm) return;
       var field = copyForm.querySelector("textarea");
@@ -2745,7 +2744,7 @@
       headerForm.addEventListener("submit", function (event) {
         event.preventDefault();
         var store = ensureCalendarRenderSlots(loadStore(), year, month);
-        store.settings.emailHeader = emailHeaderTemplate(fieldValue(headerForm, "emailHeader"), store, headerForm.querySelector("textarea").getAttribute("data-meeting-sentence"));
+        store.settings.emailHeader = fieldValue(headerForm, "emailHeader");
         headerForm.querySelector("textarea").removeAttribute("data-dirty");
         addCalendarHistory(store, "Updated email header", null, "Updated the common calendar email header.");
         saveStoreAndThen(store, root, function () {
