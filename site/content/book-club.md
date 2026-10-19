@@ -1,21 +1,21 @@
 ---
 title: "Book club: Mission Majjhima"
 layout: book-club
-summary: "Explore the Middle Length Discourses together, one sutta at a time. Thursdays, 7–7:30 p.m. Central on Zoom. Join at any point."
+summary: "Read the Middle Length Discourses with the sangha, one sutta each week. Thursdays, 7–7:30 p.m. Central on Zoom. Join at any point."
 ---
 
-Join us for a shared journey through the **152 Middle Length Discourses of the Buddha (Majjhima Nikāya)**, one sutta each week over about three years. These teachings offer practical guidance for meditation, everyday life, and understanding the mind.
+We'll read the **152 Middle Length Discourses of the Buddha (Majjhima Nikāya)** together, one sutta each week over about three years. It's a chance to spend time with the Buddha's teachings and talk about how they relate to our lives and meditation practice.
 
-### A simple weekly rhythm
+### How we meet
 
-Read the week's sutta beforehand, freely available on SuttaCentral. On Zoom, we'll watch the corresponding **10-Minute Majjhima** video from Clear Mountain Monastery, discuss what stood out, and close with a prayer at the end of 30 minutes. Stay afterward as long as you'd like for informal conversation.
+Read the week's sutta beforehand on SuttaCentral. On Zoom, we'll watch Clear Mountain Monastery's **10-Minute Majjhima** video for that sutta, then discuss it. Meetings last 30 minutes, with time to stay and chat afterward.
 
-### Come as you are
+### Joining in
 
-Each sutta offers a fresh place to begin. **Join at any point—no catching up or prior experience needed.** Bring your questions, curiosity, and reflections. Reading together helps us explore the Buddha's teachings directly and connect them with our own practice.
+**You can join at any point.** Each week focuses on one sutta, so you don't need to catch up on earlier meetings. No prior experience is needed, and questions are welcome.
 
 ### Reading and watching
 
-All readings are [free on SuttaCentral](https://suttacentral.net/pitaka/sutta/middle/mn). A printed book is optional; the edition pictured is *The Middle Length Discourses of the Buddha*, translated by Bhikkhu Ñāṇamoli and Bhikkhu Bodhi, published by [Wisdom Publications](https://wisdomexperience.org/product/middle-length-discourses-buddha/).
+All readings are [free on SuttaCentral](https://suttacentral.net/pitaka/sutta/middle/mn). You don't need to buy a book. If you prefer a printed copy, the edition pictured is *The Middle Length Discourses of the Buddha*, translated by Bhikkhu Ñāṇamoli and Bhikkhu Bodhi, published by [Wisdom Publications](https://wisdomexperience.org/product/middle-length-discourses-buddha/).
 
-You can also browse Clear Mountain Monastery's [10-Minute Majjhima video series](https://www.youtube.com/playlist?list=PLomY-Sp4p5YsIVG0DmvJhUcR6YaXR_3wf). We watch the video together, so there's no need to watch ahead.
+The [10-Minute Majjhima videos](https://www.youtube.com/playlist?list=PLomY-Sp4p5YsIVG0DmvJhUcR6YaXR_3wf) are free on YouTube. We'll watch together during the meeting, so there's no need to watch ahead.
