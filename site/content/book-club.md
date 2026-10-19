@@ -6,6 +6,30 @@ summary: "Read the Middle Length Discourses with the sangha, one sutta each week
 
 We'll read the **152 Middle Length Discourses of the Buddha (Majjhima Nikāya)** together, one sutta each week over about three years. It's a chance to spend time with the Buddha's teachings and talk about how they relate to our lives and meditation practice.
 
+### What is the Majjhima Nikāya?
+
+*Majjhima Nikāya* means “Collection of Middle Length Discourses.” Its 152 suttas record teachings and conversations of the Buddha and his disciples, covering meditation, ethical conduct, and understanding suffering.
+
+It belongs to the **Pali Canon**, the collection of scriptures preserved in the Theravāda tradition. Also called the *Tipiṭaka*, or “three baskets,” the canon has three main divisions:
+
+- **Vinaya Piṭaka:** monastic rules and the stories behind them.
+- **Sutta Piṭaka:** discourses of the Buddha and his disciples. This is where our book belongs.
+- **Abhidhamma Piṭaka:** systematic analyses of mind, experience, and the teachings.
+
+**Pali Canon → Sutta Piṭaka → Majjhima Nikāya**
+
+Within the Sutta Piṭaka, there are five collections, called *nikāyas*:
+
+- **Dīgha Nikāya (DN):** the long discourses.
+- **Majjhima Nikāya (MN):** the middle length discourses we are reading.
+- **Saṃyutta Nikāya (SN):** discourses grouped by theme.
+- **Aṅguttara Nikāya (AN):** discourses arranged by numbered groups of teachings, such as the five faculties or seven factors of awakening.
+- **Khuddaka Nikāya (KN):** a varied collection of texts, including the *Dhammapada*, *Sutta Nipāta*, and verses of the elder monks and nuns.
+
+These collections often return to the same teachings in different settings. You don't need to read them in order. A reference such as **MN 10** simply means the tenth discourse in the Majjhima Nikāya.
+
+For more background, see Access to Insight's guides to the [Pali Canon](https://accesstoinsight.org/tipitaka/index.html) and the [five collections of discourses](https://accesstoinsight.org/tipitaka/sutta.html).
+
 ### How we meet
 
 Read the week's sutta beforehand on SuttaCentral. On Zoom, we'll watch Clear Mountain Monastery's **10-Minute Majjhima** video for that sutta, then discuss it. Meetings last 30 minutes, with time to stay and chat afterward.
