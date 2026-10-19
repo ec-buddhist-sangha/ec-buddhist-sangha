@@ -1,0 +1,49 @@
+{{ define "main" }}
+{{ $club := .Site.Data.mission_majjhima }}
+<article class="bg-sangha-paper py-12 md:py-16">
+  <div class="container mx-auto px-4 max-w-5xl">
+    <a href="{{ "" | relURL }}" class="text-sm text-sangha-navy hover:underline">← Home</a>
+    <header class="mt-8 flex flex-col sm:flex-row gap-8 sm:items-center">
+      <img src="{{ "images/middle-length-discourses.jpg" | relURL }}" alt="The Middle Length Discourses of the Buddha, translated by Bhikkhu Ñāṇamoli and Bhikkhu Bodhi" width="144" height="220" class="w-36 h-auto rounded shadow-md flex-shrink-0">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-sangha-gold font-bold mb-3">A weekly exploration of the Buddha's teachings</p>
+        <h1 class="font-serif text-3xl md:text-4xl font-bold text-sangha-navy leading-tight">{{ .Title }}</h1>
+        <p class="text-gray-700 mt-4">Thursdays · 7–7:30 p.m. Central · Zoom</p>
+        <p class="text-gray-600 mt-1">Beginning November 5, 2026. Everyone is welcome.</p>
+        <a href="{{ $club.registration }}" class="inline-block mt-5 bg-sangha-navy text-white rounded-lg px-6 py-3 text-sm font-bold hover:bg-blue-900">Register for the series on Zoom →</a>
+        <p class="text-xs text-gray-500 mt-2">Register once for the series. Zoom will provide your joining link.</p>
+      </div>
+    </header>
+
+    <section class="mt-10 bg-white rounded-2xl border border-sangha-gold/30 p-6 md:p-8 shadow-sm" aria-labelledby="club-next-heading">
+      <h2 id="club-next-heading" class="text-xs uppercase tracking-widest text-sangha-gold font-bold">Next meeting &amp; reading</h2>
+      <div id="book-club-next" aria-live="polite">
+        <p class="text-gray-600 mt-3">See the reading schedule below for meeting dates and topics.</p>
+      </div>
+    </section>
+
+    <div class="prose prose-sangha max-w-3xl mt-10">{{ .Content }}</div>
+
+    <details class="mt-10 rounded-2xl border border-gray-200 bg-white p-6">
+      <summary class="cursor-pointer font-serif text-xl font-bold text-sangha-navy">Reading schedule</summary>
+      <p class="text-sm text-gray-600 mt-3">All meetings are 7–7:30 p.m. Central. More dates will be added as the series continues.</p>
+      <ol class="mt-5 divide-y divide-gray-100">
+        {{ range $club.meetings }}
+        <li class="py-4">
+          <p class="text-sm text-gray-500">{{ .date }}</p>
+          <h3 class="font-bold text-sangha-navy mt-1">{{ .title }}</h3>
+          <div class="flex flex-wrap gap-5 text-sm mt-2">
+            <a class="text-sangha-navy underline" href="{{ .reading }}">Read on SuttaCentral</a>
+            <a class="text-sangha-navy underline" href="{{ .video }}">Watch 10-Minute Majjhima</a>
+          </div>
+        </li>
+        {{ end }}
+      </ol>
+    </details>
+    <p class="mt-6 text-sm text-gray-600"><a href="{{ "calendar/" | relURL }}" class="text-sangha-navy underline">See the sangha calendar</a> for other gatherings.</p>
+  </div>
+</article>
+<script id="book-club-data" type="application/json">{{ $club | jsonify | safeJS }}</script>
+{{ $v := readFile "static/js/book-club.js" | md5 }}
+<script src="{{ "js/book-club.js" | relURL }}?v={{ $v }}" defer></script>
+{{ end }}

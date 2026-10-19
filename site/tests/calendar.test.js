@@ -6,6 +6,16 @@ const vm = require("node:vm");
 const { JSDOM } = require("jsdom");
 
 const TEST_NOW = "2026-05-20T12:00:00.000-05:00";
+test("calendar descriptions link web addresses while retaining escaped plain text", () => {
+  const api = loadApi();
+  const html = api.descriptionHtml('Details: https://eauclairesangha.org/book-club/.\n<img src=x onerror=alert(1)> javascript:alert(1)');
+  const dom = new JSDOM(html);
+  assert.equal(dom.window.document.querySelector('a').href, 'https://eauclairesangha.org/book-club/');
+  assert.equal(dom.window.document.querySelectorAll('a').length, 1);
+  assert.equal(dom.window.document.querySelector('img'), null);
+  assert.match(dom.window.document.body.textContent, /<img src=x onerror=alert\(1\)>/);
+  dom.window.close();
+});
 const RealDate = Date;
 class FixedDate extends RealDate {
   constructor(...args) {

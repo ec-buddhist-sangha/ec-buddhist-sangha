@@ -1,0 +1,1105 @@
+{
+  "registration": "https://us02web.zoom.us/meeting/register/kdhf-dsqSj2Oh_loHoKROQ",
+  "meetings": [
+    {
+      "n": 1,
+      "date": "Nov 5, 2026",
+      "start": "2026-11-06T01:00:00Z",
+      "end": "2026-11-06T01:30:00Z",
+      "title": "Book club: Mission Majjhima (1/152): The Root Sequence",
+      "pali": "Mūlapariyāya Sutta",
+      "reading": "https://suttacentral.net/mn1/en/bodhi?lang=en&reference=none&highlight=false",
+      "video": "https://www.youtube.com/watch?v=E5DuqCGz3qE"
+    },
+    {
+      "n": 2,
+      "date": "Nov 12, 2026",
+      "start": "2026-11-13T01:00:00Z",
+      "end": "2026-11-13T01:30:00Z",
+      "title": "Book club: Mission Majjhima (2/152): All the Fermentations",
+      "pali": "Sabbāsava Sutta",
+      "reading": "https://suttacentral.net/mn2/en/bodhi?lang=en&reference=none&highlight=false",
+      "video": "https://www.youtube.com/watch?v=3sFneHhWYJA"
+    },
+    {
+      "n": 3,
+      "date": "Nov 19, 2026",
+      "start": "2026-11-20T01:00:00Z",
+      "end": "2026-11-20T01:30:00Z",
+      "title": "Book club: Mission Majjhima (3/152): Heirs in Dhamma",
+      "pali": "Dhammadāyāda Sutta",
+      "reading": "https://suttacentral.net/mn3/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=6u6dv9huKw0"
+    },
+    {
+      "n": 4,
+      "date": "Nov 26, 2026",
+      "start": "2026-11-27T01:00:00Z",
+      "end": "2026-11-27T01:30:00Z",
+      "title": "Book club: Mission Majjhima (4/152): Fear and Terror",
+      "pali": "Bhaya-bherava Sutta",
+      "reading": "https://suttacentral.net/mn4/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=KXKUFE1m9Xc"
+    },
+    {
+      "n": 5,
+      "date": "Dec 3, 2026",
+      "start": "2026-12-04T01:00:00Z",
+      "end": "2026-12-04T01:30:00Z",
+      "title": "Book club: Mission Majjhima (5/152): Without Blemishes",
+      "pali": "Anaṅgana Sutta",
+      "reading": "https://suttacentral.net/mn5/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=DUyThMcmrOE"
+    },
+    {
+      "n": 6,
+      "date": "Dec 10, 2026",
+      "start": "2026-12-11T01:00:00Z",
+      "end": "2026-12-11T01:30:00Z",
+      "title": "Book club: Mission Majjhima (6/152): If a Bhikkhu Should Wish",
+      "pali": "Ākaṅkheyya Sutta",
+      "reading": "https://suttacentral.net/mn6/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=qTjh0i48bcU"
+    },
+    {
+      "n": 7,
+      "date": "Dec 17, 2026",
+      "start": "2026-12-18T01:00:00Z",
+      "end": "2026-12-18T01:30:00Z",
+      "title": "Book club: Mission Majjhima (7/152): The Simile of the Cloth",
+      "pali": "Vatthūpama Sutta",
+      "reading": "https://suttacentral.net/mn7/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=F_OgLuE2Sgg"
+    },
+    {
+      "n": 8,
+      "date": "Dec 24, 2026",
+      "start": "2026-12-25T01:00:00Z",
+      "end": "2026-12-25T01:30:00Z",
+      "title": "Book club: Mission Majjhima (8/152): The Discourse on Effacement",
+      "pali": "Sallekha Sutta",
+      "reading": "https://suttacentral.net/mn8/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=PP90mR2YjSk"
+    },
+    {
+      "n": 9,
+      "date": "Dec 31, 2026",
+      "start": "2027-01-01T01:00:00Z",
+      "end": "2027-01-01T01:30:00Z",
+      "title": "Book club: Mission Majjhima (9/152): Right View",
+      "pali": "Sammādiṭṭhi Sutta",
+      "reading": "https://suttacentral.net/mn9/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=YiRjtGLukko"
+    },
+    {
+      "n": 10,
+      "date": "Jan 7, 2027",
+      "start": "2027-01-08T01:00:00Z",
+      "end": "2027-01-08T01:30:00Z",
+      "title": "Book club: Mission Majjhima (10/152): The Foundations of Mindfulness",
+      "pali": "Satipaṭṭhāna Sutta",
+      "reading": "https://suttacentral.net/mn10/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=npOsG_1C2vk"
+    },
+    {
+      "n": 11,
+      "date": "Jan 14, 2027",
+      "start": "2027-01-15T01:00:00Z",
+      "end": "2027-01-15T01:30:00Z",
+      "title": "Book club: Mission Majjhima (11/152): The Shorter Discourse on the Lion's Roar",
+      "pali": "Cūḷa-sīhanāda Sutta",
+      "reading": "https://suttacentral.net/mn11/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=v6-tQ4YMYfQ"
+    },
+    {
+      "n": 12,
+      "date": "Jan 21, 2027",
+      "start": "2027-01-22T01:00:00Z",
+      "end": "2027-01-22T01:30:00Z",
+      "title": "Book club: Mission Majjhima (12/152): The Great Discourse on the Lion's Roar",
+      "pali": "Mahā-sīhanāda Sutta",
+      "reading": "https://suttacentral.net/mn12/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=z4Fuhq-goPI"
+    },
+    {
+      "n": 13,
+      "date": "Jan 28, 2027",
+      "start": "2027-01-29T01:00:00Z",
+      "end": "2027-01-29T01:30:00Z",
+      "title": "Book club: Mission Majjhima (13/152): The Greater Discourse on the Mass of Suffering",
+      "pali": "Mahā-dukkhakkhandha Sutta",
+      "reading": "https://suttacentral.net/mn13/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=oJYZZXfixRs"
+    },
+    {
+      "n": 14,
+      "date": "Feb 4, 2027",
+      "start": "2027-02-05T01:00:00Z",
+      "end": "2027-02-05T01:30:00Z",
+      "title": "Book club: Mission Majjhima (14/152): The Shorter Discourse on the Mass of Suffering",
+      "pali": "Cūḷa-dukkhakkhandha Sutta",
+      "reading": "https://suttacentral.net/mn14/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=ElDE3jxdpQc"
+    },
+    {
+      "n": 15,
+      "date": "Feb 11, 2027",
+      "start": "2027-02-12T01:00:00Z",
+      "end": "2027-02-12T01:30:00Z",
+      "title": "Book club: Mission Majjhima (15/152): Inference",
+      "pali": "Anumāna Sutta",
+      "reading": "https://suttacentral.net/mn15/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=-ozEEdg3Zxs"
+    },
+    {
+      "n": 16,
+      "date": "Feb 18, 2027",
+      "start": "2027-02-19T01:00:00Z",
+      "end": "2027-02-19T01:30:00Z",
+      "title": "Book club: Mission Majjhima (16/152): The Wilderness in the Heart",
+      "pali": "Cetokhila Sutta",
+      "reading": "https://suttacentral.net/mn16/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=toNTXc1vGGc"
+    },
+    {
+      "n": 17,
+      "date": "Feb 25, 2027",
+      "start": "2027-02-26T01:00:00Z",
+      "end": "2027-02-26T01:30:00Z",
+      "title": "Book club: Mission Majjhima (17/152): Jungle Thickets",
+      "pali": "Vanapattha Sutta",
+      "reading": "https://suttacentral.net/mn17/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=9ao_R-6hi8E"
+    },
+    {
+      "n": 18,
+      "date": "Mar 4, 2027",
+      "start": "2027-03-05T01:00:00Z",
+      "end": "2027-03-05T01:30:00Z",
+      "title": "Book club: Mission Majjhima (18/152): The Ball of Honey",
+      "pali": "Madhupiṇṇika Sutta",
+      "reading": "https://suttacentral.net/mn18/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=hGXbFt15aDk"
+    },
+    {
+      "n": 19,
+      "date": "Mar 11, 2027",
+      "start": "2027-03-12T01:00:00Z",
+      "end": "2027-03-12T01:30:00Z",
+      "title": "Book club: Mission Majjhima (19/152): Two Sorts of Thinking",
+      "pali": "Dvedhāvitakka Sutta",
+      "reading": "https://suttacentral.net/mn19/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=z_jXIM_r4HQ"
+    },
+    {
+      "n": 20,
+      "date": "Mar 18, 2027",
+      "start": "2027-03-19T00:00:00Z",
+      "end": "2027-03-19T00:30:00Z",
+      "title": "Book club: Mission Majjhima (20/152): The Removal of Distracting Thoughts",
+      "pali": "Vitakkasaṇṭhana Sutta",
+      "reading": "https://suttacentral.net/mn20/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=hg0lE84s_LQ"
+    },
+    {
+      "n": 21,
+      "date": "Mar 25, 2027",
+      "start": "2027-03-26T00:00:00Z",
+      "end": "2027-03-26T00:30:00Z",
+      "title": "Book club: Mission Majjhima (21/152): The Simile of the Saw",
+      "pali": "Kakacūpama Sutta",
+      "reading": "https://suttacentral.net/mn21/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=ibik3ecpwVA"
+    },
+    {
+      "n": 22,
+      "date": "Apr 1, 2027",
+      "start": "2027-04-02T00:00:00Z",
+      "end": "2027-04-02T00:30:00Z",
+      "title": "Book club: Mission Majjhima (22/152): The Water-Snake Simile",
+      "pali": "Alagaddūpama Sutta",
+      "reading": "https://suttacentral.net/mn22/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Xp8-E5DN7r8"
+    },
+    {
+      "n": 23,
+      "date": "Apr 8, 2027",
+      "start": "2027-04-09T00:00:00Z",
+      "end": "2027-04-09T00:30:00Z",
+      "title": "Book club: Mission Majjhima (23/152): The Anthill",
+      "pali": "Vammika Sutta",
+      "reading": "https://suttacentral.net/mn23/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=YzpNx7tjDOQ"
+    },
+    {
+      "n": 24,
+      "date": "Apr 15, 2027",
+      "start": "2027-04-16T00:00:00Z",
+      "end": "2027-04-16T00:30:00Z",
+      "title": "Book club: Mission Majjhima (24/152): Relay Chariots",
+      "pali": "Ratha-vinīta Sutta",
+      "reading": "https://suttacentral.net/mn24/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=nxXt1Y1f6hQ"
+    },
+    {
+      "n": 25,
+      "date": "Apr 22, 2027",
+      "start": "2027-04-23T00:00:00Z",
+      "end": "2027-04-23T00:30:00Z",
+      "title": "Book club: Mission Majjhima (25/152): The Bait",
+      "pali": "Nivāpa Sutta",
+      "reading": "https://suttacentral.net/mn25/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=0vNuqIJtGlw"
+    },
+    {
+      "n": 26,
+      "date": "Apr 29, 2027",
+      "start": "2027-04-30T00:00:00Z",
+      "end": "2027-04-30T00:30:00Z",
+      "title": "Book club: Mission Majjhima (26/152): The Noble Search",
+      "pali": "Ariyapariyesana Sutta",
+      "reading": "https://suttacentral.net/mn26/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=ha-xvVyU7JQ"
+    },
+    {
+      "n": 27,
+      "date": "May 6, 2027",
+      "start": "2027-05-07T00:00:00Z",
+      "end": "2027-05-07T00:30:00Z",
+      "title": "Book club: Mission Majjhima (27/152): The Shorter Elephant Footprint Simile",
+      "pali": "Cūḷa-hatthipadopama Sutta",
+      "reading": "https://suttacentral.net/mn27/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=YFX9aOxM7NU"
+    },
+    {
+      "n": 28,
+      "date": "May 13, 2027",
+      "start": "2027-05-14T00:00:00Z",
+      "end": "2027-05-14T00:30:00Z",
+      "title": "Book club: Mission Majjhima (28/152): The Great Elephant Footprint Simile",
+      "pali": "Mahā-hatthipadopama Sutta",
+      "reading": "https://suttacentral.net/mn28/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=UUgx9q_20w0"
+    },
+    {
+      "n": 29,
+      "date": "May 20, 2027",
+      "start": "2027-05-21T00:00:00Z",
+      "end": "2027-05-21T00:30:00Z",
+      "title": "Book club: Mission Majjhima (29/152): The Greater Discourse on the Simile of the Heartwood",
+      "pali": "Mahā-sāropama Sutta",
+      "reading": "https://suttacentral.net/mn29/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Tyv0kLcygpg"
+    },
+    {
+      "n": 30,
+      "date": "May 27, 2027",
+      "start": "2027-05-28T00:00:00Z",
+      "end": "2027-05-28T00:30:00Z",
+      "title": "Book club: Mission Majjhima (30/152): The Shorter Discourse on the Simile of the Heartwood",
+      "pali": "Cūḷa-sāropama Sutta",
+      "reading": "https://suttacentral.net/mn30/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=OIpMSCyFFNE"
+    },
+    {
+      "n": 31,
+      "date": "Jun 3, 2027",
+      "start": "2027-06-04T00:00:00Z",
+      "end": "2027-06-04T00:30:00Z",
+      "title": "Book club: Mission Majjhima (31/152): The Shorter Discourse in Gosinga",
+      "pali": "Cūḷa-gosiṅga Sutta",
+      "reading": "https://suttacentral.net/mn31/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=w26Xi59Kc3A"
+    },
+    {
+      "n": 32,
+      "date": "Jun 10, 2027",
+      "start": "2027-06-11T00:00:00Z",
+      "end": "2027-06-11T00:30:00Z",
+      "title": "Book club: Mission Majjhima (32/152): The Greater Discourse in Gosinga",
+      "pali": "Mahā-gosiṅga Sutta",
+      "reading": "https://suttacentral.net/mn32/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=_Z1Xq5GAFX4"
+    },
+    {
+      "n": 33,
+      "date": "Jun 17, 2027",
+      "start": "2027-06-18T00:00:00Z",
+      "end": "2027-06-18T00:30:00Z",
+      "title": "Book club: Mission Majjhima (33/152): The Greater Cowherd Discourse",
+      "pali": "Mahā-gopālaka Sutta",
+      "reading": "https://suttacentral.net/mn33/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=mzriZdloVUM"
+    },
+    {
+      "n": 34,
+      "date": "Jun 24, 2027",
+      "start": "2027-06-25T00:00:00Z",
+      "end": "2027-06-25T00:30:00Z",
+      "title": "Book club: Mission Majjhima (34/152): The Shorter Discourse on the Cowherd",
+      "pali": "Cūḷa-gopālaka Sutta",
+      "reading": "https://suttacentral.net/mn34/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=ycGP_jonNTw"
+    },
+    {
+      "n": 35,
+      "date": "Jul 1, 2027",
+      "start": "2027-07-02T00:00:00Z",
+      "end": "2027-07-02T00:30:00Z",
+      "title": "Book club: Mission Majjhima (35/152): The Shorter Discourse on the Saccaka",
+      "pali": "Cūḷa-saccaka Sutta",
+      "reading": "https://suttacentral.net/mn35/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=gTob3JG7IPw"
+    },
+    {
+      "n": 36,
+      "date": "Jul 8, 2027",
+      "start": "2027-07-09T00:00:00Z",
+      "end": "2027-07-09T00:30:00Z",
+      "title": "Book club: Mission Majjhima (36/152): The Greater Discourse on the Saccaka",
+      "pali": "Mahā-saccaka Sutta",
+      "reading": "https://suttacentral.net/mn36/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=6i99BFqYqYc"
+    },
+    {
+      "n": 37,
+      "date": "Jul 15, 2027",
+      "start": "2027-07-16T00:00:00Z",
+      "end": "2027-07-16T00:30:00Z",
+      "title": "Book club: Mission Majjhima (37/152): The Shorter Discourse on the Destruction of Craving",
+      "pali": "Cūḷa-taṇhāsaṅkhaya Sutta",
+      "reading": "https://suttacentral.net/mn37/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=udwB6o-N7kw"
+    },
+    {
+      "n": 38,
+      "date": "Jul 22, 2027",
+      "start": "2027-07-23T00:00:00Z",
+      "end": "2027-07-23T00:30:00Z",
+      "title": "Book club: Mission Majjhima (38/152): The Greater Discourse on the Destruction of Craving",
+      "pali": "Mahā-taṇhāsaṅkhaya Sutta",
+      "reading": "https://suttacentral.net/mn38/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=6m855FIMCpc"
+    },
+    {
+      "n": 39,
+      "date": "Jul 29, 2027",
+      "start": "2027-07-30T00:00:00Z",
+      "end": "2027-07-30T00:30:00Z",
+      "title": "Book club: Mission Majjhima (39/152): The Greater Discourse at Assapura",
+      "pali": "Mahā-Assapura Sutta",
+      "reading": "https://suttacentral.net/mn39/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=7ByWhNxj8Is"
+    },
+    {
+      "n": 40,
+      "date": "Aug 5, 2027",
+      "start": "2027-08-06T00:00:00Z",
+      "end": "2027-08-06T00:30:00Z",
+      "title": "Book club: Mission Majjhima (40/152): The Shorter Discourse at Assapura",
+      "pali": "Cūḷa-Assapura Sutta",
+      "reading": "https://suttacentral.net/mn40/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Rq7-4uv1lqE"
+    },
+    {
+      "n": 41,
+      "date": "Aug 12, 2027",
+      "start": "2027-08-13T00:00:00Z",
+      "end": "2027-08-13T00:30:00Z",
+      "title": "Book club: Mission Majjhima (41/152): The Brahmans of Sala",
+      "pali": "Sāleyyaka Sutta",
+      "reading": "https://suttacentral.net/mn41/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=U7FioZ1_BsU"
+    },
+    {
+      "n": 42,
+      "date": "Aug 19, 2027",
+      "start": "2027-08-20T00:00:00Z",
+      "end": "2027-08-20T00:30:00Z",
+      "title": "Book club: Mission Majjhima (42/152): The Brahmins of Veranjaka",
+      "pali": "Verañjaka Sutta",
+      "reading": "https://suttacentral.net/mn42/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Cp_MZVxoxV8"
+    },
+    {
+      "n": 43,
+      "date": "Aug 26, 2027",
+      "start": "2027-08-27T00:00:00Z",
+      "end": "2027-08-27T00:30:00Z",
+      "title": "Book club: Mission Majjhima (43/152): The Greater Set of Questions-and-Answers",
+      "pali": "Mahā-vedalla Sutta",
+      "reading": "https://suttacentral.net/mn43/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=7fmlDv7ZO2g"
+    },
+    {
+      "n": 44,
+      "date": "Sep 2, 2027",
+      "start": "2027-09-03T00:00:00Z",
+      "end": "2027-09-03T00:30:00Z",
+      "title": "Book club: Mission Majjhima (44/152): The Shorter Set of Questions-and-Answers",
+      "pali": "Cūḷa-vedalla Sutta",
+      "reading": "https://suttacentral.net/mn44/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=2UXPgqnppo4"
+    },
+    {
+      "n": 45,
+      "date": "Sep 9, 2027",
+      "start": "2027-09-10T00:00:00Z",
+      "end": "2027-09-10T00:30:00Z",
+      "title": "Book club: Mission Majjhima (45/152): The Shorter Discourse on Taking on Practices",
+      "pali": "Cula-dhammasamādāna Sutta",
+      "reading": "https://suttacentral.net/mn45/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Xk-AHl-uixI"
+    },
+    {
+      "n": 46,
+      "date": "Sep 16, 2027",
+      "start": "2027-09-17T00:00:00Z",
+      "end": "2027-09-17T00:30:00Z",
+      "title": "Book club: Mission Majjhima (46/152): The Greater Discourse on Taking on Practices",
+      "pali": "Mahā-dhammasamādāna Sutta",
+      "reading": "https://suttacentral.net/mn46/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=B5952ZWIuvA"
+    },
+    {
+      "n": 47,
+      "date": "Sep 23, 2027",
+      "start": "2027-09-24T00:00:00Z",
+      "end": "2027-09-24T00:30:00Z",
+      "title": "Book club: Mission Majjhima (47/152): The Inquirer",
+      "pali": "Vīmaṃsaka Sutta",
+      "reading": "https://suttacentral.net/mn47/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=oPggbNKRF7Y"
+    },
+    {
+      "n": 48,
+      "date": "Sep 30, 2027",
+      "start": "2027-10-01T00:00:00Z",
+      "end": "2027-10-01T00:30:00Z",
+      "title": "Book club: Mission Majjhima (48/152): The Kosambians",
+      "pali": "Kosambiya Sutta",
+      "reading": "https://suttacentral.net/mn48/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=8IKSAaEiKME"
+    },
+    {
+      "n": 49,
+      "date": "Oct 7, 2027",
+      "start": "2027-10-08T00:00:00Z",
+      "end": "2027-10-08T00:30:00Z",
+      "title": "Book club: Mission Majjhima (49/152): The Invitation Of A Brahma",
+      "pali": "Brahmanimantanika Sutta",
+      "reading": "https://suttacentral.net/mn49/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=BsCpvdRT-bo"
+    },
+    {
+      "n": 50,
+      "date": "Oct 14, 2027",
+      "start": "2027-10-15T00:00:00Z",
+      "end": "2027-10-15T00:30:00Z",
+      "title": "Book club: Mission Majjhima (50/152): The Rebuke to Mara",
+      "pali": "Maratajjanīya Sutta",
+      "reading": "https://suttacentral.net/mn50/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=cjlmS08fSfQ"
+    },
+    {
+      "n": 51,
+      "date": "Oct 21, 2027",
+      "start": "2027-10-22T00:00:00Z",
+      "end": "2027-10-22T00:30:00Z",
+      "title": "Book club: Mission Majjhima (51/152): To Kandaraka",
+      "pali": "Kandaka Sutta",
+      "reading": "https://suttacentral.net/mn51/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=etBRC0wF3vM"
+    },
+    {
+      "n": 52,
+      "date": "Oct 28, 2027",
+      "start": "2027-10-29T00:00:00Z",
+      "end": "2027-10-29T00:30:00Z",
+      "title": "Book club: Mission Majjhima (52/152): To the Man from Atthakanagara",
+      "pali": "Aṭṭhakanāgara Sutta",
+      "reading": "https://suttacentral.net/mn52/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=idbB2agBZ8I"
+    },
+    {
+      "n": 53,
+      "date": "Nov 4, 2027",
+      "start": "2027-11-05T00:00:00Z",
+      "end": "2027-11-05T00:30:00Z",
+      "title": "Book club: Mission Majjhima (53/152): The Practice for One in Training",
+      "pali": "Sekha-paṭipadā Sutta",
+      "reading": "https://suttacentral.net/mn53/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=71f5mafjmOM"
+    },
+    {
+      "n": 54,
+      "date": "Nov 11, 2027",
+      "start": "2027-11-12T01:00:00Z",
+      "end": "2027-11-12T01:30:00Z",
+      "title": "Book club: Mission Majjhima (54/152): To Potaliya",
+      "pali": "Potaliya Sutta",
+      "reading": "https://suttacentral.net/mn54/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=U5UHRSe1rew"
+    },
+    {
+      "n": 55,
+      "date": "Nov 18, 2027",
+      "start": "2027-11-19T01:00:00Z",
+      "end": "2027-11-19T01:30:00Z",
+      "title": "Book club: Mission Majjhima (55/152): Discourse given to Jīvaka, the healer",
+      "pali": "Jīvaka Sutta",
+      "reading": "https://suttacentral.net/mn55/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=tgheZP0ZQME"
+    },
+    {
+      "n": 56,
+      "date": "Nov 25, 2027",
+      "start": "2027-11-26T01:00:00Z",
+      "end": "2027-11-26T01:30:00Z",
+      "title": "Book club: Mission Majjhima (56/152): Discourse given to Upali the householder",
+      "pali": "Upāli Sutta",
+      "reading": "https://suttacentral.net/mn56/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=gzntumDG90Q"
+    },
+    {
+      "n": 57,
+      "date": "Dec 2, 2027",
+      "start": "2027-12-03T01:00:00Z",
+      "end": "2027-12-03T01:30:00Z",
+      "title": "Book club: Mission Majjhima (57/152): The Dog-duty Ascetic",
+      "pali": "Kukkuravatika Sutta",
+      "reading": "https://suttacentral.net/mn57/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=kioJ34rGPCg"
+    },
+    {
+      "n": 58,
+      "date": "Dec 9, 2027",
+      "start": "2027-12-10T01:00:00Z",
+      "end": "2027-12-10T01:30:00Z",
+      "title": "Book club: Mission Majjhima (58/152): To Prince Abhaya (On Right Speech)",
+      "pali": "Abhaya Sutta",
+      "reading": "https://suttacentral.net/mn58/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=3NbewkSndpQ"
+    },
+    {
+      "n": 59,
+      "date": "Dec 16, 2027",
+      "start": "2027-12-17T01:00:00Z",
+      "end": "2027-12-17T01:30:00Z",
+      "title": "Book club: Mission Majjhima (59/152): The Many Kinds of Feeling",
+      "pali": "Bahuvedaniya Sutta",
+      "reading": "https://suttacentral.net/mn59/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=yMvm9vvoJMU"
+    },
+    {
+      "n": 60,
+      "date": "Dec 23, 2027",
+      "start": "2027-12-24T01:00:00Z",
+      "end": "2027-12-24T01:30:00Z",
+      "title": "Book club: Mission Majjhima (60/152): The Incontrovertible Teaching",
+      "pali": "Apannaka Sutta",
+      "reading": "https://suttacentral.net/mn60/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=2iVWUubfUEE"
+    },
+    {
+      "n": 61,
+      "date": "Dec 30, 2027",
+      "start": "2027-12-31T01:00:00Z",
+      "end": "2027-12-31T01:30:00Z",
+      "title": "Book club: Mission Majjhima (61/152): Advice to Rahula at Mango Stone",
+      "pali": "Ambalatthikarahulovada Sutta",
+      "reading": "https://suttacentral.net/mn61/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=yXgkiZazp9E"
+    },
+    {
+      "n": 62,
+      "date": "Jan 6, 2028",
+      "start": "2028-01-07T01:00:00Z",
+      "end": "2028-01-07T01:30:00Z",
+      "title": "Book club: Mission Majjhima (62/152): The Greater Discourse of Advice to Rahula",
+      "pali": "Maha-Rahulovada Sutta",
+      "reading": "https://suttacentral.net/mn62/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=BwArc1RxcaQ"
+    },
+    {
+      "n": 63,
+      "date": "Jan 13, 2028",
+      "start": "2028-01-14T01:00:00Z",
+      "end": "2028-01-14T01:30:00Z",
+      "title": "Book club: Mission Majjhima (63/152): The Shorter Instructions to Malunkya",
+      "pali": "Cula-Malunkyovada Sutta",
+      "reading": "https://suttacentral.net/mn63/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=ErDFtAro1Ww"
+    },
+    {
+      "n": 64,
+      "date": "Jan 20, 2028",
+      "start": "2028-01-21T01:00:00Z",
+      "end": "2028-01-21T01:30:00Z",
+      "title": "Book club: Mission Majjhima (64/152): The Greater Instructions to Malunkya",
+      "pali": "Maha-Malunkyaputta Sutta",
+      "reading": "https://suttacentral.net/mn64/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=qNNnUKX6aDY"
+    },
+    {
+      "n": 65,
+      "date": "Jan 27, 2028",
+      "start": "2028-01-28T01:00:00Z",
+      "end": "2028-01-28T01:30:00Z",
+      "title": "Book club: Mission Majjhima (65/152): To Bhaddali",
+      "pali": "Bhaddali Sutta",
+      "reading": "https://suttacentral.net/mn65/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=hPsCT_Q3mPI"
+    },
+    {
+      "n": 66,
+      "date": "Feb 3, 2028",
+      "start": "2028-02-04T01:00:00Z",
+      "end": "2028-02-04T01:30:00Z",
+      "title": "Book club: Mission Majjhima (66/152): The Quail Simile",
+      "pali": "Latukikopama Sutta",
+      "reading": "https://suttacentral.net/mn66/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=fCXmZ7JT0GM"
+    },
+    {
+      "n": 67,
+      "date": "Feb 10, 2028",
+      "start": "2028-02-11T01:00:00Z",
+      "end": "2028-02-11T01:30:00Z",
+      "title": "Book club: Mission Majjhima (67/152): At Catuma",
+      "pali": "Catuma Sutta",
+      "reading": "https://suttacentral.net/mn67/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=WxzQGGZID04"
+    },
+    {
+      "n": 68,
+      "date": "Feb 17, 2028",
+      "start": "2028-02-18T01:00:00Z",
+      "end": "2028-02-18T01:30:00Z",
+      "title": "Book club: Mission Majjhima (68/152): At Nalakapana",
+      "pali": "Nalakapana Sutta",
+      "reading": "https://suttacentral.net/mn68/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=It6DjI9JsIU"
+    },
+    {
+      "n": 69,
+      "date": "Feb 24, 2028",
+      "start": "2028-02-25T01:00:00Z",
+      "end": "2028-02-25T01:30:00Z",
+      "title": "Book club: Mission Majjhima (69/152): Gulissani",
+      "pali": "Gulissani Sutta",
+      "reading": "https://suttacentral.net/mn69/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=rXUMbDWqSg0"
+    },
+    {
+      "n": 70,
+      "date": "Mar 2, 2028",
+      "start": "2028-03-03T01:00:00Z",
+      "end": "2028-03-03T01:30:00Z",
+      "title": "Book club: Mission Majjhima (70/152): At Kitagiri",
+      "pali": "Kitagiri Sutta",
+      "reading": "https://suttacentral.net/mn70/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=moyckf0TzYM"
+    },
+    {
+      "n": 71,
+      "date": "Mar 9, 2028",
+      "start": "2028-03-10T01:00:00Z",
+      "end": "2028-03-10T01:30:00Z",
+      "title": "Book club: Mission Majjhima (71/152): To Vacchagotta on the Threefold True Knowledge",
+      "pali": "Tevijja Vacchagotta Sutta",
+      "reading": "https://suttacentral.net/mn71/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=M9hDwbIUwUs"
+    },
+    {
+      "n": 72,
+      "date": "Mar 16, 2028",
+      "start": "2028-03-17T00:00:00Z",
+      "end": "2028-03-17T00:30:00Z",
+      "title": "Book club: Mission Majjhima (72/152): To Vacchagotta on Fire",
+      "pali": "Aggi-Vacchagotta Sutta",
+      "reading": "https://suttacentral.net/mn72/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Q10WQPNdtss"
+    },
+    {
+      "n": 73,
+      "date": "Mar 23, 2028",
+      "start": "2028-03-24T00:00:00Z",
+      "end": "2028-03-24T00:30:00Z",
+      "title": "Book club: Mission Majjhima (73/152): The Greater Discourse to Vacchagotta",
+      "pali": "Maha-Vacchagotta Sutta",
+      "reading": "https://suttacentral.net/mn73/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=j9F1bU2kFFw"
+    },
+    {
+      "n": 74,
+      "date": "Mar 30, 2028",
+      "start": "2028-03-31T00:00:00Z",
+      "end": "2028-03-31T00:30:00Z",
+      "title": "Book club: Mission Majjhima (74/152): To Dighanakha",
+      "pali": "Dighanahka Sutta",
+      "reading": "https://suttacentral.net/mn74/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=bvCXRfeCC5E"
+    },
+    {
+      "n": 75,
+      "date": "Apr 6, 2028",
+      "start": "2028-04-07T00:00:00Z",
+      "end": "2028-04-07T00:30:00Z",
+      "title": "Book club: Mission Majjhima (75/152): To Magandiya",
+      "pali": "Magandiya Sutta",
+      "reading": "https://suttacentral.net/mn75/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=EA3lVEakWZg"
+    },
+    {
+      "n": 76,
+      "date": "Apr 13, 2028",
+      "start": "2028-04-14T00:00:00Z",
+      "end": "2028-04-14T00:30:00Z",
+      "title": "Book club: Mission Majjhima (76/152): To Sandaka",
+      "pali": "Sandaka Sutta",
+      "reading": "https://suttacentral.net/mn76/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=HL_zW63Z1Lo"
+    },
+    {
+      "n": 77,
+      "date": "Apr 20, 2028",
+      "start": "2028-04-21T00:00:00Z",
+      "end": "2028-04-21T00:30:00Z",
+      "title": "Book club: Mission Majjhima (77/152): The Greater Discourse to Sakuludayin",
+      "pali": "Maha-sakuludayi Sutta",
+      "reading": "https://suttacentral.net/mn77/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=y1zHVRj1Ip0"
+    },
+    {
+      "n": 78,
+      "date": "Apr 27, 2028",
+      "start": "2028-04-28T00:00:00Z",
+      "end": "2028-04-28T00:30:00Z",
+      "title": "Book club: Mission Majjhima (78/152): Mundika the Contemplative",
+      "pali": "Samana-Mundika Sutta",
+      "reading": "https://suttacentral.net/mn78/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=yV7Sud3sKKA"
+    },
+    {
+      "n": 79,
+      "date": "May 4, 2028",
+      "start": "2028-05-05T00:00:00Z",
+      "end": "2028-05-05T00:30:00Z",
+      "title": "Book club: Mission Majjhima (79/152): The Shorter Discourse to Sakuludayin",
+      "pali": "Cula-sakuludayi Sutta",
+      "reading": "https://suttacentral.net/mn79/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=vRntxbLEXo8"
+    },
+    {
+      "n": 80,
+      "date": "May 11, 2028",
+      "start": "2028-05-12T00:00:00Z",
+      "end": "2028-05-12T00:30:00Z",
+      "title": "Book club: Mission Majjhima (80/152): To Vekhanassa",
+      "pali": "Vekhanassa Sutta",
+      "reading": "https://suttacentral.net/mn80/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=i5curi5NMVs"
+    },
+    {
+      "n": 81,
+      "date": "May 18, 2028",
+      "start": "2028-05-19T00:00:00Z",
+      "end": "2028-05-19T00:30:00Z",
+      "title": "Book club: Mission Majjhima (81/152): Ghatikara the Potter",
+      "pali": "Ghatikara Sutta",
+      "reading": "https://suttacentral.net/mn81/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=KZpUUVDS4A4"
+    },
+    {
+      "n": 82,
+      "date": "May 25, 2028",
+      "start": "2028-05-26T00:00:00Z",
+      "end": "2028-05-26T00:30:00Z",
+      "title": "Book club: Mission Majjhima (82/152): About Ratthapala",
+      "pali": "Ratthapala Sutta",
+      "reading": "https://suttacentral.net/mn82/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=kaAeNkZqvNk"
+    },
+    {
+      "n": 83,
+      "date": "Jun 1, 2028",
+      "start": "2028-06-02T00:00:00Z",
+      "end": "2028-06-02T00:30:00Z",
+      "title": "Book club: Mission Majjhima (83/152): About King Makhadeva",
+      "pali": "Makhadeva Sutta",
+      "reading": "https://suttacentral.net/mn83/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=ueD-sFkHMyM"
+    },
+    {
+      "n": 84,
+      "date": "Jun 8, 2028",
+      "start": "2028-06-09T00:00:00Z",
+      "end": "2028-06-09T00:30:00Z",
+      "title": "Book club: Mission Majjhima (84/152): At Madhura",
+      "pali": "Madhura Sutta",
+      "reading": "https://suttacentral.net/mn84/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=7FGTldTnlpI"
+    },
+    {
+      "n": 85,
+      "date": "Jun 15, 2028",
+      "start": "2028-06-16T00:00:00Z",
+      "end": "2028-06-16T00:30:00Z",
+      "title": "Book club: Mission Majjhima (85/152): To Prince Bodhi",
+      "pali": "Bodhirajakumara Sutta",
+      "reading": "https://suttacentral.net/mn85/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=7sQnorryGPA"
+    },
+    {
+      "n": 86,
+      "date": "Jun 22, 2028",
+      "start": "2028-06-23T00:00:00Z",
+      "end": "2028-06-23T00:30:00Z",
+      "title": "Book club: Mission Majjhima (86/152): About Angulimala",
+      "pali": "Angulimala Sutta",
+      "reading": "https://suttacentral.net/mn86/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=0MJ26O2vx9s"
+    },
+    {
+      "n": 87,
+      "date": "Jun 29, 2028",
+      "start": "2028-06-30T00:00:00Z",
+      "end": "2028-06-30T00:30:00Z",
+      "title": "Book club: Mission Majjhima (87/152): From One Who Is Dear",
+      "pali": "Piyajatika Sutta",
+      "reading": "https://suttacentral.net/mn87/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Qf8Whypc7-g"
+    },
+    {
+      "n": 88,
+      "date": "Jul 6, 2028",
+      "start": "2028-07-07T00:00:00Z",
+      "end": "2028-07-07T00:30:00Z",
+      "title": "Book club: Mission Majjhima (88/152): The Cloak",
+      "pali": "Bahitika Sutta",
+      "reading": "https://suttacentral.net/mn88/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=iW_xdrSHwzQ"
+    },
+    {
+      "n": 89,
+      "date": "Jul 13, 2028",
+      "start": "2028-07-14T00:00:00Z",
+      "end": "2028-07-14T00:30:00Z",
+      "title": "Book club: Mission Majjhima (89/152): Monuments to the Dhamma",
+      "pali": "Dhammacetiya Sutta",
+      "reading": "https://suttacentral.net/mn89/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=t_ckriBzAsA"
+    },
+    {
+      "n": 90,
+      "date": "Jul 20, 2028",
+      "start": "2028-07-21T00:00:00Z",
+      "end": "2028-07-21T00:30:00Z",
+      "title": "Book club: Mission Majjhima (90/152): At Kannakatthala",
+      "pali": "Kannakatthala Sutta",
+      "reading": "https://suttacentral.net/mn90/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=Uyt85KOdrjk"
+    },
+    {
+      "n": 91,
+      "date": "Jul 27, 2028",
+      "start": "2028-07-28T00:00:00Z",
+      "end": "2028-07-28T00:30:00Z",
+      "title": "Book club: Mission Majjhima (91/152): Brahmayu",
+      "pali": "Brahmayu Sutta",
+      "reading": "https://suttacentral.net/mn91/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=zxTMIVoOxMQ"
+    },
+    {
+      "n": 92,
+      "date": "Aug 3, 2028",
+      "start": "2028-08-04T00:00:00Z",
+      "end": "2028-08-04T00:30:00Z",
+      "title": "Book club: Mission Majjhima (92/152): To Sela",
+      "pali": "Sela Sutta",
+      "reading": "https://suttacentral.net/mn92/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=JXv7loxgvzc"
+    },
+    {
+      "n": 93,
+      "date": "Aug 10, 2028",
+      "start": "2028-08-11T00:00:00Z",
+      "end": "2028-08-11T00:30:00Z",
+      "title": "Book club: Mission Majjhima (93/152): To Assalayana",
+      "pali": "Assalayana Sutta",
+      "reading": "https://suttacentral.net/mn93/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=T84gj_Xp7T0"
+    },
+    {
+      "n": 94,
+      "date": "Aug 17, 2028",
+      "start": "2028-08-18T00:00:00Z",
+      "end": "2028-08-18T00:30:00Z",
+      "title": "Book club: Mission Majjhima (94/152): To Ghotamukha",
+      "pali": "Ghotamukha Sutta",
+      "reading": "https://suttacentral.net/mn94/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=HqxAS_xmQK4"
+    },
+    {
+      "n": 95,
+      "date": "Aug 24, 2028",
+      "start": "2028-08-25T00:00:00Z",
+      "end": "2028-08-25T00:30:00Z",
+      "title": "Book club: Mission Majjhima (95/152): With Canki",
+      "pali": "Canki Sutta",
+      "reading": "https://suttacentral.net/mn95/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=g9s9UprLhLQ"
+    },
+    {
+      "n": 96,
+      "date": "Aug 31, 2028",
+      "start": "2028-09-01T00:00:00Z",
+      "end": "2028-09-01T00:30:00Z",
+      "title": "Book club: Mission Majjhima (96/152): To Esukari",
+      "pali": "Esukari Sutta",
+      "reading": "https://suttacentral.net/mn96/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=brkD4AkohKM"
+    },
+    {
+      "n": 97,
+      "date": "Sep 7, 2028",
+      "start": "2028-09-08T00:00:00Z",
+      "end": "2028-09-08T00:30:00Z",
+      "title": "Book club: Mission Majjhima (97/152): To Dhananjani",
+      "pali": "Dhananjani Sutta",
+      "reading": "https://suttacentral.net/mn97/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=W8IVkSoi49Q"
+    },
+    {
+      "n": 98,
+      "date": "Sep 14, 2028",
+      "start": "2028-09-15T00:00:00Z",
+      "end": "2028-09-15T00:30:00Z",
+      "title": "Book club: Mission Majjhima (98/152): To Vasettha",
+      "pali": "Vasettha Sutta",
+      "reading": "https://suttacentral.net/mn98/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=FsUO3F5JAZU"
+    },
+    {
+      "n": 99,
+      "date": "Sep 21, 2028",
+      "start": "2028-09-22T00:00:00Z",
+      "end": "2028-09-22T00:30:00Z",
+      "title": "Book club: Mission Majjhima (99/152): To Subha",
+      "pali": "Subha Sutta",
+      "reading": "https://suttacentral.net/mn99/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=95fQYtOtUNw"
+    },
+    {
+      "n": 100,
+      "date": "Sep 28, 2028",
+      "start": "2028-09-29T00:00:00Z",
+      "end": "2028-09-29T00:30:00Z",
+      "title": "Book club: Mission Majjhima (100/152): To Sangarava",
+      "pali": "Sangarava Sutta",
+      "reading": "https://suttacentral.net/mn100/en/bodhi?lang=en",
+      "video": "https://www.youtube.com/watch?v=YjJUfUjjksU"
+    },
+    {
+      "n": 101,
+      "date": "Oct 5, 2028",
+      "start": "2028-10-06T00:00:00Z",
+      "end": "2028-10-06T00:30:00Z",
+      "title": "Book club: Mission Majjhima (101/152): To Devadaha",
+      "pali": "Devadaha Sutta",
+      "reading": "https://suttacentral.net/mn101/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=bb2d9D3Rw78"
+    },
+    {
+      "n": 102,
+      "date": "Oct 12, 2028",
+      "start": "2028-10-13T00:00:00Z",
+      "end": "2028-10-13T00:30:00Z",
+      "title": "Book club: Mission Majjhima (102/152): The Five and Three",
+      "pali": "Pañcattaya Sutta",
+      "reading": "https://suttacentral.net/mn102/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=NXfvhLY-158"
+    },
+    {
+      "n": 103,
+      "date": "Oct 19, 2028",
+      "start": "2028-10-20T00:00:00Z",
+      "end": "2028-10-20T00:30:00Z",
+      "title": "Book club: Mission Majjhima (103/152): What Do You Think About Me?",
+      "pali": "Kinti Sutta",
+      "reading": "https://suttacentral.net/mn103/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=aWZQC-5Hoc8"
+    },
+    {
+      "n": 104,
+      "date": "Oct 26, 2028",
+      "start": "2028-10-27T00:00:00Z",
+      "end": "2028-10-27T00:30:00Z",
+      "title": "Book club: Mission Majjhima (104/152): At Samagama",
+      "pali": "Sāmagāma Sutta",
+      "reading": "https://suttacentral.net/mn104/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=BjhC_ORikyk"
+    },
+    {
+      "n": 105,
+      "date": "Nov 2, 2028",
+      "start": "2028-11-03T00:00:00Z",
+      "end": "2028-11-03T00:30:00Z",
+      "title": "Book club: Mission Majjhima (105/152): To Sunakkhatta",
+      "pali": "Sunakkhatta Sutta",
+      "reading": "https://suttacentral.net/mn105/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=u_r_z-Jjmik"
+    },
+    {
+      "n": 106,
+      "date": "Nov 9, 2028",
+      "start": "2028-11-10T01:00:00Z",
+      "end": "2028-11-10T01:30:00Z",
+      "title": "Book club: Mission Majjhima (106/152): Conducive to the Imperturbable",
+      "pali": "Āneñja-sappāya Sutta",
+      "reading": "https://suttacentral.net/mn106/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=MwxbYZZnkoc"
+    },
+    {
+      "n": 107,
+      "date": "Nov 16, 2028",
+      "start": "2028-11-17T01:00:00Z",
+      "end": "2028-11-17T01:30:00Z",
+      "title": "Book club: Mission Majjhima (107/152): The Discourse to Ganaka-Moggallana",
+      "pali": "Gaṇaka-Moggallāna Sutta",
+      "reading": "https://suttacentral.net/mn107/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=g8d4xXkkhb4"
+    },
+    {
+      "n": 108,
+      "date": "Nov 23, 2028",
+      "start": "2028-11-24T01:00:00Z",
+      "end": "2028-11-24T01:30:00Z",
+      "title": "Book club: Mission Majjhima (108/152): Moggallana the Guardsman",
+      "pali": "Gopaka-Moggallāna Sutta",
+      "reading": "https://suttacentral.net/mn108/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=Fhzj17dAbaU"
+    },
+    {
+      "n": 109,
+      "date": "Nov 30, 2028",
+      "start": "2028-12-01T01:00:00Z",
+      "end": "2028-12-01T01:30:00Z",
+      "title": "Book club: Mission Majjhima (109/152): The Great Full-moon Night Discourse",
+      "pali": "Mahā-puṇṇama Sutta",
+      "reading": "https://suttacentral.net/mn109/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=IRqM9kHgWL8"
+    },
+    {
+      "n": 110,
+      "date": "Dec 7, 2028",
+      "start": "2028-12-08T01:00:00Z",
+      "end": "2028-12-08T01:30:00Z",
+      "title": "Book club: Mission Majjhima (110/152): The Shorter Discourse on the Full-moon Night",
+      "pali": "Cūḷa-puṇṇama Sutta",
+      "reading": "https://suttacentral.net/mn110/en/bodhi",
+      "video": "https://www.youtube.com/watch?v=MouqXLsL9a8"
+    }
+  ]
+}

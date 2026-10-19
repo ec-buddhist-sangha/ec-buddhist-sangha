@@ -174,3 +174,5 @@ The prototype includes a Gemini-based AI assistant. **In production:**
 ## License
 
 This repo is for the Eau Claire Buddhist Sangha.
+
+Book-club page and schedule maintenance: [docs/BOOK_CLUB.md](docs/BOOK_CLUB.md).

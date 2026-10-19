@@ -130,3 +130,5 @@ npm test
 ```
 
 Before deployment, test desktop and mobile rendering plus two independent browsers or devices. Both should resolve the same deterministic item ID and shared signup state.
+
+Calendar item descriptions automatically link explicit HTTP(S) URLs while escaping all HTML. The Mission Majjhima recurrence links to /book-club/; see [BOOK_CLUB.md](BOOK_CLUB.md).

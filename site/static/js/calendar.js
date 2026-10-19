@@ -1427,6 +1427,22 @@
     return text.slice(0, limit - 3).trimEnd() + "...";
   }
 
+  // Descriptions stay plain text; only explicit HTTP(S) addresses become links.
+  function descriptionHtml(value) {
+    var text = String(value || "");
+    var html = "";
+    var cursor = 0;
+    text.replace(/https?:\/\/[^\s<>"']+/g, function (match, offset) {
+      var url = match.replace(/[.,;!?]+$/, "");
+      html += escapeHtml(text.slice(cursor, offset));
+      html += '<a class="underline text-sangha-navy break-words" href="' + escapeHtml(url) + '">' + escapeHtml(url) + '</a>';
+      html += escapeHtml(match.slice(url.length));
+      cursor = offset + match.length;
+      return match;
+    });
+    return html + escapeHtml(text.slice(cursor));
+  }
+
   function tooltipAttr(value) {
     var text = String(value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
     return text ? ' title="' + escapeHtml(text) + '"' : "";
@@ -3669,7 +3685,7 @@
             '<span class="text-xs text-gray-400">' + displayDate(slot.date) + ' at ' + displayTimeRange(slot) + '</span>' +
           '</div>' +
           '<h2 class="font-serif text-2xl font-bold text-sangha-navy">' + escapeHtml(slot.title || "Talk offering") + '</h2>' +
-          '<p class="text-gray-600 mt-3 leading-relaxed" style="white-space: pre-line;">' + escapeHtml(slot.description || "") + '</p>' +
+          '<p class="text-gray-600 mt-3 leading-relaxed" style="white-space: pre-line;">' + descriptionHtml(slot.description) + '</p>' +
           renderLocationSummary(slot) +
           renderZoomSummary(slot, store) +
           '<div class="mt-5 flex flex-wrap items-start gap-3">' +
@@ -3961,7 +3977,7 @@
             '<span class="text-xs text-gray-400">' + displayDate(slot.date) + ' at ' + displayTimeRange(slot) + '</span>' +
           '</div>' +
           '<h2 class="font-serif text-2xl font-bold text-sangha-navy">' + escapeHtml(slot.title || "Regular meeting") + '</h2>' +
-          '<p class="text-gray-600 mt-3 leading-relaxed" style="white-space: pre-line;">' + escapeHtml(slot.description || "") + '</p>' +
+          '<p class="text-gray-600 mt-3 leading-relaxed" style="white-space: pre-line;">' + descriptionHtml(slot.description) + '</p>' +
           renderLocationSummary(slot) +
           renderZoomSummary(slot, store) +
           '<div class="mt-5 flex flex-wrap items-start gap-3">' +
@@ -4490,6 +4506,7 @@
       scheduleReminders: scheduleReminders,
       icsForSlot: icsForSlot,
       zoomLinkForSlot: zoomLinkForSlot,
+      descriptionHtml: descriptionHtml,
       isSlotOccurringNow: isSlotOccurringNow,
       upcomingCalendarEmailText: upcomingCalendarEmailText,
       upcomingCalendarEmailHtml: upcomingCalendarEmailHtml,
