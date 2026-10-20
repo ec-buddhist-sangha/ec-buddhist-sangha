@@ -26,11 +26,9 @@ background: |
   These collections often return to the same teachings in different settings. You don't need to read them in order. A reference such as **MN 10** simply means the tenth discourse in the Majjhima Nikāya.
 
   For more background, see Access to Insight's guides to the [Pali Canon](https://accesstoinsight.org/tipitaka/index.html) and the [five collections of discourses](https://accesstoinsight.org/tipitaka/sutta.html).
-
-  Our book club was inspired by Clear Mountain Monastery's **Mission Majjhima** series. You can also join their [Sunday Sutta Study](https://www.clearmountain.org/events/sunday-sutta-study/), a weekly teaching and discussion on YouTube and Zoom.
 ---
 
-We'll read the **152 Middle Length Discourses of the Buddha (Majjhima Nikāya)** together, one sutta each week over about three years. It's a chance to spend time with the Buddha's teachings and talk about how they relate to our lives and meditation practice.
+Inspired by Clear Mountain Monastery's ongoing [Sunday Sutta Study](https://www.clearmountain.org/events/sunday-sutta-study/), we'll read the **152 Middle Length Discourses of the Buddha (Majjhima Nikāya)** alongside their **10-Minute Majjhima** videos, one sutta each week over about three years. We'll talk about how the teachings relate to our lives and meditation practice.
 
 ### How we meet
 
