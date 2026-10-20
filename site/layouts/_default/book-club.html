@@ -41,6 +41,9 @@
       </ol>
     </details>
     <p class="mt-6 text-sm text-gray-600"><a href="{{ "calendar/" | relURL }}" class="text-sangha-navy underline">See the sangha calendar</a> for other gatherings.</p>
+    {{ with .Params.background }}
+    <div class="prose prose-sangha max-w-3xl mt-10">{{ $.RenderString . }}</div>
+    {{ end }}
   </div>
 </article>
 <script id="book-club-data" type="application/json">{{ $club | jsonify | safeJS }}</script>
