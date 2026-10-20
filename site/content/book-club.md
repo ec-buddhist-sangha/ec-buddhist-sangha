@@ -27,7 +27,7 @@ background: |
 
   For more background, see Access to Insight's guides to the [Pali Canon](https://accesstoinsight.org/tipitaka/index.html) and the [five collections of discourses](https://accesstoinsight.org/tipitaka/sutta.html).
 
-  You can also join [Clear Mountain Monastery's Sunday Sutta Study](https://www.clearmountain.org/events/sunday-sutta-study/), their own weekly Mission Majjhima teaching and discussion on YouTube and Zoom.
+  Our book club was inspired by Clear Mountain Monastery's **Mission Majjhima** series. You can also join their [Sunday Sutta Study](https://www.clearmountain.org/events/sunday-sutta-study/), a weekly teaching and discussion on YouTube and Zoom.
 ---
 
 We'll read the **152 Middle Length Discourses of the Buddha (Majjhima Nikāya)** together, one sutta each week over about three years. It's a chance to spend time with the Buddha's teachings and talk about how they relate to our lives and meditation practice.
