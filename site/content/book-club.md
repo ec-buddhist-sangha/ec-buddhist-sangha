@@ -1,7 +1,7 @@
 ---
 title: "Book club: Mission Majjhima"
 layout: book-club
-summary: "Read the Middle Length Discourses with the sangha, one sutta each week. Thursdays, 7–7:30 p.m. Central on Zoom. Join at any point."
+summary: "Thursdays on Zoom: book club 7–7:30 p.m., followed by a casual sangha meet-and-greet until 8 p.m. Central. Everyone is welcome to either part."
 background: |
   ### What is the Majjhima Nikāya?
 
@@ -36,7 +36,11 @@ Inspired by Clear Mountain Monastery's ongoing [Sunday Sutta Study](https://www.
 
 ### How we meet
 
-Read the week's sutta beforehand on SuttaCentral. On Zoom, we'll watch Clear Mountain Monastery's **10-Minute Majjhima** video for that sutta, then discuss it. Meetings last 30 minutes, with time to stay and chat afterward.
+**7–7:30 p.m.: Book club.** Read the week's sutta beforehand on SuttaCentral. On Zoom, we'll watch Clear Mountain Monastery's **10-Minute Majjhima** video for that sutta, then discuss it.
+
+**7:30–8 p.m.: Sangha meet-and-greet.** Stay for a casual chat, or join us at 7:30 just to say hello and get to know others in the sangha. Everyone is welcome, whether or not you're interested in the book club. No reading or preparation is needed for this part.
+
+We meet on Thursdays, beginning November 5, 2026. All times are Central. Register once using the link above and use the same Zoom link for either part of the evening.
 
 ### Joining in
 

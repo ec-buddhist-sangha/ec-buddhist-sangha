@@ -1,8 +1,11 @@
 # Mission Majjhima book club
 
 Public page: `/book-club/`. The homepage card appears directly below Next Gathering.
-The generic calendar recurrence is **Book club: Mission Majjhima**, Thursdays
-19:00–19:30 America/Chicago beginning November 5, 2026. Its description links
+The calendar recurrence combines **Book club: Mission Majjhima & sangha meet-and-greet**, Thursdays
+19:00–20:00 America/Chicago beginning November 5, 2026. Book club runs until
+19:30, followed by a casual meet-and-greet open to everyone, including people
+who do not attend the book club. Both parts use the same Zoom registration and
+joining link. Its description links
 to `https://eauclairesangha.org/book-club/` for registration and the current topic.
 
 ## Updating the page
@@ -14,7 +17,8 @@ to `https://eauclairesangha.org/book-club/` for registration and the current top
   `site/data/mission_majjhima.json`.
 - The browser selects the earliest meeting whose UTC `end` is in the future,
   using `site/static/js/book-club.js`; dates display in America/Chicago.
-  It refreshes every minute and when a background tab becomes visible.
+  The end includes the meet-and-greet, so the current reading remains visible
+  until 20:00. It refreshes every minute and when a background tab becomes visible.
 - The expanded reading schedule also works without JavaScript.
 
 The data records the 110 existing Zoom occurrences, MN 1–110, through December 7,
