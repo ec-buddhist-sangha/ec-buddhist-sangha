@@ -28,7 +28,7 @@
       return;
     }
     add("p", formatDate(meeting.start) + " · 7–8 p.m. Central", "text-gray-600 mt-3");
-    add("p", "Book club 7–7:30 · Sangha meet-and-greet 7:30–8. Join either part.", "text-gray-600 text-sm mt-2");
+    add("p", "Book club 7–7:30 · Sangha social 7:30–8. Come for either or both.", "text-gray-600 text-sm mt-2");
     add("h3", meeting.title, "font-serif text-xl md:text-2xl font-bold text-sangha-navy mt-2");
     add("p", meeting.pali + " · MN " + meeting.n, "text-gray-500 text-sm mt-2");
     var links = add("div", "", "flex flex-wrap gap-5 mt-5 text-sm font-bold");

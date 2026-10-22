@@ -6,18 +6,19 @@
     <header class="mt-8 flex flex-col sm:flex-row gap-8 sm:items-center">
       <img src="{{ "images/middle-length-discourses.jpg" | relURL }}" alt="The Middle Length Discourses of the Buddha, translated by Bhikkhu Ñāṇamoli and Bhikkhu Bodhi" width="144" height="220" class="w-36 h-auto rounded shadow-md flex-shrink-0">
       <div>
-        <p class="text-xs uppercase tracking-widest text-sangha-gold font-bold mb-3">Read the suttas with the sangha</p>
+        <p class="text-xs uppercase tracking-widest text-sangha-gold font-bold mb-3">Thursday evenings with the sangha</p>
         <h1 class="font-serif text-3xl md:text-4xl font-bold text-sangha-navy leading-tight">{{ .Title }}</h1>
+        <p class="text-gray-700 mt-4">A sutta, a short teaching, and a conversation.</p>
         <p class="text-gray-700 mt-4">Thursdays · 7–8 p.m. Central · Zoom</p>
-        <p class="text-gray-700 mt-1">Book club 7–7:30 · Sangha meet-and-greet 7:30–8</p>
+        <p class="text-gray-700 mt-1">Book club 7–7:30 · Sangha social 7:30–8</p>
         <p class="text-gray-600 mt-1">Beginning November 5, 2026. Everyone is welcome.</p>
-        <a href="{{ $club.registration }}" class="inline-block mt-5 bg-sangha-navy text-white rounded-lg px-6 py-3 text-sm font-bold hover:bg-blue-900">Register for the series on Zoom →</a>
-        <p class="text-xs text-gray-500 mt-2">Join either part of the evening. Register once; Zoom will provide your joining link.</p>
+        <a href="{{ $club.registration }}" class="inline-block mt-5 bg-sangha-navy text-white rounded-lg px-6 py-3 text-sm font-bold hover:bg-blue-900">Join us on Zoom →</a>
+        <p class="text-xs text-gray-500 mt-2">Register once to get the link. Come for the book club, the chat, or both.</p>
       </div>
     </header>
 
     <section class="mt-10 bg-white rounded-2xl border border-sangha-gold/30 p-6 md:p-8 shadow-sm" aria-labelledby="club-next-heading">
-      <h2 id="club-next-heading" class="text-xs uppercase tracking-widest text-sangha-gold font-bold">Next meeting &amp; reading</h2>
+      <h2 id="club-next-heading" class="text-xs uppercase tracking-widest text-sangha-gold font-bold">What we're reading next</h2>
       <div id="book-club-next" aria-live="polite">
         <p class="text-gray-600 mt-3">See the reading schedule below for meeting dates and topics.</p>
       </div>
@@ -27,7 +28,7 @@
 
     <details class="mt-10 rounded-2xl border border-gray-200 bg-white p-6">
       <summary class="cursor-pointer font-serif text-xl font-bold text-sangha-navy">Reading schedule</summary>
-      <p class="text-sm text-gray-600 mt-3">Book club is 7–7:30 p.m. Central, followed by a casual sangha meet-and-greet until 8. Everyone is welcome to either part. More dates will be added as the series continues.</p>
+      <p class="text-sm text-gray-600 mt-3">Book club is 7–7:30 p.m. Central, followed by the sangha social until 8. More dates will be added as we go.</p>
       <ol class="mt-5 divide-y divide-gray-100">
         {{ range $club.meetings }}
         <li class="py-4">
