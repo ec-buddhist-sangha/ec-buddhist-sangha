@@ -20,6 +20,8 @@ Read the week's sutta if you can. We'll watch the video together, then talk abou
 
 Join us for a chat, with or without the book club.
 
+*If no one else shows up, enjoy a little quiet time with your one-person sangha.*
+
 All times are Central, starting **November 5, 2026**. Register once above; the same Zoom link works for both.
 
 ### Join any week
