@@ -22,7 +22,8 @@ for joining details and the current topic.
   using `site/static/js/book-club.js`; dates display in America/Chicago.
   The current reading remains visible until the book club ends at 19:30.
   It refreshes every minute and when a background tab becomes visible.
-- The expanded reading schedule also works without JavaScript.
+- The reading schedule is collapsed at the bottom of the next-reading card and
+  also works without JavaScript. The header shows the permanent Zoom URL as a plain link.
 
 The data records the reading schedule for MN 1–110 through December 7,
 2028, independently of Zoom's scheduled occurrences. Extend the data when

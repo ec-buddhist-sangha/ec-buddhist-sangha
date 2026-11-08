@@ -10,21 +10,9 @@ background: |
 
 Inspired by Clear Mountain Monastery's [Sunday Sutta Study](https://www.clearmountain.org/events/sunday-sutta-study/), we're reading the **Middle Length Discourses of the Buddha** with their **10-Minute Majjhima** videos. One sutta a week, a short teaching, and a conversation about what it means in our own lives.
 
-### Thursday evenings
-
-**7–7:30 p.m. · Sutta study / book club**
-
-Read the week's sutta if you can. We'll watch the video together, then talk about what stood out, what puzzled us, and what we might put into practice.
-
-You're welcome to come just to chat, or stay after the book club.
-
-*If no one else shows up, enjoy a little quiet time with your one-person sangha.*
-
-All times are Central. Use the Zoom button above to join the sangha's personal room. The same link works every week.
-
 ### Join any week
 
-We're reading all 152 suttas over about three years. Come when you can: each week has its own reading, with no catching up required. No prior experience needed.
+Come when you can: each week has its own reading, with no catching up required. No prior experience needed. You're welcome to come just to chat, or stay after the book club.
 
 ### Read for free, or bring a book
 

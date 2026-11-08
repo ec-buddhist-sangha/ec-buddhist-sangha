@@ -10,9 +10,9 @@
         <h1 class="font-serif text-3xl md:text-4xl font-bold text-sangha-navy leading-tight">{{ .Title }}</h1>
         <p class="text-gray-700 mt-4">A sutta, a short teaching, and a conversation.</p>
         <p class="text-gray-700 mt-4">Thursdays · 7–7:30 p.m. Central · Zoom</p>
-        <p class="text-gray-600 mt-1">Beginning November 5, 2026. Everyone is welcome.</p>
-        <a href="{{ $club.zoom_url }}" class="inline-block mt-5 bg-sangha-navy text-white rounded-lg px-6 py-3 text-sm font-bold hover:bg-blue-900">Join us on Zoom →</a>
-        <p class="text-xs text-gray-500 mt-2">No registration needed. Sign in to Zoom to join.</p>
+        <p class="text-gray-600 mt-1">Everyone is welcome.</p>
+        <a href="{{ $club.zoom_url }}" class="inline-block mt-5 text-sangha-navy underline break-all">{{ $club.zoom_url }}</a>
+        <p class="text-xs text-gray-500 mt-2">This link never changes. No registration needed; sign in to Zoom to join.</p>
       </div>
     </header>
 
@@ -21,11 +21,7 @@
       <div id="book-club-next" aria-live="polite">
         <p class="text-gray-600 mt-3">See the reading schedule below for meeting dates and topics.</p>
       </div>
-    </section>
-
-    <div class="prose prose-sangha max-w-3xl mt-10">{{ .Content }}</div>
-
-    <details class="mt-10 rounded-2xl border border-gray-200 bg-white p-6">
+    <details class="mt-6 border-t border-gray-200 pt-5">
       <summary class="cursor-pointer font-serif text-xl font-bold text-sangha-navy">Reading schedule</summary>
       <p class="text-sm text-gray-600 mt-3">Book club is 7–7:30 p.m. Central. More dates will be added as we go.</p>
       <ol class="mt-5 divide-y divide-gray-100">
@@ -41,7 +37,9 @@
         {{ end }}
       </ol>
     </details>
-    <p class="mt-6 text-sm text-gray-600"><a href="{{ "calendar/" | relURL }}" class="text-sangha-navy underline">See the sangha calendar</a> for other gatherings.</p>
+    </section>
+
+    <div class="prose prose-sangha max-w-3xl mt-10">{{ .Content }}</div>
     {{ with .Params.background }}
     <div class="prose prose-sangha max-w-3xl mt-10">{{ $.RenderString . }}</div>
     {{ end }}
