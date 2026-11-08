@@ -220,6 +220,36 @@ test("hidden attendance setting removes public meeting attendance controls", () 
   assert.doesNotMatch(api.__root.textContent, /You Are Attending|Click To Attend|Attending/i);
 });
 
+test("book club calendar details use the shared reading schedule and Central meeting date", () => {
+  const api = loadDomApi({ url: "http://127.0.0.1:1313/ec-buddhist-sangha/calendar-item/?slot=book-club" });
+  const club = JSON.parse(fs.readFileSync(path.join(__dirname, "../data/mission_majjhima.json"), "utf8"));
+  const data = api.__document.createElement("script");
+  data.id = "calendar-book-club-data";
+  data.type = "application/json";
+  data.textContent = JSON.stringify(club);
+  api.__document.body.appendChild(data);
+  const render = (overrides = {}) => {
+    api.__setStore({ recurrences: [], slots: [{
+      id: "book-club", itemType: "meeting", title: "Book club: Mission Majjhima",
+      recurrenceId: club.calendar_recurrence_id, date: "2026-11-12", ...overrides
+    }] });
+    api.renderSchedule(api.__root);
+    return api.__root.querySelector('[aria-label="Book club reading"]');
+  };
+  let reading = render();
+  assert.match(reading.textContent, /All the Fermentations \(MN 2\)/);
+  assert.equal(reading.querySelector('a').href, club.meetings[1].reading);
+  assert.equal(reading.querySelectorAll('a')[1].href, club.meetings[1].video);
+  const summerReading = club.meetings.find(m => m.start.startsWith("2027-07"));
+  const centralDate = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" });
+  reading = render({ date: centralDate.format(new Date(summerReading.start)) });
+  assert.equal(reading.querySelector('a').href, summerReading.reading);
+  assert.equal(render({ recurrenceId: "another-club" }), null);
+  assert.equal(render({ date: "2030-01-01" }), null);
+  assert.equal(render({ canceled: true }), null);
+  api.__window.close();
+});
+
 test("public talk cards omit attendance and backup totals", () => {
   const api = loadDomApi();
   api.__setStore({

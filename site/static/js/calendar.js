@@ -3982,6 +3982,29 @@
           '<div class="mt-5 flex flex-wrap items-start gap-3">' +
             '<a href="' + exportUrl + '" download="meeting-' + escapeHtml(slot.date) + '.ics" class="inline-flex items-center rounded-lg border border-gray-200 px-3 py-2 text-[10px] uppercase tracking-widest font-bold text-sangha-navy hover:bg-sangha-light">Add To Calendar</a>' +
             topReminderControls +
+  function renderBookClubReading(slot) {
+    var data = document.getElementById("calendar-book-club-data");
+    if (!data || slot.canceled) return "";
+    var club = JSON.parse(data.textContent);
+    if (!club.calendar_recurrence_id || slot.recurrenceId !== club.calendar_recurrence_id) return "";
+    var centralDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit"
+    });
+    var reading = club.meetings.find(function (meeting) {
+      return centralDate.format(new Date(meeting.start)) === slot.date;
+    });
+    if (!reading) return "";
+    var title = reading.title.replace(/^.*?\):\s*/, "") + " (MN " + reading.n + ")";
+    return '<section class="mt-5 border-t border-gray-200 pt-5" aria-label="Book club reading">' +
+      '<h3 class="font-serif text-xl font-bold text-sangha-navy">' + escapeHtml(title) + '</h3>' +
+      '<p class="text-sm text-gray-500 mt-2">' + escapeHtml(reading.pali) + '</p>' +
+      '<div class="flex flex-wrap gap-5 mt-3 text-sm">' +
+        '<a class="text-sangha-navy underline" href="' + escapeHtml(reading.reading) + '">Read on SuttaCentral</a>' +
+        '<a class="text-sangha-navy underline" href="' + escapeHtml(reading.video) + '">Watch 10-Minute Majjhima</a>' +
+      '</div>' +
+    '</section>';
+  }
+
           '</div>' +
         '</article>' +
         (settings.hideAttendingBlock ? '' : '<div class="' + (closed ? 'grid' : 'grid md:grid-cols-2') + ' gap-6">' +
@@ -4013,6 +4036,7 @@
         touchSlot(freshSlot);
         addCalendarHistory(freshStore, existingAttendee ? "Attendee updated signup" : "Attendee signed up", freshSlot, existingAttendee ? calendarHistoryPersonName(attendee) + " updated their attendance for this meeting." : calendarHistoryPersonName(attendee) + " signed up to attend this meeting.");
         saveStoreAndThen(freshStore, root, function () { renderSchedule(root); });
+          renderBookClubReading(slot) +
       });
     }
 
