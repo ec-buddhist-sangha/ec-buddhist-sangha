@@ -250,7 +250,7 @@ test("book club calendar details use the shared reading schedule and Central mee
   api.__window.close();
 });
 
-test("book club email links the book page, dated sutta, and full Zoom URL", () => {
+test("book club email places Zoom link beside the title and links the dated sutta", () => {
   const api = loadDomApi();
   const club = JSON.parse(fs.readFileSync(path.join(__dirname, "../data/mission_majjhima.json"), "utf8"));
   const data = api.__document.createElement("script");
@@ -266,14 +266,17 @@ test("book club email links the book page, dated sutta, and full Zoom URL", () =
   preview.innerHTML = api.upcomingCalendarEmailHtml(store);
   const row = Array.from(preview.querySelectorAll('p')).find(p => p.textContent.startsWith('Nov 12:'));
   const links = row.querySelectorAll('a');
-  assert.equal(row.textContent, "Nov 12: Book club: Mission Majjhima: Sutta: MN 2 All the Fermentations, " + club.zoom_url);
+  assert.equal(row.textContent, "Nov 12: Book club: Mission Majjhima (Zoom link): Sutta: MN 2 All the Fermentations");
   assert.equal(links[0].href, "http://127.0.0.1:1313/ec-buddhist-sangha/book-club/");
-  assert.equal(links[1].href, club.meetings[1].reading);
-  assert.equal(links[2].href, club.zoom_url);
+  assert.equal(links[1].textContent, "Zoom link");
+  assert.equal(links[1].href, club.zoom_url);
+  assert.equal(links[2].href, club.meetings[1].reading);
   const text = api.upcomingCalendarEmailText(store);
   assert.match(text, /Sutta: MN 2 All the Fermentations \(https:\/\/suttacentral.net\/mn2\/en\/bodhi/);
   assert.equal(text.split(club.zoom_url).length - 1, 1);
   assert.match(text, /Nov 13: Another meeting .*: meeting details/);
+  store.slots[0].useZoom = false;
+  assert.doesNotMatch(api.upcomingCalendarEmailHtml(store), /Zoom link/);
   store.slots[0].date = "2030-01-01";
   assert.doesNotMatch(api.upcomingCalendarEmailText(store), /Sutta: MN/);
   api.__window.close();
@@ -890,7 +893,7 @@ test("upcomingCalendarEmailText adds Zoom link when enabled", () => {
 
   const text = api.upcomingCalendarEmailText(store);
 
-  assert.match(text, /Zoom \(https:\/\/zoom.example\/j\/123\)/);
+  assert.match(text, /\(Zoom link: https:\/\/zoom.example\/j\/123\): volunteer to bring talk/);
 });
 
 test("open volunteer panels require a logged in user", () => {

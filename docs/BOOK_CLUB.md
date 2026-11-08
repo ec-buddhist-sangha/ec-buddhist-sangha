@@ -19,7 +19,8 @@ existing book-club series. No individual item edits or backend integration are
 needed. Other calendar series, canceled items, and dates without a scheduled
 reading do not show this block. The full reading schedule stays on `/book-club/`.
 In Calendar Admin's email block, book-club titles link to `/book-club/`, followed
-by `Sutta: MN [number] [title]` linked to SuttaCentral and the full Zoom URL.
+by `(Zoom link)` when Zoom is enabled and `Sutta: MN [number] [title]` linked to
+SuttaCentral. The linked Zoom label sits beside each Zoom-enabled item's title.
 The reading comes from the same date lookup; other meetings retain their usual links.
 
 ## Updating the page

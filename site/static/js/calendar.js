@@ -2340,10 +2340,11 @@
           date: displayShortDate(slot.date),
           title: title,
           titleHref: absoluteAppUrl("book-club/"),
+          zoomHref: zoomLink,
           actions: (reading ? [{
             text: "Sutta: MN " + reading.n + " " + reading.title.replace(/^.*?\):\s*/, ""),
             href: reading.reading
-          }] : []).concat(zoomLink ? [{ text: zoomLink, href: zoomLink }] : [])
+          }] : [])
         };
       }
       if (isMeetingSlot(slot)) {
@@ -2351,20 +2352,22 @@
           date: displayShortDate(slot.date),
           title: title,
           titleHref: scheduleUrl,
+          zoomHref: zoomLink,
           actions: [
             { text: "meeting details", href: scheduleUrl }
-          ].concat(zoomLink ? [{ text: "Zoom", href: zoomLink }] : [])
+          ]
         };
       }
       return {
         date: displayShortDate(slot.date),
         title: title,
         titleHref: scheduleUrl,
+        zoomHref: zoomLink,
         actions: [
           slot.speaker && slot.speaker.name
               ? { text: publicName(slot.speaker.name), href: "", kind: "name" }
               : { text: "volunteer to bring talk", href: scheduleUrl }
-        ].concat(zoomLink ? [{ text: "Zoom", href: zoomLink }] : [])
+        ]
       };
     });
   }
@@ -2400,7 +2403,8 @@
     var rows = upcomingCalendarEmailRows(store);
     var body = rows.length ? rows.map(function (row) {
       var title = row.titleHref ? row.title + " (" + row.titleHref + ")" : row.title;
-      return row.date + ": " + title + ": " + row.actions.map(function (action) {
+      if (row.zoomHref) title += " (Zoom link: " + row.zoomHref + ")";
+      return row.date + ": " + title + (row.actions.length ? ": " : "") + row.actions.map(function (action) {
         return action.href && action.href !== action.text ? action.text + " (" + action.href + ")" : action.text;
       }).join(", ");
     }).join("\n") : "No upcoming calendar items are currently scheduled.";
@@ -2415,7 +2419,8 @@
       var titleMarkup = row.titleHref
         ? '<a href="' + escapeHtml(row.titleHref) + '" style="color:inherit;text-decoration:none;">' + escapeHtml(row.title) + '</a>'
         : escapeHtml(row.title);
-      return '<p class="mb-2">' + escapeHtml(row.date) + ': ' + titleMarkup + ': ' + row.actions.map(function (action) {
+      if (row.zoomHref) titleMarkup += ' (<a href="' + escapeHtml(row.zoomHref) + '" style="color:#2563eb;text-decoration:underline;">Zoom link</a>)';
+      return '<p class="mb-2">' + escapeHtml(row.date) + ': ' + titleMarkup + (row.actions.length ? ': ' : '') + row.actions.map(function (action) {
         if (action.href) return '<a href="' + escapeHtml(action.href) + '" style="color:#2563eb;text-decoration:underline;">' + escapeHtml(action.text) + '</a>';
         if (action.kind === "name") return '<span style="color:#c76a00;font-weight:700;">' + escapeHtml(action.text) + '</span>';
         return escapeHtml(action.text);
