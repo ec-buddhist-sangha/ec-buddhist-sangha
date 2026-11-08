@@ -9,6 +9,7 @@
   </div>
 </section>
 {{ $calendarApiVersion := readFile "static/js/calendar-api.js" | md5 }}
+<script id="calendar-book-club-data" type="application/json">{{ .Site.Data.mission_majjhima | jsonify | safeJS }}</script>
 {{ $calendarVersion := readFile "static/js/calendar.js" | md5 }}
 <script src="{{ "js/calendar-api.js" | relURL }}?v={{ $calendarApiVersion }}"></script>
 <script src="{{ "js/calendar.js" | relURL }}?v={{ $calendarVersion }}"></script>

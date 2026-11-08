@@ -2333,6 +2333,19 @@
       var scheduleUrl = absoluteAppUrl("calendar-item/", { slot: slot.id });
       var title = slot.title || (isMeetingSlot(slot) ? "Meeting" : DEFAULT_TITLE);
       var zoomLink = zoomLinkForSlot(slot, store);
+      var bookClub = bookClubDetails(slot);
+      if (bookClub) {
+        var reading = bookClub.reading;
+        return {
+          date: displayShortDate(slot.date),
+          title: title,
+          titleHref: absoluteAppUrl("book-club/"),
+          actions: (reading ? [{
+            text: "Sutta: MN " + reading.n + " " + reading.title.replace(/^.*?\):\s*/, ""),
+            href: reading.reading
+          }] : []).concat(zoomLink ? [{ text: zoomLink, href: zoomLink }] : [])
+        };
+      }
       if (isMeetingSlot(slot)) {
         return {
           date: displayShortDate(slot.date),
@@ -2388,7 +2401,7 @@
     var body = rows.length ? rows.map(function (row) {
       var title = row.titleHref ? row.title + " (" + row.titleHref + ")" : row.title;
       return row.date + ": " + title + ": " + row.actions.map(function (action) {
-        return action.href ? action.text + " (" + action.href + ")" : action.text;
+        return action.href && action.href !== action.text ? action.text + " (" + action.href + ")" : action.text;
       }).join(", ");
     }).join("\n") : "No upcoming calendar items are currently scheduled.";
     return [calendarEmailHeaderText(store), body, normalizeCalendarSettings(store.settings).emailFooter]
@@ -3946,17 +3959,23 @@
     '</aside>';
   }
 
-  function renderBookClubReading(slot) {
+  function bookClubDetails(slot) {
     var data = document.getElementById("calendar-book-club-data");
-    if (!data || slot.canceled) return "";
+    if (!data || slot.canceled) return null;
     var club = JSON.parse(data.textContent);
-    if (!club.calendar_recurrence_id || slot.recurrenceId !== club.calendar_recurrence_id) return "";
+    if (!club.calendar_recurrence_id || slot.recurrenceId !== club.calendar_recurrence_id) return null;
     var centralDate = new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit"
     });
     var reading = club.meetings.find(function (meeting) {
       return centralDate.format(new Date(meeting.start)) === slot.date;
     });
+    return { reading: reading };
+  }
+
+  function renderBookClubReading(slot) {
+    var details = bookClubDetails(slot);
+    var reading = details && details.reading;
     if (!reading) return "";
     var readingDate = parseDate(slot.date);
     var title = MONTH_LABELS[readingDate.getMonth()] + " " + readingDate.getDate() + ": " + reading.title.replace(/^.*?\):\s*/, "") + " (MN " + reading.n + ")";
