@@ -43,3 +43,22 @@ test('page renders the next reading and safely handles titles and missing future
   assert.equal(root.querySelector('a').href, altered.meetings[0].reading);
   dom.window.close();
 });
+
+test('schedule hides completed readings on load and when an open meeting ends', () => {
+  const dom = new JSDOM('<div id="book-club-next"></div><script id="book-club-data" type="application/json"></script><ol>' +
+    data.meetings.slice(0, 3).map(m => '<li data-book-club-end="' + m.end + '">MN ' + m.n + '</li>').join('') +
+    '</ol>', { runScripts: 'outside-only' });
+  let now = Date.parse(data.meetings[1].end) - 1;
+  let refresh;
+  dom.window.Date.now = () => now;
+  dom.window.setInterval = callback => { refresh = callback; };
+  dom.window.document.getElementById('book-club-data').textContent = JSON.stringify(data);
+  dom.window.eval(fs.readFileSync(path.join(__dirname, '../static/js/book-club.js'), 'utf8'));
+  const rows = Array.from(dom.window.document.querySelectorAll('li'));
+  assert.deepEqual(rows.map(row => row.hidden), [true, false, false]);
+  now += 1;
+  refresh();
+  assert.deepEqual(rows.map(row => row.hidden), [true, true, false]);
+  assert.equal(dom.window.document.querySelector('#book-club-next h3').textContent, data.meetings[2].title);
+  dom.window.close();
+});

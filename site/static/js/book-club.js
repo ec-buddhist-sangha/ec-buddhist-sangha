@@ -47,7 +47,13 @@
   var data = document.getElementById("book-club-data");
   if (!root || !data) return;
   var meetings = JSON.parse(data.textContent).meetings;
-  function refresh() { render(root, meetings, Date.now()); }
+  function refresh() {
+    var now = Date.now();
+    render(root, meetings, now);
+    document.querySelectorAll("[data-book-club-end]").forEach(function (row) {
+      row.hidden = Date.parse(row.getAttribute("data-book-club-end")) <= now;
+    });
+  }
   refresh();
   window.setInterval(refresh, 60000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });

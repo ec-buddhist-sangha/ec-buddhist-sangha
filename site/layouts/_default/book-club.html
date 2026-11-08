@@ -26,7 +26,8 @@
       <p class="text-sm text-gray-600 mt-3">Book club is 7–7:30 p.m. Central. More dates will be added as we go.</p>
       <ol class="mt-5 divide-y divide-gray-100">
         {{ range $club.meetings }}
-        <li class="py-4">
+        {{ if (time.AsTime .end).After now }}
+        <li class="py-4" data-book-club-end="{{ .end }}">
           <p class="text-sm text-gray-500">{{ .date }}</p>
           <h3 class="font-bold text-sangha-navy mt-1">{{ .title }}</h3>
           <div class="flex flex-wrap gap-5 text-sm mt-2">
@@ -34,6 +35,7 @@
             <a class="text-sangha-navy underline" href="{{ .video }}">Watch 10-Minute Majjhima</a>
           </div>
         </li>
+        {{ end }}
         {{ end }}
       </ol>
     </details>

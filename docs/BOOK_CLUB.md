@@ -24,6 +24,9 @@ for joining details and the current topic.
   It refreshes every minute and when a background tab becomes visible.
 - The reading schedule is collapsed at the bottom of the next-reading card and
   also works without JavaScript. The header shows the permanent Zoom URL as a plain link.
+- Completed readings are omitted at build time and hidden by the browser once
+  their meeting ends at 19:30 Central, including when the page stays open.
+  The source data retains past readings.
 
 The data records the reading schedule for MN 1–110 through December 7,
 2028, independently of Zoom's scheduled occurrences. Extend the data when
