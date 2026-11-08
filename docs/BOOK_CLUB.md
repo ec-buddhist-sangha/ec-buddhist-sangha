@@ -1,10 +1,10 @@
 # Mission Majjhima book club
 
 Public page: `/book-club/`. The homepage card appears directly below Next Gathering.
-The calendar recurrence combines **Book club: Mission Majjhima & sangha meet-and-greet**, Thursdays
-19:00–20:00 America/Chicago beginning November 5, 2026. Book club runs until
-19:30, followed by a casual meet-and-greet open to everyone, including people
-who do not attend the book club. Both parts use the sangha's Zoom personal room:
+The page and homepage card advertise **Book club: Mission Majjhima**, Thursdays
+19:00–19:30 America/Chicago beginning November 5, 2026. People may come just
+to chat or stay afterward; there is no separately scheduled social on the page.
+The book club uses the sangha's Zoom personal room:
 `https://us02web.zoom.us/j/9333279943`. No meeting registration is required;
 participants must sign in to Zoom. The room allows participants to join anytime.
 These settings and the invite link were verified in Zoom on November 8, 2026.
@@ -20,8 +20,8 @@ for joining details and the current topic.
   `site/data/mission_majjhima.json`.
 - The browser selects the earliest meeting whose UTC `end` is in the future,
   using `site/static/js/book-club.js`; dates display in America/Chicago.
-  The end includes the meet-and-greet, so the current reading remains visible
-  until 20:00. It refreshes every minute and when a background tab becomes visible.
+  The current reading remains visible until the book club ends at 19:30.
+  It refreshes every minute and when a background tab becomes visible.
 - The expanded reading schedule also works without JavaScript.
 
 The data records the reading schedule for MN 1–110 through December 7,

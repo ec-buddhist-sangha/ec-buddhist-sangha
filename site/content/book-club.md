@@ -1,7 +1,7 @@
 ---
 title: "Book club: Mission Majjhima"
 layout: book-club
-summary: "A sutta, a short teaching, and a conversation. Thursdays on Zoom: book club 7–7:30 p.m., sangha social 7:30–8 p.m. Central."
+summary: "A sutta, a short teaching, and a conversation. Thursdays on Zoom, 7–7:30 p.m. Central."
 background: |
   ### About the Majjhima Nikāya
 
@@ -16,13 +16,11 @@ Inspired by Clear Mountain Monastery's [Sunday Sutta Study](https://www.clearmou
 
 Read the week's sutta if you can. We'll watch the video together, then talk about what stood out, what puzzled us, and what we might put into practice.
 
-**7:30–8 p.m. · Sangha social**
-
-Join us for a chat, with or without the book club.
+You're welcome to come just to chat, or stay after the book club.
 
 *If no one else shows up, enjoy a little quiet time with your one-person sangha.*
 
-All times are Central. Use the Zoom button above to join the sangha's personal room. The same link works every week for both the book club and the social.
+All times are Central. Use the Zoom button above to join the sangha's personal room. The same link works every week.
 
 ### Join any week
 

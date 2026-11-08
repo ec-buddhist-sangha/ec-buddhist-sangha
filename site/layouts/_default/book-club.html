@@ -9,11 +9,10 @@
         <p class="text-xs uppercase tracking-widest text-sangha-gold font-bold mb-3">Thursday evenings with the sangha</p>
         <h1 class="font-serif text-3xl md:text-4xl font-bold text-sangha-navy leading-tight">{{ .Title }}</h1>
         <p class="text-gray-700 mt-4">A sutta, a short teaching, and a conversation.</p>
-        <p class="text-gray-700 mt-4">Thursdays · 7–8 p.m. Central · Zoom</p>
-        <p class="text-gray-700 mt-1">Book club 7–7:30 · Sangha social 7:30–8</p>
+        <p class="text-gray-700 mt-4">Thursdays · 7–7:30 p.m. Central · Zoom</p>
         <p class="text-gray-600 mt-1">Beginning November 5, 2026. Everyone is welcome.</p>
         <a href="{{ $club.zoom_url }}" class="inline-block mt-5 bg-sangha-navy text-white rounded-lg px-6 py-3 text-sm font-bold hover:bg-blue-900">Join us on Zoom →</a>
-        <p class="text-xs text-gray-500 mt-2">No registration needed. Sign in to Zoom, then join for the book club, the chat, or both.</p>
+        <p class="text-xs text-gray-500 mt-2">No registration needed. Sign in to Zoom to join.</p>
       </div>
     </header>
 
@@ -28,7 +27,7 @@
 
     <details class="mt-10 rounded-2xl border border-gray-200 bg-white p-6">
       <summary class="cursor-pointer font-serif text-xl font-bold text-sangha-navy">Reading schedule</summary>
-      <p class="text-sm text-gray-600 mt-3">Book club is 7–7:30 p.m. Central, followed by the sangha social until 8. More dates will be added as we go.</p>
+      <p class="text-sm text-gray-600 mt-3">Book club is 7–7:30 p.m. Central. More dates will be added as we go.</p>
       <ol class="mt-5 divide-y divide-gray-100">
         {{ range $club.meetings }}
         <li class="py-4">
