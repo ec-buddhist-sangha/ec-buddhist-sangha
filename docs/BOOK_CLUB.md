@@ -1,6 +1,7 @@
 # Mission Majjhima book club
 
 Public page: `/book-club/`. The homepage card appears directly below Next Gathering.
+The homepage card includes a direct Zoom link using the same `zoom_url` as the book-club page.
 The page and homepage card advertise **Book club: Mission Majjhima**, Thursdays
 19:00–19:30 America/Chicago beginning November 5, 2026. People may come just
 to chat or stay afterward; there is no separately scheduled social on the page.
