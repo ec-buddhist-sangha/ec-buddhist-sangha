@@ -3958,7 +3958,8 @@
       return centralDate.format(new Date(meeting.start)) === slot.date;
     });
     if (!reading) return "";
-    var title = reading.title.replace(/^.*?\):\s*/, "") + " (MN " + reading.n + ")";
+    var readingDate = parseDate(slot.date);
+    var title = MONTH_LABELS[readingDate.getMonth()] + " " + readingDate.getDate() + ": " + reading.title.replace(/^.*?\):\s*/, "") + " (MN " + reading.n + ")";
     return '<section class="mt-5 border-t border-gray-200 pt-5" aria-label="Book club reading">' +
       '<h3 class="font-serif text-xl font-bold text-sangha-navy">' + escapeHtml(title) + '</h3>' +
       '<p class="text-sm text-gray-500 mt-2">' + escapeHtml(reading.pali) + '</p>' +

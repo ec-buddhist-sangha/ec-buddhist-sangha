@@ -237,7 +237,7 @@ test("book club calendar details use the shared reading schedule and Central mee
     return api.__root.querySelector('[aria-label="Book club reading"]');
   };
   let reading = render();
-  assert.match(reading.textContent, /All the Fermentations \(MN 2\)/);
+  assert.equal(reading.querySelector('h3').textContent, "November 12: All the Fermentations (MN 2)");
   assert.equal(reading.querySelector('a').href, club.meetings[1].reading);
   assert.equal(reading.querySelectorAll('a')[1].href, club.meetings[1].video);
   const summerReading = club.meetings.find(m => m.start.startsWith("2027-07"));

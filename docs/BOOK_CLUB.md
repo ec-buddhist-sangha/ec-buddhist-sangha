@@ -12,7 +12,7 @@ These settings and the invite link were verified in Zoom on November 8, 2026.
 The calendar description links to `https://eauclairesangha.org/book-club/`
 for joining details and the current topic.
 
-The calendar item also displays its sutta title, SuttaCentral link, and video
+The calendar item also displays its date followed by the sutta title, SuttaCentral link, and video
 from this same schedule, matched by the meeting date in America/Chicago.
 `calendar_recurrence_id` in `site/data/mission_majjhima.json` identifies the
 existing book-club series. No individual item edits or backend integration are
