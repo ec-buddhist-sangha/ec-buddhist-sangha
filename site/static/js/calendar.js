@@ -2331,7 +2331,6 @@
     if (!upcoming.length) return [];
     return upcoming.map(function (slot) {
       var scheduleUrl = absoluteAppUrl("calendar-item/", { slot: slot.id });
-      var attendUrl = absoluteAppUrl("calendar-item/", { slot: slot.id, attend: "1" });
       var title = slot.title || (isMeetingSlot(slot) ? "Meeting" : DEFAULT_TITLE);
       var zoomLink = zoomLinkForSlot(slot, store);
       if (isMeetingSlot(slot)) {
@@ -2340,7 +2339,7 @@
           title: title,
           titleHref: scheduleUrl,
           actions: [
-            { text: itemSignupsOpen(slot) ? "attend" : "meeting details", href: itemSignupsOpen(slot) ? attendUrl : scheduleUrl }
+            { text: "meeting details", href: scheduleUrl }
           ].concat(zoomLink ? [{ text: "Zoom", href: zoomLink }] : [])
         };
       }
