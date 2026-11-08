@@ -4,16 +4,19 @@ Public page: `/book-club/`. The homepage card appears directly below Next Gather
 The calendar recurrence combines **Book club: Mission Majjhima & sangha meet-and-greet**, Thursdays
 19:00–20:00 America/Chicago beginning November 5, 2026. Book club runs until
 19:30, followed by a casual meet-and-greet open to everyone, including people
-who do not attend the book club. Both parts use the same Zoom registration and
-joining link. Its description links
-to `https://eauclairesangha.org/book-club/` for registration and the current topic.
+who do not attend the book club. Both parts use the sangha's Zoom personal room:
+`https://us02web.zoom.us/j/9333279943`. No meeting registration is required;
+participants must sign in to Zoom. The room allows participants to join anytime.
+These settings and the invite link were verified in Zoom on November 8, 2026.
+The calendar description links to `https://eauclairesangha.org/book-club/`
+for joining details and the current topic.
 
 ## Updating the page
 
 - Introductory copy: `site/content/book-club.md`.
 - Layout and homepage card: `site/layouts/_default/book-club.html` and
   `site/layouts/partials/book-club-promo.html`.
-- Registration URL, dates, topics, reading links, and videos:
+- Personal-room URL (`zoom_url`), dates, topics, reading links, and videos:
   `site/data/mission_majjhima.json`.
 - The browser selects the earliest meeting whose UTC `end` is in the future,
   using `site/static/js/book-club.js`; dates display in America/Chicago.
@@ -21,12 +24,13 @@ to `https://eauclairesangha.org/book-club/` for registration and the current top
   until 20:00. It refreshes every minute and when a background tab becomes visible.
 - The expanded reading schedule also works without JavaScript.
 
-The data records the 110 existing Zoom occurrences, MN 1–110, through December 7,
-2028. It does not invent dates for the remaining 42 suttas. Extend the data when
-those Zoom meetings are scheduled. The calendar recurrence has no end-date field;
+The data records the reading schedule for MN 1–110 through December 7,
+2028, independently of Zoom's scheduled occurrences. Extend the data when
+readings for the remaining 42 suttas are planned. The calendar recurrence has no end-date field;
 pause it at the end of the scheduled run unless more dates have been added.
-If a session is canceled, moved, or assigned a different reading, update Zoom,
-the calendar, and this data together. This is a published schedule, not a live
+If a session is canceled, moved, or assigned a different reading, update
+the calendar and this data together. The personal-room link stays the same.
+This is a published schedule, not a live
 Zoom API integration. It requires no credentials or additional service.
 
 Dates were copied from the Zoom occurrence schedule. Titles/readings follow

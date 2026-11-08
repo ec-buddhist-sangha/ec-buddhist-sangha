@@ -24,7 +24,7 @@
       return element;
     }
     if (!meeting) {
-      add("p", "More meeting dates and readings will be announced here. You're welcome to register for the series.", "text-gray-600 mt-3");
+      add("p", "More meeting dates and readings will be announced here.", "text-gray-600 mt-3");
       return;
     }
     add("p", formatDate(meeting.start) + " · 7–8 p.m. Central", "text-gray-600 mt-3");

@@ -22,7 +22,7 @@ Join us for a chat, with or without the book club.
 
 *If no one else shows up, enjoy a little quiet time with your one-person sangha.*
 
-All times are Central, starting **November 5, 2026**. Register once above; the same Zoom link works for both.
+All times are Central. Use the Zoom button above to join the sangha's personal room. The same link works every week for both the book club and the social.
 
 ### Join any week
 
